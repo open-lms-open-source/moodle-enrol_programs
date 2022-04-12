@@ -1,0 +1,45 @@
+.programbox {
+    padding: 0.5rem;
+}
+
+.programbox .programimage img {
+    max-width: 200px;
+    max-height: 100px;
+    width: auto;
+    height: auto;
+}
+
+#page-enrol-programs-management-program .programimage img,
+#page-admin-enrol-programs-management-program .programimage img {
+    max-width: 300px;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+}
+
+.programs .programbox.even {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+#page-enrol-programs-management-program_users .allocation-filtering .simplesearchform,
+#page-admin-enrol-programs-management-program_users .allocation-filtering .simplesearchform {
+    float: left;
+}
+
+#page-enrol-programs-management-program_users .allocation-filtering .singleselect,
+#page-admin-enrol-programs-management-program_users .allocation-filtering .singleselect {
+    float: right;
+}
+
+#page-enrol-programs-documentation #programs_docs img {
+    width: 100%;
+    height: 100%;
+}
+
+#program_content a.movehere {
+    margin: 0;
+    padding: 5px;
+    display: inline;
+    height: 2rem;
+    border: 2px dashed #343a40;
+}

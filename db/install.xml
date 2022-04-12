@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="enrol/programs/db" VERSION="20220523" COMMENT="XMLDB file for Open LMS enrol/programs"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="enrol_programs_programs" COMMENT="List of programs">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Context for program management access control, will also be used for multi-tenancy"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false" COMMENT="Human readable name of the program, does not have to be unique"/>
+        <FIELD NAME="idnumber" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Unique identifier of a program, multilang definitely not supported"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Program description text"/>
+        <FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="presentationjson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Visual presentation of program, such as image files"/>
+        <FIELD NAME="public" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="1 means visible to everyone, 0 means use cohorts for visibility"/>
+        <FIELD NAME="archived" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Archived programs are hidden, non-mutable and mostly ignored, program must be archived before deletion"/>
+        <FIELD NAME="creategroups" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Create course groups for each course in program"/>
+        <FIELD NAME="timeallocationstart" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Restriction for allocations- allocations allowed from this date forward if set"/>
+        <FIELD NAME="timeallocationend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Restriction for allocations - allocations not allowed after this date if set"/>
+        <FIELD NAME="startdatejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Calculation rules for user start date in program allocation"/>
+        <FIELD NAME="duedatejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Calculation rules for user due date in program allocation"/>
+        <FIELD NAME="enddatejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Calculation rules for user end date in program allocation"/>
+        <FIELD NAME="notifystart" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when program started"/>
+        <FIELD NAME="notifycompleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when program was completed"/>
+        <FIELD NAME="notifyduesoon" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users before their due date, unless already completed"/>
+        <FIELD NAME="notifydue" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users before their due date passed, unless already completed"/>
+        <FIELD NAME="notifyendsoon" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users before their end date, unless already completed"/>
+        <FIELD NAME="notifyendcompleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users at the end of program which they completed"/>
+        <FIELD NAME="notifyendfailed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users at the end of program which they failed"/>
+        <FIELD NAME="notifydeallocation" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when they are deallocated from program"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="contextid" TYPE="foreign" FIELDS="contextid" REFTABLE="context" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idnumber" UNIQUE="true" FIELDS="idnumber" COMMENT="Enforce unique idnumber for all programs"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_items" COMMENT="Structure of programs - items representing courses and course-sets with their ordering and completion rules.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="topitem" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="1 for top most item representing program itself, NULL for all other items"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Course reference, NULL if item is course-set (must not be set for top item)"/>
+        <FIELD NAME="previtemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Previous item needs to be completed in order to allow courseid access, this is ignored for sets"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false" COMMENT="Human readable name of course-set, copy of course.fullname if courseid set, copy of program name for top item"/>
+        <FIELD NAME="sequencejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="List of children with ordering and completion rules, optional start delay info if courseid set"/>
+        <FIELD NAME="minprerequisites" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Number of required prerequisite item completions needed for this item completion - derived from sequencejson, 1 for empty set means cannot be completed, 1 if courseid set"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="previtemid" TYPE="foreign" FIELDS="previtemid" REFTABLE="enrol_programs_items" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="enrol_programs_groups" COMMENT="Course groups that were created for course items">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="groupid" TYPE="foreign" FIELDS="groupid" REFTABLE="groups" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="programid-courseid" UNIQUE="true" FIELDS="programid, courseid" COMMENT="Only one group for program-course combination"/>
+        <INDEX NAME="groupid" UNIQUE="true" FIELDS="groupid" COMMENT="One group cannot be linked to more than one course"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_prerequisites" COMMENT="Internal item dependency map - it is built automatically from program items using sequencejson">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="prerequisiteitemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="enrol_programs_items" REFFIELDS="id"/>
+        <KEY NAME="prerequisiteitemid" TYPE="foreign" FIELDS="prerequisiteitemid" REFTABLE="enrol_programs_items" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="itemid-prerequisiteitemid" UNIQUE="true" FIELDS="itemid, prerequisiteitemid" COMMENT="Prevent duplicates"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_cohorts" COMMENT="Members of these cohorts may browse non-public programs before allocation, optionally they can be allocated automatically">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cohortid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+        <KEY NAME="cohortid" TYPE="foreign" FIELDS="cohortid" REFTABLE="cohort" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="programid-cohortid" UNIQUE="true" FIELDS="programid, cohortid" COMMENT="Prevent duplicates"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_sources" COMMENT="Program allocation sources representing different means of user allocation">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="Type of allocation - manual, self, cohort, certification, etc."/>
+        <FIELD NAME="datajson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General source allocation settings"/>
+        <FIELD NAME="notifyallocation" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when they are allocated to program via this source"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="enrol_programs_requests" COMMENT="List of people waiting for allocation to programs, entry is deleted after allocation, there are no historic snapshots for requests">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="datajson" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Request details created by source"/>
+        <FIELD NAME="timerequested" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timerejected" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Rejected request blocks retry, delete rejected record if retry allowed"/>
+        <FIELD NAME="rejectedby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="sourceid" TYPE="foreign" FIELDS="sourceid" REFTABLE="enrol_programs_sources" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="users" REFFIELDS="id"/>
+        <KEY NAME="rejectedby" TYPE="foreign" FIELDS="rejectedby" REFTABLE="users" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="sourceid-userid" UNIQUE="true" FIELDS="sourceid, userid" COMMENT="Only one request for allocation of user per source, delete rejection if they are allowed to retry"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_allocations" COMMENT="User allocations to programs">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Means of user allocation"/>
+        <FIELD NAME="archived" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="All enrolments are suspended when user allocation is archived and completion is frozen, useful when user is removed from cohort when auto allocating"/>
+        <FIELD NAME="sourcedatajson" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Extra allocation data belonging to source, it can store waitlist history, person who allocated mannually, etc."/>
+        <FIELD NAME="timeallocated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Date when user was allocated to program"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Date when program opens for this user"/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Expected completion date"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Date when program closes for this user (progress is fronzen after this date and enrolments are suspended)"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User program completion date, NULL means program not completed"/>
+        <FIELD NAME="timenotifiedallocation" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about allocation via this source"/>
+        <FIELD NAME="timenotifiedstart" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about program that just started"/>
+        <FIELD NAME="timenotifiedcompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about their completion"/>
+        <FIELD NAME="timenotifiedduesoon" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about incoming due date if they did not complete yet"/>
+        <FIELD NAME="timenotifieddue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified that due date passed, but they did not complete yet"/>
+        <FIELD NAME="timenotifiedendsoon" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about program ending soon if they did not complete yet"/>
+        <FIELD NAME="timenotifiedendcompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about end of program that they completed"/>
+        <FIELD NAME="timenotifiedendfailed" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about end of program that they failed"/>
+        <FIELD NAME="timenotifieddeallocation" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about allocation via this source"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="users" REFFIELDS="id"/>
+        <KEY NAME="sourceid" TYPE="foreign" FIELDS="sourceid" REFTABLE="enrol_programs_sources" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="programid-userid" UNIQUE="true" FIELDS="programid, userid" COMMENT="Only one allocation of user per program, archive and delete allocation if change needed, or use other evidence in case of certification certification"/>
+        <INDEX NAME="archived-timestart-timeend" UNIQUE="false" FIELDS="archived, timestart, timeend" COMMENT="Used in queries that deal with non-archived active allocations only"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_completions" COMMENT="Program item completions, added after item completion">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="allocationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Item completion date"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="enrol_programs_items" REFFIELDS="id"/>
+        <KEY NAME="allocationid" TYPE="foreign" FIELDS="allocationid" REFTABLE="enrol_programs_allocations" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="itemid-allocationid" UNIQUE="true" FIELDS="itemid, allocationid" COMMENT="Only one completion per item and user"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_evidences" COMMENT="Alternative evidence for completion of a program item">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="evidencejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Evidence details"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Item completion date"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="enrol_programs_items" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="users" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="users" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="itemid-userid" UNIQUE="true" FIELDS="itemid, userid" COMMENT="Only one evidence per item and user allowed"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_prg_snapshots" COMMENT="Archive of ALL program entity snapshots after modification including items, sources and cohorts">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="reason" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="Reason for archiving - delete, add"/>
+        <FIELD NAME="timesnapshot" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When was the program modified"/>
+        <FIELD NAME="snapshotby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who modified the program, NULL means system action"/>
+        <FIELD NAME="explanation" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Extra explanation"/>
+        <FIELD NAME="programjson" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialised data from enrol_programs_programs, NULL after program deletion"/>
+        <FIELD NAME="itemsjson" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialised data from enrol_programs_items"/>
+        <FIELD NAME="cohortsjson" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialised data from enrol_programs_cohorts"/>
+        <FIELD NAME="sourcesjson" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Serialised data from enrol_programs_sources"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+        <KEY NAME="snapshotby" TYPE="foreign" FIELDS="snapshotby" REFTABLE="users" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="enrol_programs_usr_snapshots" COMMENT="Archive of SOME user allocation/progress snapshots - only important stuff is recorded">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="allocationid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="id of original user allocation, it is handy to have it after it gets deleted"/>
+        <FIELD NAME="reason" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="Reason for archiving - program_delete, completion, allocation_edit, allocation_edit_before, completion_edit_before, completion_edit etc."/>
+        <FIELD NAME="timesnapshot" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When was the snapshot was taken"/>
+        <FIELD NAME="snapshotby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who was logged-in at the time of snasphot, NULL means system action"/>
+        <FIELD NAME="explanation" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Extra explanation"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="archived" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourcedatajson" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timeallocated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="completionsjson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Record of completions for program items"/>
+        <FIELD NAME="evidencesjson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Other evidences of completions for program items"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="allocationid" TYPE="foreign" FIELDS="allocationid" REFTABLE="enrol_programs_allocations" REFFIELDS="id"/>
+        <KEY NAME="snapshotby" TYPE="foreign" FIELDS="snapshotby" REFTABLE="users" REFFIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="users" REFFIELDS="id"/>
+        <KEY NAME="sourceid" TYPE="foreign" FIELDS="sourceid" REFTABLE="enrol_programs_sources" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="reason-userid-programid" UNIQUE="false" FIELDS="reason, userid, programid" COMMENT="Faster lookup by reason and userid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

@@ -1,0 +1,177 @@
+@enrol @enrol_programs @olms
+Feature: Program selfallocation tests
+
+  Background:
+    Given Unnecessary Admin bookmarks block gets deleted
+    And the following "categories" exist:
+      | name  | category | idnumber |
+      | Cat 1 | 0        | CAT1     |
+      | Cat 2 | 0        | CAT2     |
+      | Cat 3 | 0        | CAT3     |
+      | Cat 4 | CAT3     | CAT4     |
+    And the following "cohorts" exist:
+      | name     | idnumber |
+      | Cohort 1 | CH1      |
+      | Cohort 2 | CH2      |
+      | Cohort 3 | CH3      |
+    And the following "courses" exist:
+      | fullname | shortname | format | category |
+      | Course 1 | C1        | topics | CAT1     |
+      | Course 2 | C2        | topics | CAT2     |
+      | Course 3 | C3        | topics | CAT3     |
+      | Course 4 | C4        | topics | CAT4     |
+      | Course 5 | C5        | topics | CAT4     |
+      | Course 6 | C6        | topics | CAT4     |
+    And the following "users" exist:
+      | username | firstname | lastname | email                |
+      | manager1 | Manager   | 1        | manager1@example.com |
+      | manager2 | Manager   | 2        | manager2@example.com |
+      | viewer1  | Viewer    | 1        | viewer1@example.com  |
+      | student1 | Student   | 1        | student1@example.com |
+      | student2 | Student   | 2        | student2@example.com |
+      | student3 | Student   | 3        | student3@example.com |
+      | student4 | Student   | 4        | student4@example.com |
+      | student5 | Student   | 5        | student5@example.com |
+    And the following "cohort members" exist:
+      | user     | cohort |
+      | student1 | CH1    |
+      | student2 | CH1    |
+      | student3 | CH1    |
+      | student2 | CH2    |
+      | student4 | CH2    |
+    And the following "roles" exist:
+      | name            | shortname |
+      | Program viewer  | pviewer   |
+      | Program manager | pmanager  |
+    And the following "permission overrides" exist:
+      | capability                     | permission | role     | contextlevel | reference |
+      | enrol/programs:view            | Allow      | pviewer  | System       |           |
+      | enrol/programs:view            | Allow      | pmanager | System       |           |
+      | enrol/programs:edit            | Allow      | pmanager | System       |           |
+      | enrol/programs:delete          | Allow      | pmanager | System       |           |
+      | enrol/programs:addcourse       | Allow      | pmanager | System       |           |
+      | enrol/programs:allocate        | Allow      | pmanager | System       |           |
+      | moodle/cohort:view             | Allow      | pmanager | System       |           |
+    And the following "role assigns" exist:
+      | user      | role          | contextlevel | reference |
+      | manager1  | pmanager      | System       |           |
+      | manager2  | pmanager      | Category     | CAT2      |
+      | manager2  | pmanager      | Category     | CAT3      |
+      | viewer1   | pviewer       | System       |           |
+    And the following "enrol_programs > programs" exist:
+      | fullname    | idnumber | category | cohorts  | public |
+      | Program 000 | PR0      |          | Cohort 2 |        |
+      | Program 001 | PR1      | Cat 1    |          | 1      |
+      | Program 002 | PR2      | Cat 2    |          |        |
+      | Program 003 | PR3      | Cat 3    |          |        |
+
+  @javascript
+  Scenario: Student may self allocate without a key
+    When I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Allocation settings"
+    And I click on "Update Self allocation" "link"
+    And I set the following fields to these values:
+      | Active             | Yes |
+      | Allow new sign ups | No  |
+    And I press dialog form button "Update"
+    Then I should see "Active; Sign ups are not allowed" in the "Self allocation:" definition list item
+    And I log out
+
+    When I log in as "student2"
+    And I am on Program catalogue page
+    And I should see "Program 000"
+    And I should see "Program 001"
+    And I follow "Program 000"
+    And I should not see "Sign up"
+    And I log out
+
+    When I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Allocation settings"
+    And I click on "Update Self allocation" "link"
+    And I set the following fields to these values:
+      | Allow new sign ups | Yes |
+    And I press dialog form button "Update"
+    Then I should see "Active; Sign ups are allowed" in the "Self allocation:" definition list item
+    And I log out
+
+    When I log in as "student2"
+    And I am on Program catalogue page
+    And I should see "Program 000"
+    And I should see "Program 001"
+    And I follow "Program 000"
+    And I press "Sign up"
+    And I press dialog form button "Cancel"
+    And I press "Sign up"
+    And I press dialog form button "Sign up"
+    Then I should see "Open" in the "Program status:" definition list item
+    And I should see "All in any order" in the "Program 000" "table_row"
+
+  @javascript
+  Scenario: Student may self allocate with a key
+    Given I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Allocation settings"
+
+    When I click on "Update Self allocation" "link"
+    And I set the following fields to these values:
+      | Active      | Yes   |
+      | Sign up key | heslo |
+    And I press dialog form button "Update"
+    Then I should see "Active; Sign up key is required; Sign ups are allowed" in the "Self allocation:" definition list item
+    And I log out
+
+    When I log in as "student2"
+    And I am on Program catalogue page
+    And I follow "Program 000"
+    And I press "Sign up"
+    And I press dialog form button "Sign up"
+    And I should see "Required"
+    And I set the following fields to these values:
+      | Sign up key | hEslo |
+    And I press dialog form button "Sign up"
+    And I should see "Error"
+    And I set the following fields to these values:
+      | Sign up key | heslo |
+    And I press dialog form button "Sign up"
+    Then I should see "Open" in the "Program status:" definition list item
+    And I should see "All in any order" in the "Program 000" "table_row"
+
+  @javascript
+  Scenario: Student may self allocate with max users limit
+    Given I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 001"
+    And I follow "Allocation settings"
+
+    When I click on "Update Self allocation" "link"
+    And I set the following fields to these values:
+      | Active    | Yes |
+      | Max users | 2   |
+    And I press dialog form button "Update"
+    Then I should see "Active; Users 0/2; Sign ups are allowed" in the "Self allocation:" definition list item
+    And I log out
+
+    And I log in as "student1"
+    And I am on Program catalogue page
+    And I follow "Program 001"
+    And I press "Sign up"
+    And I press dialog form button "Sign up"
+    And I should see "Open" in the "Program status:" definition list item
+    And I log out
+    And I log in as "student2"
+    And I am on Program catalogue page
+    And I follow "Program 001"
+    And I press "Sign up"
+    And I press dialog form button "Sign up"
+    And I log out
+
+    When I log in as "student3"
+    And I am on Program catalogue page
+    And I follow "Program 001"
+    Then I should see "Maximum number of users self-allocated already"
+
