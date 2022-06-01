@@ -328,7 +328,9 @@ final class allocation {
         foreach ($rs as $enrol) {
             $puserid = $enrol->userid;
             unset($enrol->userid);
-            $plugin->enrol_user($enrol, $puserid, null, 0, 0, ENROL_USER_SUSPENDED);
+            // Do NOT restore grades, that would be a wrong thing to do here for programs
+            // and especially certifications later.
+            $plugin->enrol_user($enrol, $puserid, null, 0, 0, ENROL_USER_SUSPENDED, false);
         }
         $rs->close();
 
