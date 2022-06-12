@@ -83,12 +83,6 @@ Feature: General program management tests
       | Course groups | Yes         |
       | Description   | Nice desc   |
     And I upload "enrol/programs/tests/fixtures/badge.png" file to "Program image" filemanager
-    And I open the autocomplete suggestions list in the "Context" "fieldset"
-    And I should see "Miscellaneous" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Cat 1" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Cat 2" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Cat 3" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Cat 3 / Cat 4" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
     And I set the field "Context" to "Cat 2"
     And I set the field "Tags" to "Mathematics, Algebra"
     And I press dialog form button "Add program"
@@ -149,13 +143,6 @@ Feature: General program management tests
       | Course groups | Yes         |
       | Description   | Nice desc   |
     And I upload "enrol/programs/tests/fixtures/badge.png" file to "Program image" filemanager
-    And I open the autocomplete suggestions list in the "Context" "fieldset"
-    And I should see "System" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Miscellaneous" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should not see "Cat 1" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Cat 2" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Cat 3" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
-    And I should see "Cat 3 / Cat 4" in the "#fitem_id_contextid .form-autocomplete-suggestions" "css_element"
     And I set the field "Context" to "Cat 2"
     And I set the field "Tags" to "Mathematics, Algebra"
     And I press dialog form button "Update program"
