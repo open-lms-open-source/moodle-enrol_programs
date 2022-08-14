@@ -18,7 +18,7 @@
  * Program enrolment plugin capabilities.
  *
  * @package    enrol_programs
- * @copyright  Copyright (c] 2022 Open LMS (https://www.openlms.net/]
+ * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -57,5 +57,20 @@ $observers = [
     [
         'eventname'   => '\core\event\group_deleted',
         'callback'    => 'enrol_programs\local\event_observer::group_deleted',
+    ],
+
+    // Certificate related observers, in the future they should be moved
+    // to a new tool_certificate subplugin type.
+    [
+        'eventname' => '\tool_certificate\event\template_deleted',
+        'callback' => 'enrol_programs\local\certificate_observer::template_deleted'
+    ],
+    [
+        'eventname' => '\enrol_programs\event\program_deleted',
+        'callback' => 'enrol_programs\local\certificate_observer::program_deleted',
+    ],
+    [
+        'eventname' => '\enrol_programs\event\user_deallocated',
+        'callback' => 'enrol_programs\local\certificate_observer::user_deallocated',
     ],
 ];

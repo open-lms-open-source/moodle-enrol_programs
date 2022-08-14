@@ -44,4 +44,5 @@ Following capabilities are used to control access to program management:
 * [Program visibility](program_visibility.md)
 * [Program allocation](program_allocation.md)
 * [Program completion tracking](program_completion.md)
+* [Program certificate](program_certificate.md)
 

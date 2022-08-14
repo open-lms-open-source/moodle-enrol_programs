@@ -222,6 +222,13 @@ class renderer extends \plugin_renderer_base {
             }
         }
 
+        if (\enrol_programs\local\certificate::is_available()) {
+            // NOTE: this should be implemented via hooks, then the tab would be stored
+            // in new subplugin in tool_certificate.
+            $url = new moodle_url('/enrol/programs/management/program_certificate.php', ['id' => $program->id]);
+            $tabs[] = new tabobject('certificate', $url, get_string('certificate', 'tool_certificate'));
+        }
+
         $url = new moodle_url('/enrol/programs/management/program_users.php', ['id' => $program->id]);
         $tabs[] = new tabobject('users', $url, get_string('tabusers', 'enrol_programs'), '', true);
 

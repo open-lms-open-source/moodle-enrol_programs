@@ -200,4 +200,13 @@ class behat_enrol_programs extends behat_base {
             throw new ExpectationException('"' . $text . '" text was found in the "' . $label . '" element', $this->getSession());
         }
     }
+
+    /**
+     * @Given I skip program certificate tests if tool_certificate is not installed
+     */
+    public function skip_if_tool_certificate_missing() {
+        if (!get_config('tool_certificate', 'version')) {
+            throw new \Moodle\BehatExtension\Exception\SkippedException('Program certificate tests were skipped due to missing tool_certificate');
+        }
+    }
 }

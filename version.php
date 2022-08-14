@@ -18,7 +18,7 @@
  * Program enrolment plugin upgrade steps.
  *
  * @package    enrol_programs
- * @copyright  Copyright (c) 2022 Open LMS (https://www.openlms.net/)
+ * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,11 +27,11 @@ defined('MOODLE_INTERNAL') || die();
 
 /** @var stdClass $plugin */
 
-$plugin->version   = 2022053100;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2022081401;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2021051704;        // Requires this Moodle version.
 $plugin->component = 'enrol_programs';
 $plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '1.0.0-alpha3';
+$plugin->release   = '1.0.0-alpha3+';
 $plugin->supported = [311, 400];
 
 $plugin->dependencies = ['local_openlms' => 2022053100];

@@ -27,6 +27,7 @@ _Programs for Moodle_ consists of the following plugins published on GitHub:
 * [moodle-enrol_programs](https://github.com/open-lms-open-source/moodle-enrol_programs)
 * [moodle-block_myprograms](https://github.com/open-lms-open-source/moodle-block_myprograms)
 * [moodle-local_openlms](https://github.com/open-lms-open-source/moodle-local_openlms)
+* [moodle-certificateelement_programs](https://github.com/open-lms-open-source/moodle-certificateelement_programs)
 
 There are no special installation instructions, _My programs_ block is automatically added
 to all dashboards during installation.

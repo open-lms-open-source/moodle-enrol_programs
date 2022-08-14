@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/programs/db" VERSION="20220523" COMMENT="XMLDB file for Open LMS enrol/programs"
+<XMLDB PATH="enrol/programs/db" VERSION="20220814" COMMENT="XMLDB file for Open LMS enrol/programs"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -259,6 +259,41 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="reason-userid-programid" UNIQUE="false" FIELDS="reason, userid, programid" COMMENT="Faster lookup by reason and userid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_certs" COMMENT="List of certificate templates used for program completions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Template for program certificate"/>
+        <FIELD NAME="expirydatetype" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="expirydateoffset" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Timestamp for absolute dates, duration in seconds for relative dates"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign-unique" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="templateid" UNIQUE="false" FIELDS="templateid" COMMENT="Soft reference to tool_certificate_templates.id, one template can be used in multiple programs"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="enrol_programs_certs_issues" COMMENT="Issued certificates created via tool_certificate">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="allocationid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="issueid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="programid" TYPE="foreign" FIELDS="programid" REFTABLE="enrol_programs_programs" REFFIELDS="id"/>
+        <KEY NAME="allocationid" TYPE="foreign" FIELDS="allocationid" REFTABLE="enrol_programs_allocations" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="issueid" UNIQUE="true" FIELDS="issueid" COMMENT="Soft reference to tool_certificate_issues.id"/>
       </INDEXES>
     </TABLE>
   </TABLES>
