@@ -21,6 +21,7 @@ use enrol_programs\local\program;
 /**
  * Program viewed event test.
  *
+ * @group      openlms
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda

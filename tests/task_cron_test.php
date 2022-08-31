@@ -21,6 +21,7 @@ use enrol_programs\task\cron;
 /**
  * Programs cron test.
  *
+ * @group      openlms
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda

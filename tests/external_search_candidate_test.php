@@ -19,6 +19,7 @@ namespace enrol_programs;
 /**
  * External API for program allocation candidate test.
  *
+ * @group      openlms
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda

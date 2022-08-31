@@ -24,6 +24,7 @@ use enrol_programs\local\source\manual;
 /**
  * Details tests for enrolment sequencing of a program.
  *
+ * @group      openlms
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda

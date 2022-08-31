@@ -23,6 +23,7 @@ use enrol_programs\local\program;
 /**
  * Approval allocation source test.
  *
+ * @group      openlms
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda

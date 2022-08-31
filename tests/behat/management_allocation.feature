@@ -1,4 +1,4 @@
-@enrol @enrol_programs @olms
+@enrol @enrol_programs @openlms
 Feature: Program allocation management tests
 
   Background:

@@ -1,4 +1,4 @@
-@enrol @enrol_programs @olms @tool_certificate
+@enrol @enrol_programs @openlms @tool_certificate
 Feature: Issuing of certificates for program completion
 
   Background:

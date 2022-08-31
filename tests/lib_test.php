@@ -22,6 +22,7 @@ use enrol_programs\local\util;
 /**
  * Program lib.php tests.
  *
+ * @group      openlms
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda
