@@ -31,19 +31,6 @@ use Behat\Mink\Exception\ExpectationException;
  */
 class behat_enrol_programs extends behat_base {
     /**
-     * Remove the useless Admin bookmarks block that takes precious screen space in tests.
-     *
-     * @Given Unnecessary Admin bookmarks block gets deleted
-     */
-    public function kill_admin_bookmark() {
-        global $DB;
-        $instances = $DB->get_records('block_instances', ['blockname' => 'admin_bookmarks']);
-        foreach ($instances as $instance) {
-            blocks_delete_instance($instance);
-        }
-    }
-
-    /**
      * Opens program management page with all programs.
      *
      * @Given I am on all programs management page
