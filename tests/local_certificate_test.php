@@ -42,7 +42,7 @@ final class local_certificate_test extends \advanced_testcase {
     public function test_is_available() {
         $this->assertTrue(certificate::is_available());
 
-        set_config('version', 2022031620, 'tool_certificate');
+        set_config('version', 2022031619, 'tool_certificate');
         $this->assertFalse(certificate::is_available());
 
         unset_config('version', 'tool_certificate');
@@ -239,10 +239,7 @@ final class local_certificate_test extends \advanced_testcase {
 
         \enrol_programs\local\source\manual::deallocate_user($program, $source, $allocation1);
         certificate::cron();
-        $this->assertSame(1, $DB->count_records('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation1->id]));
+        $this->assertSame(0, $DB->count_records('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation1->id]));
         $this->assertSame(0, $DB->count_records('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation2->id]));
-        $issue1 = $DB->get_record('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation1->id], '*', MUST_EXIST);
-        $i1 = $DB->get_record('tool_certificate_issues', ['id' => $issue1->issueid], '*', MUST_EXIST);
-        $this->assertSame('1', $i1->archived);
     }
 }

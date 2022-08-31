@@ -58,10 +58,7 @@ final class certificate_observer {
      */
     public static function user_deallocated(\enrol_programs\event\user_deallocated $event): void {
         global $DB;
-        $issues = $DB->get_record('enrol_programs_certs_issues', ['allocationid' => $event->objectid]);
-        if (!$issues) {
-            return;
-        }
+        $issues = $DB->get_records('enrol_programs_certs_issues', ['allocationid' => $event->objectid]);
         foreach ($issues as $issue) {
             $DB->set_field('tool_certificate_issues', 'archived', 1, ['id' => $issue->issueid]);
             $DB->set_field('enrol_programs_certs_issues', 'allocationid', null, ['id' => $issue->id]);
