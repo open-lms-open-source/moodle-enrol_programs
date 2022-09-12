@@ -3,7 +3,7 @@ Feature: Issuing of certificates for program completion
 
   Background:
     Given I skip program certificate tests if tool_certificate is not installed
-    And Unnecessary Admin bookmarks block gets deleted
+    And unnecessary Admin bookmarks block gets deleted
     And the following "users" exist:
       | username | firstname | lastname | email                |
       | manager1 | Manager   | 1        | manager1@example.com |

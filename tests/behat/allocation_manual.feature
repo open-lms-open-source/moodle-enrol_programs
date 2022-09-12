@@ -2,7 +2,7 @@
 Feature: Manual program allocation tests
 
   Background:
-    Given Unnecessary Admin bookmarks block gets deleted
+    Given unnecessary Admin bookmarks block gets deleted
     And the following "categories" exist:
       | name  | category | idnumber |
       | Cat 1 | 0        | CAT1     |
@@ -23,15 +23,15 @@ Feature: Manual program allocation tests
       | Course 5 | C5        | topics | CAT4     |
       | Course 6 | C6        | topics | CAT4     |
     And the following "users" exist:
-      | username | firstname | lastname | email                |
-      | manager1 | Manager   | 1        | manager1@example.com |
-      | manager2 | Manager   | 2        | manager2@example.com |
-      | viewer1  | Viewer    | 1        | viewer1@example.com  |
-      | student1 | Student   | 1        | student1@example.com |
-      | student2 | Student   | 2        | student2@example.com |
-      | student3 | Student   | 3        | student3@example.com |
-      | student4 | Student   | 4        | student4@example.com |
-      | student5 | Student   | 5        | student5@example.com |
+      | username | firstname | lastname | email                | idnumber |
+      | manager1 | Manager   | 1        | manager1@example.com | m1       |
+      | manager2 | Manager   | 2        | manager2@example.com | m2       |
+      | viewer1  | Viewer    | 1        | viewer1@example.com  | v1       |
+      | student1 | Student   | 1        | student1@example.com | s1       |
+      | student2 | Student   | 2        | student2@example.com | s2       |
+      | student3 | Student   | 3        | student3@example.com | s3       |
+      | student4 | Student   | 4        | student4@example.com | s4       |
+      | student5 | Student   | 5        | student5@example.com | s5       |
     And the following "cohort members" exist:
       | user     | cohort |
       | student1 | CH1    |
@@ -104,3 +104,72 @@ Feature: Manual program allocation tests
     When I click on "Delete program allocation" "link" in the "Student 2" "table_row"
     And I press dialog form button "Delete program allocation"
     Then I should not see "Student 2"
+
+  @javascript @_file_upload
+  Scenario: Manager may upload CSV file with manual allocations
+    Given I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I should see "Active" in the "Manual allocation:" definition list item
+    And I follow "Users"
+
+    When I press "Upload allocations"
+    And I upload "enrol/programs/tests/fixtures/upload1.csv" file to "CSV file" filemanager
+    And I set the following fields to these values:
+      | CSV separator | ,     |
+      | Encoding      | UTF-8 |
+    And I press dialog form button "Continue"
+    And the following fields match these values:
+      | User identification column | username |
+      | User mapping via           | Username |
+      | First line is header       | 1        |
+    And I press dialog form button "Upload allocations"
+    Then I should see "3 users were assigned to program."
+    And "Student 1" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 2" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 3" row "Source" column of "program_allocations" table should contain "Manual allocation"
+
+    When I press "Upload allocations"
+    And I upload "enrol/programs/tests/fixtures/upload2.csv" file to "CSV file" filemanager
+    And I set the following fields to these values:
+      | CSV separator | ,     |
+      | Encoding      | UTF-8 |
+    And I press dialog form button "Continue"
+    And the following fields match these values:
+      | User identification column | student1@example.com |
+      | User mapping via           | Username             |
+      | First line is header       | 0                    |
+    And I set the following fields to these values:
+      | User mapping via           | Email address    |
+    And I press dialog form button "Upload allocations"
+    Then I should see "1 users were assigned to program."
+    And I should see "2 users were already assigned to program."
+    And I should see "1 errors detected when assigning programs."
+    And "Student 1" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 2" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 3" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 4" row "Source" column of "program_allocations" table should contain "Manual allocation"
+
+    When I press "Upload allocations"
+    And I upload "enrol/programs/tests/fixtures/upload3.csv" file to "CSV file" filemanager
+    And I set the following fields to these values:
+      | CSV separator | ;     |
+      | Encoding      | UTF-8 |
+    And I press dialog form button "Continue"
+    And the following fields match these values:
+      | User identification column | idnumber  |
+      | User mapping via           | ID number |
+      | First line is header       | 1         |
+    And I press dialog form button "Upload allocations"
+    Then I should see "1 users were assigned to program."
+    And I should see "1 users were already assigned to program."
+    And "Student 1" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 2" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 3" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 4" row "Source" column of "program_allocations" table should contain "Manual allocation"
+    And "Student 5" row "Source" column of "program_allocations" table should contain "Manual allocation"

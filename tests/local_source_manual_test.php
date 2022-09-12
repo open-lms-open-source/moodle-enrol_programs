@@ -206,6 +206,204 @@ final class local_source_manual_test extends \advanced_testcase {
         $this->assertStringContainsString('you have been deallocated from program', $message->fullmessage);
         $this->assertSame($user1->id, $message->useridto);
         $this->assertSame($user3->id, $message->useridfrom);
+    }
 
+    public function test_store_uploaded_data() {
+        global $CFG;
+        require_once("$CFG->libdir/filelib.php");
+
+        $admin = get_admin();
+        $this->setUser($admin);
+        $draftid = file_get_unused_draft_itemid();
+        $fs = get_file_storage();
+        $context = \context_user::instance($admin->id);
+        $record = [
+            'contextid' => $context->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $draftid,
+            'filepath' => '/',
+            'filename' => 'somefile.csv',
+        ];
+        $fs->create_file_from_string($record, 'content is irrelevant');
+
+        $csvdata = [
+            ['username', 'firstname', 'lastname'],
+            ['user1', 'First', 'User'],
+            ['user2', 'Second', 'User'],
+        ];
+        manual::store_uploaded_data($draftid, $csvdata);
+
+        $files = $fs->get_area_files($context->id, 'enrol_programs', 'upload', $draftid, 'id ASC', false);
+        $this->assertCount(1, $files);
+        $file = reset($files);
+        $this->assertSame('/', $file->get_filepath());
+        $this->assertSame('data.json', $file->get_filename());
+        $this->assertEquals($csvdata, json_decode($file->get_content()));
+    }
+
+    public function test_get_uploaded_data() {
+        global $CFG;
+        require_once("$CFG->libdir/filelib.php");
+
+        $admin = get_admin();
+        $this->setUser($admin);
+        $draftid = file_get_unused_draft_itemid();
+
+        $this->assertNull(manual::get_uploaded_data($draftid));
+        $this->assertNull(manual::get_uploaded_data(-1));
+        $this->assertNull(manual::get_uploaded_data(0));
+
+        $fs = get_file_storage();
+        $context = \context_user::instance($admin->id);
+        $record = [
+            'contextid' => $context->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $draftid,
+            'filepath' => '/',
+            'filename' => 'somefile.csv',
+        ];
+        $fs->create_file_from_string($record, 'content is irrelevant');
+
+        $this->assertNull(manual::get_uploaded_data($draftid));
+
+        $csvdata = [
+            ['username', 'firstname', 'lastname'],
+            ['user1', 'First', 'User'],
+            ['user2', 'Second', 'User'],
+        ];
+        manual::store_uploaded_data($draftid, $csvdata);
+
+        $this->assertEquals($csvdata, manual::get_uploaded_data($draftid));
+    }
+
+    public function test_process_uploaded_data() {
+        global $CFG, $DB;
+        require_once("$CFG->libdir/filelib.php");
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $admin = get_admin();
+        $user1 = $this->getDataGenerator()->create_user(['username' => 'user1', 'email' => 'user1@example.com', 'idnumber' => 'u1']);
+        $user2 = $this->getDataGenerator()->create_user(['username' => 'user2', 'email' => 'user2@example.com', 'idnumber' => 'u2']);
+        $user3 = $this->getDataGenerator()->create_user(['username' => 'user3', 'email' => 'user3@example.com', 'idnumber' => 'u3']);
+        $user4 = $this->getDataGenerator()->create_user(['username' => 'user4', 'email' => 'user4@example.com', 'idnumber' => 'u4']);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program2 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $admin = get_admin();
+        $this->setUser($admin);
+        $draftid = file_get_unused_draft_itemid();
+
+        $csvdata = [
+            ['username', 'firstname', 'lastname'],
+            ['user1', 'First', 'User'],
+            ['user2', 'Second', 'User'],
+        ];
+        $data = (object)[
+            'sourceid' => $source1->id,
+            'usermapping' => 'username',
+            'usercolumn' => 0,
+            'hasheaders' => 1,
+            'userfile' => $draftid,
+        ];
+        $expected = [
+            'assigned' => 2,
+            'skipped' => 0,
+            'errors' => 0,
+        ];
+        $result = manual::process_uploaded_data($data, $csvdata);
+        $this->assertSame($expected, $result);
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]));
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id]));
+        $this->assertFalse($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id]));
+        $this->assertFalse($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user4->id]));
+
+        $csvdata = [
+            ['user3@example.com'],
+            ['user2@example.com'],
+        ];
+        $data = (object)[
+            'sourceid' => $source1->id,
+            'usermapping' => 'email',
+            'usercolumn' => 0,
+            'hasheaders' => 0,
+            'userfile' => $draftid,
+        ];
+        $expected = [
+            'assigned' => 1,
+            'skipped' => 1,
+            'errors' => 0,
+        ];
+        $result = manual::process_uploaded_data($data, $csvdata);
+        $this->assertSame($expected, $result);
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]));
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id]));
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id]));
+        $this->assertFalse($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user4->id]));
+
+        $csvdata = [
+            ['1', 'u5'],
+            ['1', 'u4'],
+        ];
+        $data = (object)[
+            'sourceid' => $source1->id,
+            'usermapping' => 'idnumber',
+            'usercolumn' => 1,
+            'hasheaders' => 0,
+            'userfile' => $draftid,
+        ];
+        $expected = [
+            'assigned' => 1,
+            'skipped' => 0,
+            'errors' => 1,
+        ];
+        $result = manual::process_uploaded_data($data, $csvdata);
+        $this->assertSame($expected, $result);
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]));
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id]));
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id]));
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user4->id]));
+    }
+
+    public function test_cleanup_uploaded_data() {
+        global $CFG, $DB;
+        require_once("$CFG->libdir/filelib.php");
+
+        $admin = get_admin();
+        $this->setUser($admin);
+        $draftid = file_get_unused_draft_itemid();
+        $fs = get_file_storage();
+        $context = \context_user::instance($admin->id);
+        $csvdata = [
+            ['username', 'firstname', 'lastname'],
+            ['user1', 'First', 'User'],
+            ['user2', 'Second', 'User'],
+        ];
+        manual::store_uploaded_data($draftid, $csvdata);
+        $files = $fs->get_area_files($context->id, 'enrol_programs', 'upload', $draftid, 'id ASC', false);
+        $this->assertCount(1, $files);
+
+        manual::cleanup_uploaded_data();
+        $files = $fs->get_area_files($context->id, 'enrol_programs', 'upload', $draftid, 'id ASC', false);
+        $this->assertCount(1, $files);
+
+        $old = time() - 60*60*24*1;
+        $DB->set_field('files', 'timecreated', $old, ['component' => 'enrol_programs']);
+        manual::cleanup_uploaded_data();
+        $files = $fs->get_area_files($context->id, 'enrol_programs', 'upload', $draftid, 'id ASC', false);
+        $this->assertCount(1, $files);
+
+        $old = time() - 60*60*24*2 - 10;
+        $DB->set_field('files', 'timecreated', $old, ['component' => 'enrol_programs']);
+        manual::cleanup_uploaded_data();
+        $files = $fs->get_area_files($context->id, 'enrol_programs', 'upload', $draftid, 'id ASC', false);
+        $this->assertCount(0, $files);
     }
 }

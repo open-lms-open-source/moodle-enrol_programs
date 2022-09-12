@@ -2,7 +2,7 @@
 Feature: Programs behat generator tests
 
   Background:
-    Given Unnecessary Admin bookmarks block gets deleted
+    Given unnecessary Admin bookmarks block gets deleted
     And the following "cohorts" exist:
       | name     | idnumber |
       | Cohort 1 | CH1      |

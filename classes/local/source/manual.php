@@ -113,6 +113,10 @@ final class manual extends base {
             $url = new \moodle_url('/enrol/programs/management/source_manual_allocate.php', ['sourceid' => $source->id]);
             $button = new \local_openlms\output\dialog_form\button($url, get_string('source_manual_allocateusers', 'enrol_programs'));
             $buttons[] = $dialogformoutput->render($button);
+
+            $url = new \moodle_url('/enrol/programs/management/source_manual_upload.php', ['sourceid' => $source->id]);
+            $button = new \local_openlms\output\dialog_form\button($url, get_string('source_manual_uploadusers', 'enrol_programs'));
+            $buttons[] = $dialogformoutput->render($button);
         }
         return $buttons;
     }
@@ -153,6 +157,10 @@ final class manual extends base {
         $source = $DB->get_record('enrol_programs_sources',
             ['id' => $sourceid, 'type' => static::get_type(), 'programid' => $program->id], '*', MUST_EXIST);
 
+        if (count($userids) === 0) {
+            return;
+        }
+
         foreach ($userids as $userid) {
             $user = $DB->get_record('user', ['id' => $userid, 'deleted' => 0], '*', MUST_EXIST);
             if ($DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id])) {
@@ -162,8 +170,218 @@ final class manual extends base {
             self::allocate_user($program, $source, $user->id, []);
         }
 
-        \enrol_programs\local\allocation::fix_user_enrolments($programid, null);
-        \enrol_programs\local\notification::trigger_notifications($programid, null);
+        if (count($userids) === 1) {
+            $userid = reset($userids);
+        } else {
+            $userid = null;
+        }
+        \enrol_programs\local\allocation::fix_user_enrolments($programid, $userid);
+        \enrol_programs\local\notification::trigger_notifications($programid, $userid);
+    }
+
+    /**
+     * Stores csv file contents as normalised JSON file.
+     *
+     * NOTE: uploaded file is deleted and instead a new data.json file is stored.
+     *
+     * @param int $draftid
+     * @param array $filedata
+     * @return void
+     */
+    public static function store_uploaded_data(int $draftid, array $filedata): void {
+        global $USER;
+
+        $fs = get_file_storage();
+        $context = \context_user::instance($USER->id);
+
+        $fs->delete_area_files($context->id, 'enrol_programs', 'upload', $draftid);
+
+        $content = json_encode($filedata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $record = [
+            'contextid' => $context->id,
+            'component' => 'enrol_programs',
+            'filearea' => 'upload',
+            'itemid' => $draftid,
+            'filepath' => '/',
+            'filename' => 'data.json',
+        ];
+
+        $fs->create_file_from_string($record, $content);
+    }
+
+    /**
+     * Returns preprocessed data.json user allocation file contents.
+     *
+     * @param int $draftid
+     * @return array|null
+     */
+    public static function get_uploaded_data(int $draftid): ?array {
+        global $USER;
+
+        if (!$draftid) {
+            return null;
+        }
+
+        $fs = get_file_storage();
+        $context = \context_user::instance($USER->id);
+
+        $file = $fs->get_file($context->id, 'enrol_programs', 'upload', $draftid, '/', 'data.json');
+        if (!$file) {
+            return null;
+        }
+        $data = json_decode($file->get_content(), true);
+        if (!is_array($data)) {
+            return null;
+        }
+        $data = fix_utf8($data);
+        return $data;
+    }
+
+    /**
+     * Returns preprocessed user allocation upload file contents.
+     *
+     * NOTE: data.json file is deleted.
+     *
+     * @param stdClass $data form submission data
+     * @param array $filedata decoded data.json file
+     * @return array with keys 'assigned', 'skipped' and 'errors'
+     */
+    public static function process_uploaded_data(stdClass $data, array $filedata): array {
+        global $DB, $USER;
+
+        if ($data->usermapping !== 'username'
+            && $data->usermapping !== 'email'
+            && $data->usermapping !== 'idnumber'
+        ) {
+            // We need to prevent SQL injections in get_record later!
+            throw new \coding_exception('Invalid usermapping value');
+        }
+
+        $result = [
+            'assigned' => 0,
+            'skipped' => 0,
+            'errors' => 0,
+        ];
+
+        $source = $DB->get_record('enrol_programs_sources', ['id' => $data->sourceid, 'type' => 'manual'], '*', MUST_EXIST);
+        $program = $DB->get_record('enrol_programs_programs', ['id' => $source->programid], '*', MUST_EXIST);
+
+        if ($data->hasheaders) {
+            unset($filedata[0]);
+        }
+
+        $userids = [];
+        foreach ($filedata as $i => $row) {
+            $userident = $row[$data->usercolumn];
+            if (!$userident) {
+                $result['errors']++;
+                continue;
+            }
+            $users = $DB->get_records('user', [$data->usermapping => $userident, 'deleted' => 0, 'confirmed' => 1]);
+            if (count($users) !== 1) {
+                $result['errors']++;
+                continue;
+            }
+            $user = reset($users);
+            if (isguestuser($user->id)) {
+                $result['errors']++;
+                continue;
+            }
+            if ($DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id])) {
+                $result['skipped']++;
+                continue;
+            }
+            $userids[] = $user->id;
+        }
+
+        if ($userids) {
+            manual::allocate_users($program->id, $source->id, $userids);
+            $result['assigned'] = count($userids);
+        }
+
+        if (!empty($data->csvfile)) {
+            $fs = get_file_storage();
+            $context = \context_user::instance($USER->id);
+            $fs->delete_area_files($context->id, 'user', 'draft', $data->csvfile);
+            $fs->delete_area_files($context->id, 'enrol_programs', 'upload', $data->csvfile);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Deletes old orphaned upload related data.
+     *
+     * @return void
+     */
+    public static function cleanup_uploaded_data(): void {
+        global $DB;
+
+        $fs = get_file_storage();
+        $sql = "SELECT contextid, itemid
+                  FROM {files}
+                 WHERE component = 'enrol_programs' AND filearea = 'upload' AND filepath = '/' AND filename = '.'
+                       AND timecreated < :old";
+        $rs = $DB->get_recordset_sql($sql, ['old' => time() - 60*60*24*2]);
+        foreach ($rs as $dir) {
+            $fs->delete_area_files($dir->contextid, 'enrol_programs', 'upload', $dir->itemid);
+        }
+        $rs->close();
+    }
+
+    /**
+     * Called from \tool_uploaduser\process::process_line()
+     *
+     * @param stdClass $user
+     * @param string $column
+     * @param \uu_progress_tracker $upt
+     * @param array $programcache
+     * @return void
+     */
+    public static function tool_uploaduser_process(stdClass $user, string $column, \uu_progress_tracker $upt, array &$programcache): void {
+        global $DB;
+
+        if (!preg_match('/^program\d+$/', $column)) {
+            return;
+        }
+        if (empty($user->{$column})) {
+            return;
+        }
+
+        $programid = $user->{$column};
+
+        if (!isset($programcache[$programid])) {
+            if (is_number($programid)) {
+                $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
+            } else {
+                $program = $DB->get_record('enrol_programs_programs', ['idnumber' => $programid]);
+            }
+            if ($program) {
+                $context = \context::instance_by_id($program->contextid);
+                if (has_capability('enrol/programs:allocate', $context)) {
+                    $source = $DB->get_record('enrol_programs_sources', ['type' => 'manual', 'programid' => $program->id]);
+                    if ($source && self::is_allocation_possible($program, $source)) {
+                        $programcache[$programid] = (object)['id' => $program->id, 'sourceid' => $source->id, 'name' => format_string($program->fullname)];
+                    }
+                }
+            }
+        }
+        if (!isset($programcache[$programid])) {
+            $programcache[$programid] = get_string('source_manual_userupload_invalidprogram', 'enrol_programs', s($programid));
+        }
+        $program = $programcache[$programid];
+        if (!is_object($program)) {
+            $upt->track('enrolments', $program, 'error');
+            return;
+        }
+
+        if ($DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id])) {
+            $upt->track('enrolments', get_string('source_manual_userupload_alreadyallocated', 'enrol_programs', $program->name), 'info');
+            return;
+        }
+
+        self::allocate_users($program->id, $program->sourceid, [$user->id]);
+        $upt->track('enrolments', get_string('source_manual_userupload_allocated', 'enrol_programs', $program->name), 'info');
     }
 }
 

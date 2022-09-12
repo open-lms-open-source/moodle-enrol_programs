@@ -51,6 +51,8 @@ class cron extends \core\task\scheduled_task {
 
         \enrol_programs\local\notification::trigger_notifications(null, null);
 
+        \enrol_programs\local\source\manual::cleanup_uploaded_data();
+
         $trace->finished();
     }
 }
