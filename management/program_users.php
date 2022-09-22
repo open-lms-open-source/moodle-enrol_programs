@@ -197,7 +197,7 @@ $sql = "SELECT a.*, s.type AS sourcetype, $userfields
          WHERE a.programid = :programid $usersearch $statusselect
       ORDER BY $orderby";
 $params['programid'] = $program->id;
-$allocations = $DB->get_records_sql($sql, $params);
+$allocations = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
 
 $sql = "SELECT COUNT(a.id)
           FROM {enrol_programs_allocations} a
