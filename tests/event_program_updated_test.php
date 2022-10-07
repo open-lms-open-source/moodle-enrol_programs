@@ -35,24 +35,46 @@ final class event_program_updated_test extends \advanced_testcase {
     }
 
     public function test_update_program_general() {
+        global $DB;
+
         $syscontext = \context_system::instance();
         $data = (object)[
             'fullname' => 'Some program',
             'idnumber' => 'SP1',
             'contextid' => $syscontext->id,
+            'sources' => ['manual' => []],
         ];
         $this->setAdminUser();
-        $program = program::add_program($data);
 
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+        $program = $generator->create_program($data);
+        $program->duedatejson = '{"type":"date","date":' . time() . '}';
+        $DB->update_record('enrol_programs_programs', $program);
+
+        $source = $DB->get_record('enrol_programs_sources', ['programid' => $program->id, 'type' => 'manual']);
+        $user = $this->getDataGenerator()->create_user();
+        \enrol_programs\local\source\manual::allocate_users($program->id, $source->id, [$user->id]);
         $sink = $this->redirectEvents();
         $program->fullname = 'Another program';
+        $program->duedatejson = '{"type":"date","date":' . time() + 1 . '}';
+
         $program = program::update_program_general($program);
         $events = $sink->get_events();
         $sink->close();
 
-        $this->assertCount(1, $events);
-        $event = reset($events);
-        $this->assertInstanceOf('enrol_programs\event\program_updated', $event);
+        $allowedevents = [
+            'enrol_programs\event\program_updated',
+            'core\event\calendar_event_created',
+            'core\event\calendar_event_deleted'
+        ];
+        foreach ($events as $ev) {
+            $this->assertContains(get_class($ev), $allowedevents);
+            if (get_class($ev)) {
+                $event = $ev;
+            }
+        }
+
         $this->assertEquals($syscontext->id, $event->contextid);
         $this->assertSame($program->id, $event->objectid);
         $this->assertSame('u', $event->crud);

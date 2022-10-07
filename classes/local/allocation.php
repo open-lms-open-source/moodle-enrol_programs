@@ -24,6 +24,7 @@ use enrol_programs\local\source\selfallocation;
 use enrol_programs\local\content\course;
 use enrol_programs\local\content\top;
 use enrol_programs\local\content\set;
+use enrol_programs\local\allocation_calendar_event;
 use stdClass;
 
 /**
@@ -620,6 +621,7 @@ final class allocation {
             $user = $DB->get_record('user', ['id' => $allocation->userid]);
 
             self::make_snapshot($allocation->id, 'completion');
+            allocation_calendar_event::adjust_allocation_completion_calendar_events($allocation);
             $event = \enrol_programs\event\program_completed::create_from_allocation($allocation, $program);
             $event->trigger();
             notification::notify_completed($program, $source, $allocation, $user);
@@ -788,6 +790,7 @@ final class allocation {
         $trans->allow_commit();
 
         self::fix_user_enrolments($allocation->programid, $allocation->userid);
+        allocation_calendar_event::adjust_allocation_completion_calendar_events($allocation);
     }
 
     /**

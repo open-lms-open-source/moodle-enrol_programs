@@ -48,6 +48,7 @@ class cron extends \core\task\scheduled_task {
         \enrol_programs\local\allocation::fix_allocation_sources(null, null);
         \enrol_programs\local\allocation::fix_enrol_instances(null);
         \enrol_programs\local\allocation::fix_user_enrolments(null, null);
+        \enrol_programs\local\allocation_calendar_event::fix_allocation_calendar_events(null);
 
         \enrol_programs\local\notification::trigger_notifications(null, null);
 

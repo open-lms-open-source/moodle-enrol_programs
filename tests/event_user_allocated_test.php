@@ -59,9 +59,10 @@ final class event_user_allocated_test extends \advanced_testcase {
 
         $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id]);
 
-        $this->assertCount(1, $events);
-        $event = reset($events);
+        $this->assertCount(2, $events);
+        $event = $events[1];
         $this->assertInstanceOf('enrol_programs\event\user_allocated', $event);
+        $this->assertInstanceOf('core\event\calendar_event_created', $events[0]);
         $this->assertEquals($syscontext->id, $event->contextid);
         $this->assertSame($allocation->id, $event->objectid);
         $this->assertSame($admin->id, $event->userid);
@@ -72,5 +73,20 @@ final class event_user_allocated_test extends \advanced_testcase {
         $description = $event->get_description();
         $programurl = new \moodle_url('/enrol/programs/management/user_allocation.php', ['id' => $allocation->id]);
         $this->assertSame($programurl->out(false), $event->get_url()->out(false));
+
+        $allocationcalendarevents = $DB->get_records('event', ['instance' => $allocation->id, 'component' => 'enrol_programs', 'userid' => $user->id]);
+        $allocationeventtypes = ['programstart', 'programend', 'programdue'];
+        foreach ($allocationcalendarevents as $calendarevent) {
+            $this->assertContains($calendarevent->eventtype, $allocationeventtypes);
+            if ($calendarevent->eventtype === 'programstart') {
+                $this->assertEquals($calendarevent->timestart, $allocation->timestart);
+            }
+            if ($calendarevent->eventtype === 'programend') {
+                $this->assertEquals($calendarevent->timestart, $allocation->timeend);
+            }
+            if ($calendarevent->eventtype === 'programdue') {
+                $this->assertEquals($calendarevent->timestart, $allocation->timedue);
+            }
+        }
     }
 }
