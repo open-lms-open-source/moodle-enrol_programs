@@ -292,9 +292,9 @@ final class allocation_calendar_event {
                 SELECT 1 FROM {event}
                 WHERE instance=a.id AND component='enrol_programs' AND (
                     name NOT LIKE CONCAT(p.fullname, '%%') OR description != p.description OR
-                    (eventtype=? && timestart <> a.timestart) OR
-                    (eventtype=? && timestart <> a.timeend) OR
-                    (eventtype=? && timestart <> a.timedue)
+                    (eventtype=? AND timestart <> a.timestart) OR
+                    (eventtype=? AND timestart <> a.timeend) OR
+                    (eventtype=? AND timestart <> a.timedue)
                 )
             )";
         if ($program) {
