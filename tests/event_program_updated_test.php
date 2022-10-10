@@ -57,7 +57,7 @@ final class event_program_updated_test extends \advanced_testcase {
         \enrol_programs\local\source\manual::allocate_users($program->id, $source->id, [$user->id]);
         $sink = $this->redirectEvents();
         $program->fullname = 'Another program';
-        $program->duedatejson = '{"type":"date","date":' . time() + 1 . '}';
+        $program->duedatejson = '{"type":"date","date":' . (time() + 1) . '}';
 
         $program = program::update_program_general($program);
         $events = $sink->get_events();
