@@ -31,6 +31,7 @@ $string['allocationend'] = 'Allocation end';
 $string['allocationend_help'] = 'Allocation end date meaning depends on enabled allocation sources. Usually new allocation are not possible after this date if specified.';
 $string['allocation'] = 'Allocation';
 $string['allocations'] = 'Allocations';
+$string['programallocations'] = 'Program Allocations';
 $string['allocationdate'] = 'Allocation date';
 $string['allocationsources'] = 'Allocation sources';
 $string['allocationstart'] = 'Allocation start';
@@ -149,18 +150,54 @@ $string['plugindisabled'] = 'Program enrolment plugin is disabled, programs will
 $string['pluginname'] = 'Programs';
 $string['pluginname_desc'] = 'Programs are designed to allow creation of course sets.';
 $string['privacy:metadata:field:programid'] = 'Program id';
-$string['privacy:metadata:field:timeallocated'] = 'Program allocation date';
-$string['privacy:metadata:field:timecompleted'] = 'Completion date';
-$string['privacy:metadata:field:timecreated'] = 'Creation date';
-$string['privacy:metadata:field:timerejected'] = 'Rejection date';
-$string['privacy:metadata:field:timerequested'] = 'Request date';
-$string['privacy:metadata:field:timesnapshot'] = 'Snapshot date';
-$string['privacy:metadata:field:timestarted'] = 'program start date';
 $string['privacy:metadata:field:userid'] = 'User id';
+$string['privacy:metadata:field:allocationid'] = 'Program allocation id';
+$string['privacy:metadata:field:sourceid'] = 'Source of allocation';
+$string['privacy:metadata:field:itemid'] = 'Item ID';
+$string['privacy:metadata:field:timecreated'] = 'Creation date';
+$string['privacy:metadata:field:timecompleted'] = 'Completion date';
+
 $string['privacy:metadata:table:enrol_programs_allocations'] = 'Information about program allocations';
+$string['privacy:metadata:field:archived'] = 'Is the record archived';
+$string['privacy:metadata:field:sourcedatajson'] = 'Information about the source of the allocation';
+$string['privacy:metadata:field:timeallocated'] = 'Program allocation date';
+$string['privacy:metadata:field:timestart'] = 'Start date';
+$string['privacy:metadata:field:timedue'] = 'Due date';
+$string['privacy:metadata:field:timeend'] = 'End date';
+$string['privacy:metadata:field:timenotifiedallocation'] = 'Time notified of program allocation';
+$string['privacy:metadata:field:timenotifiedstart'] = 'Time notified of start date';
+$string['privacy:metadata:field:timenotifiedcompleted'] = 'Time notified of completion date';
+$string['privacy:metadata:field:timenotifiedduesoon'] = 'Time notified of approaching due date';
+$string['privacy:metadata:field:timenotifieddue'] = 'Time notified of due date arrival';
+$string['privacy:metadata:field:timenotifiedendsoon'] = 'Time notified of approaching end date';
+$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Time notified of completed program';
+$string['privacy:metadata:field:timenotifiedendfailed'] = 'Time notified of failed program';
+$string['privacy:metadata:field:timenotifieddeallocation'] = 'Time notified of program deallocation';
+
+$string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Program allocation certificate issues';
+$string['privacy:metadata:field:issueid'] = 'Issue ID';
+
+$string['privacy:metadata:table:enrol_programs_completions'] = 'Program allocation completions';
+
 $string['privacy:metadata:table:enrol_programs_evidences'] = 'Information about other completion evidences';
+$string['privacy:metadata:field:evidencejson'] = 'Information about completion evidence';
+$string['privacy:metadata:field:createdby'] = 'Evidence created by';
+
 $string['privacy:metadata:table:enrol_programs_requests'] = 'Information about allocation request';
+$string['privacy:metadata:field:datajson'] = 'Information about the request';
+$string['privacy:metadata:field:timerequested'] = 'Request date';
+$string['privacy:metadata:field:timerejected'] = 'Rejection date';
+$string['privacy:metadata:field:rejectedby'] = 'Request rejected by';
+
+
 $string['privacy:metadata:table:enrol_programs_usr_snapshots'] = 'Program allocation snapshots';
+$string['privacy:metadata:field:reason'] = 'Reason';
+$string['privacy:metadata:field:timesnapshot'] = 'Snapshot date';
+$string['privacy:metadata:field:snapshotby'] = 'Snapshot by';
+$string['privacy:metadata:field:explanation'] = 'Explanation';
+$string['privacy:metadata:field:completionsjson'] = 'Information about completion';
+$string['privacy:metadata:field:evidencesjson'] = 'Information about completion evidence';
+
 $string['program'] = 'Program';
 $string['programautofix'] = 'Auto repair program';
 $string['programdue'] = 'Program due';
