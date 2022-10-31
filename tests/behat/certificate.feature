@@ -2,7 +2,7 @@
 Feature: Issuing of certificates for program completion
 
   Background:
-    Given I skip program certificate tests if tool_certificate is not installed
+    Given I skip tests if "tool_certificate" is not installed
     And unnecessary Admin bookmarks block gets deleted
     And the following "users" exist:
       | username | firstname | lastname | email                |

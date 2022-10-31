@@ -289,9 +289,19 @@ EOT;
             $params['searchtext'] = '%' . $DB->sql_like_escape($this->searchtext) . '%';
         }
 
+        $tenantjoin = "";
+        if (tenant::is_active()) {
+            $tenantid = \tool_olms_tenant\tenancy::get_tenant_id();
+            if ($tenantid) {
+                $tenantjoin = "JOIN {context} pc ON pc.id = p.contextid AND (pc.tenantid IS NULL OR pc.tenantid = :tenantid)";
+                $params['tenantid'] = $tenantid;
+            }
+        }
+
         $sql = "SELECT p.*
                   FROM {enrol_programs_programs} p
              LEFT JOIN {enrol_programs_allocations} pa ON pa.programid = p.id AND pa.userid = :userid1 AND pa.archived = 0
+                  $tenantjoin
                  WHERE p.archived = 0 $searchwhere
                        AND (p.public = 1 OR pa.id IS NOT NULL OR EXISTS (
                             SELECT cm.id
@@ -323,6 +333,22 @@ EOT;
         if ($program->archived) {
             return false;
         }
+
+        if (\enrol_programs\local\tenant::is_active()) {
+            if ($userid == $USER->id) {
+                $tenantid = \tool_olms_tenant\tenancy::get_tenant_id();
+            } else {
+                $tenantid = \tool_olms_tenant\tenant_users::get_user_tenant_id($userid);
+            }
+            if ($tenantid) {
+                $programcontext = \context::instance_by_id($program->contextid);
+                $programtenantid = \tool_olms_tenant\tenants::get_context_tenant_id($programcontext);
+                if ($programtenantid && $programtenantid != $tenantid) {
+                    return false;
+                }
+            }
+        }
+
         if ($program->public) {
             return true;
         }

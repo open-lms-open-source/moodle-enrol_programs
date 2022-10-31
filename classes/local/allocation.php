@@ -932,4 +932,33 @@ final class allocation {
 
         return $allocation;
     }
+
+    /**
+     * Returns list of programs with allocation data that user can see.
+     * @return array
+     */
+    public static function get_my_allocations(): array {
+        global $USER, $DB;
+
+        $params = ['userid' => $USER->id];
+
+        $tenantjoin = "";
+        if (\enrol_programs\local\tenant::is_active()) {
+            // Having program allocations in different tenant is a BAD thing,
+            // so let's just do the same as the catalogue for now.
+            $tenantid = \tool_olms_tenant\tenancy::get_tenant_id();
+            if ($tenantid) {
+                $tenantjoin = "JOIN {context} pc ON pc.id = p.contextid AND (pc.tenantid IS NULL OR pc.tenantid = :tenantid)";
+                $params['tenantid'] = $tenantid;
+            }
+        }
+
+        $sql = "SELECT pa.*
+                  FROM {enrol_programs_allocations} pa
+                  JOIN {enrol_programs_programs} p ON p.id = pa.programid
+                  $tenantjoin
+                 WHERE pa.userid = :userid AND p.archived = 0 AND pa.archived = 0
+              ORDER BY p.fullname ASC";
+        return $DB->get_records_sql($sql, $params);
+    }
 }

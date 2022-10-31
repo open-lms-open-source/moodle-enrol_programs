@@ -69,14 +69,30 @@ class search_candidate extends external_api {
         $params = array_merge($searchparams, $sortparams);
         $params['programid'] = $programid;
 
-        // NOTE: hardcoded tenant restrictions would go here too.
+        $tenantjoin = "";
+        $tenantwhere = "";
+        if (\enrol_programs\local\tenant::is_active()) {
+            $tenantid = \tool_olms_tenant\tenants::get_context_tenant_id($context);
+            if ($tenantid) {
+                $tenantjoin = "LEFT JOIN {tool_olms_tenant_user} tu ON tu.userid = usr.id";
+                $tenantwhere = "AND tu.id IS NULL OR tu.tenantid = :tenantid";
+                $params['tenantid'] = $tenantid;
+            }
+            $currenttenantid = \tool_olms_tenant\tenancy::get_tenant_id();
+            if ($currenttenantid) {
+                $tenantjoin = "LEFT JOIN {tool_olms_tenant_user} ctu ON ctu.userid = usr.id";
+                $tenantwhere = "AND ctu.tenantid = :currenttenantid";
+                $params['currenttenantid'] = $currenttenantid;
+            }
+        }
 
         $additionalfields = $fields->get_sql('usr')->selects;
         $sqlquery = <<<SQL
             SELECT usr.id {$additionalfields}
               FROM {user} usr
          LEFT JOIN {enrol_programs_allocations} pa ON (pa.userid = usr.id AND pa.programid = :programid)
-             WHERE pa.id IS NULL AND {$searchsql}
+         {$tenantjoin}     
+             WHERE pa.id IS NULL AND {$searchsql} {$tenantwhere}
           ORDER BY {$sortsql}
 SQL;
 

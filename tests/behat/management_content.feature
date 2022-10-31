@@ -18,6 +18,7 @@ Feature: Program content management tests
       | Course 6 | C6        | topics | CAT1     |
     And the following "users" exist:
       | username | firstname | lastname | email                |
+      | manager  | Site      | Manager  | manager@example.com  |
       | manager1 | Manager   | 1        | manager1@example.com |
       | manager2 | Manager   | 2        | manager2@example.com |
       | viewer1  | Viewer    | 1        | viewer1@example.com  |
@@ -35,6 +36,7 @@ Feature: Program content management tests
       | enrol/programs:allocate        | Allow      | pmanager | System       |           |
     And the following "role assigns" exist:
       | user      | role          | contextlevel | reference |
+      | manager   | manager       | System       |           |
       | manager1  | pmanager      | System       |           |
       | manager2  | pmanager      | Category     | CAT2      |
       | manager2  | pmanager      | Category     | CAT3      |
@@ -51,7 +53,7 @@ Feature: Program content management tests
     Given I log in as "manager1"
     And I am on all programs management page
     And I follow "Program 000"
-    And I follow "Content"
+    And I click on "Content" "link" in the ".nav-tabs" "css_element"
     And I should see "All in any order" in the "Program 000" "table_row"
 
     # Add courses and sets
@@ -183,3 +185,32 @@ Feature: Program content management tests
 
     When I click on "Delete set" "link" in the "First set" "table_row"
     And I press dialog form button "Delete set"
+
+  @javascript @tool_olms_tenant
+  Scenario: Tenant manager may add program courses from non-conflicting tenants
+    Given I skip tests if "tool_olms_tenant" is not installed
+    And tenant support was activated
+    And the following "tool_olms_tenant > tenants" exist:
+      | name     | idnumber | category |
+      | Tenant 1 | TEN1     | CAT1     |
+      | Tenant 2 | TEN2     | CAT2     |
+    And I log in as "manager"
+    And I click on "Select a tenant" "link"
+    And I set the following fields to these values:
+      | Tenant      | Tenant 1         |
+    And I press dialog form button "Switch"
+
+    When I am on all programs management page
+    And I follow "Program 000"
+    And I click on "Content" "link" in the ".nav-tabs" "css_element"
+    And I click on "Append item" "link" in the "Program 000" "table_row"
+    And I set the following fields to these values:
+      | Courses | Course 1 |
+    And I press dialog form button "Append item"
+    Then I should see "Course 1" in the "#program_content" "css_element"
+
+    When I click on "Append item" "link" in the "Program 000" "table_row"
+    And I set the following fields to these values:
+      | Courses | Course 4 |
+    And I press dialog form button "Append item"
+    Then I should see "Course 4" in the "#program_content" "css_element"

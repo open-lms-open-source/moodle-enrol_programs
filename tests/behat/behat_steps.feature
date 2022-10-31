@@ -294,22 +294,3 @@ Feature: Programs navigation behat steps test
     When I select "My programs" from flat navigation drawer
     Then I should see "My programs"
     And I should see "You are not allocated to any programs."
-
-  Scenario: List term definition assertion works
-    Given I log in as "manager1"
-    And I am on all programs management page
-    When I follow "Program 000"
-    Then I should see "Program 000" in the "Full name:" definition list item
-    And I should see "Program" in the "Full name:" definition list item
-    And I should see "P" in the "Full name:" definition list item
-    And I should see "rog" in the "Full name:" definition list item
-  # Uncomment following to test a failure.
-    #And I should see "program 000" in the "Full name:" definition list item
-
-  Scenario: List term definition negative assertion works
-    Given I log in as "manager1"
-    And I am on all programs management page
-    When I follow "Program 000"
-    Then I should not see "program" in the "Full name:" definition list item
-  # Uncomment following to test a failure.
-    #And I should not see "Program" in the "Full name:" definition list item

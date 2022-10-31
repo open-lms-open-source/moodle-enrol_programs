@@ -62,6 +62,7 @@ $string['duedate'] = 'Due date';
 $string['enrolrole'] = 'Course role';
 $string['enrolrole_desc'] = 'Select role that will be used by programs for course enrolment';
 $string['errorcontentproblem'] = 'Problem detected in the program content structure, program completion will not be tracked correctly!';
+$string['errordifferenttenant'] = 'Program from another tenant cannot be accessed';
 $string['errornoallocations'] = 'No user allocations found';
 $string['errornoallocation'] = 'Program is not allocated';
 $string['errornomyprograms'] = 'You are not allocated to any programs.';

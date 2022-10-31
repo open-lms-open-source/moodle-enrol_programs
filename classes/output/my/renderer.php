@@ -179,16 +179,9 @@ EOT;
      * @return string
      */
     public function render_block_content(): string {
-        global $DB, $USER;
+        global $DB;
 
-        $sql = "SELECT pa.*
-                  FROM {enrol_programs_allocations} pa
-                  JOIN {enrol_programs_programs} p ON p.id = pa.programid
-                 WHERE pa.userid = :userid AND p.archived = 0 AND pa.archived = 0
-              ORDER BY p.fullname ASC";
-        $params = ['userid' => $USER->id];
-        $allocations = $DB->get_records_sql($sql, $params);
-
+        $allocations = allocation::get_my_allocations();
         if (!$allocations) {
             return '<em>' . get_string('errornomyprograms', 'enrol_programs') . '</em>';
         }

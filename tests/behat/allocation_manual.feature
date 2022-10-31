@@ -24,6 +24,7 @@ Feature: Manual program allocation tests
       | Course 6 | C6        | topics | CAT4     |
     And the following "users" exist:
       | username | firstname | lastname | email                | idnumber |
+      | manager  | Site      | Manager  | manager@example.com  | m        |
       | manager1 | Manager   | 1        | manager1@example.com | m1       |
       | manager2 | Manager   | 2        | manager2@example.com | m2       |
       | viewer1  | Viewer    | 1        | viewer1@example.com  | v1       |
@@ -53,6 +54,7 @@ Feature: Manual program allocation tests
       | moodle/cohort:view             | Allow      | pmanager | System       |           |
     And the following "role assigns" exist:
       | user      | role          | contextlevel | reference |
+      | manager   | manager       | System       |           |
       | manager1  | pmanager      | System       |           |
       | manager2  | pmanager      | Category     | CAT2      |
       | manager2  | pmanager      | Category     | CAT3      |
@@ -104,6 +106,77 @@ Feature: Manual program allocation tests
     When I click on "Delete program allocation" "link" in the "Student 2" "table_row"
     And I press dialog form button "Delete program allocation"
     Then I should not see "Student 2"
+
+  @javascript @tool_olms_tenant
+  Scenario: Tenant manager may allocate users manually
+    Given I skip tests if "tool_olms_tenant" is not installed
+    And tenant support was activated
+    And the following "tool_olms_tenant > tenants" exist:
+      | name     | idnumber | category |
+      | Tenant 1 | TEN1     | CAT1     |
+      | Tenant 2 | TEN2     | CAT2     |
+    And the following "users" exist:
+      | username | firstname | lastname | email                | tenant   |
+      | tu1      | Tenant 1  | Student  | tu1@example.com      | TEN1     |
+      | tu2      | Tenant 2  | Student  | tu2@example.com      | TEN2     |
+    And I log in as "manager"
+
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I should see "Active" in the "Manual allocation:" definition list item
+    And I follow "Users"
+
+    When I press "Allocate users"
+    And I set the following fields to these values:
+      | Users | Student 1 |
+    And I press dialog form button "Allocate users"
+    Then "Student 1" row "Source" column of "program_allocations" table should contain "Manual allocation"
+
+    And I am on all programs management page
+    And I follow "Program 001"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I should see "Active" in the "Manual allocation:" definition list item
+    And I follow "Users"
+
+    When I press "Allocate users"
+    And I set the following fields to these values:
+      | Users | Student 1 |
+    And I press dialog form button "Allocate users"
+    And "Student 1" row "Source" column of "program_allocations" table should contain "Manual allocation"
+
+    And I click on "Select a tenant" "link"
+    And I set the following fields to these values:
+      | Tenant      | Tenant 1         |
+    And I press dialog form button "Switch"
+
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Users"
+
+    When I press "Allocate users"
+    And I set the following fields to these values:
+      | Users | Tenant 1 Student |
+    And I press dialog form button "Allocate users"
+    Then "Tenant 1 Student" row "Source" column of "program_allocations" table should contain "Manual allocation"
+
+    And I am on all programs management page
+    And I follow "Program 001"
+    And I follow "Users"
+
+    When I press "Allocate users"
+    And I set the following fields to these values:
+      | Users | Tenant 1 Student |
+    And I press dialog form button "Allocate users"
+    Then "Tenant 1 Student" row "Source" column of "program_allocations" table should contain "Manual allocation"
 
   @javascript @_file_upload
   Scenario: Manager may upload CSV file with manual allocations

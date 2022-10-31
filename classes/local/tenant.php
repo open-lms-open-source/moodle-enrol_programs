@@ -14,24 +14,42 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace enrol_programs\local;
+
 /**
- * Program enrolment plugin upgrade steps.
+ * Tenant support for programs.
  *
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+final class tenant {
+    /**
+     * Is this recent OLMS Work code is present?
+     *
+     * @return bool
+     */
+    public static function is_available(): bool {
+        if (!file_exists(__DIR__ . '/../../../../admin/tool/olms_tenant/version.php')) {
+            return false;
+        }
+        $version = get_config('tool_olms_tenant', 'version');
+        if (!$version || $version < 2022102704) {
+            return false;
+        }
+        return true;
+    }
 
-defined('MOODLE_INTERNAL') || die();
-
-/** @var stdClass $plugin */
-
-$plugin->version   = 2022103100;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2021051704;        // Requires this Moodle version.
-$plugin->component = 'enrol_programs';
-$plugin->maturity  = MATURITY_RC;
-$plugin->release   = 'v1.0.7.1+';
-$plugin->supported = [311, 400];
-
-$plugin->dependencies = ['local_openlms' => 2022103100];
+    /**
+     * Is this recent OLMS Work site with activated tenants?
+     *
+     * @return bool
+     */
+    public static function is_active(): bool {
+        if (!self::is_available()) {
+            return false;
+        }
+        return \tool_olms_tenant\tenants::is_active();
+    }
+}

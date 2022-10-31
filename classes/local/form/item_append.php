@@ -67,6 +67,8 @@ final class item_append extends \local_openlms\dialog_form {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
+        $context = $this->_customdata['context'];
+
         if ($data['addset']) {
             if (trim($data['fullname']) === '') {
                 $errors['fullname'] = get_string('required');
@@ -79,6 +81,22 @@ final class item_append extends \local_openlms\dialog_form {
         } else {
             if (!$data['courses']) {
                 $errors['courses'] = get_string('required');
+            } else {
+                if (\enrol_programs\local\tenant::is_active()) {
+                    $tenantid = \tool_olms_tenant\tenants::get_context_tenant_id($context);
+                    if ($tenantid) {
+                        foreach ($data['courses'] as $courseid) {
+                            // The caps are removed in other tenants, but we need to make sure
+                            // admins do not add other tenant courses accidentally.
+                            $coursecontext = \context_course::instance($courseid);
+                            $coursetenantid = \tool_olms_tenant\tenants::get_context_tenant_id($coursecontext);
+                            if ($coursetenantid && $coursetenantid != $tenantid) {
+                                $errors['courses'] = get_string('errordifferenttenant', 'enrol_programs');
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
 

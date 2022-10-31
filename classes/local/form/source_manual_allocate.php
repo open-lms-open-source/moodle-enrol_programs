@@ -78,21 +78,38 @@ final class source_manual_allocate extends \local_openlms\dialog_form {
 
         $errors = parent::validation($data, $files);
 
+        $context = $this->_customdata['context'];
+
         if ($data['cohortid']) {
-            $cohort = $DB->get_record('cohort', array('id' => $data['cohortid']), 'id, contextid, visible');
-            if (!$cohort->visible) {
-                $cohortcontext = \context::instance_by_id($cohort->contextid);
-                if (!has_capability('moodle/cohort:view', $cohortcontext)) {
-                    $errors['cohortid'] = get_string('error');
+            $cohort = $DB->get_record('cohort', ['id' => $data['cohortid']], '*', MUST_EXIST);
+            $cohortcontext = \context::instance_by_id($cohort->contextid);
+            if (!$cohort->visible && !has_capability('moodle/cohort:view', $cohortcontext)) {
+                $errors['cohortid'] = get_string('error');
+            }
+            if (\enrol_programs\local\tenant::is_active()) {
+                $tenantid = \tool_olms_tenant\tenants::get_context_tenant_id($context);
+                if ($tenantid) {
+                    $cohorttenantid = \tool_olms_tenant\tenants::get_context_tenant_id($cohortcontext);
+                    if ($cohorttenantid && $cohorttenantid != $tenantid) {
+                        $errors['cohortid'] = get_string('error');
+                    }
                 }
             }
-            // NOTE: Later add tenant access restrictions if cohort visible.
         }
 
         if ($data['users']) {
             foreach ($data['users'] as $userid) {
                 $user = $DB->get_record('user', ['id' => $userid, 'deleted' => 0, 'confirmed' => 1], '*', MUST_EXIST);
-                // NOTE: Later add tenant access restrictions here.
+                if (\enrol_programs\local\tenant::is_active()) {
+                    $tenantid = \tool_olms_tenant\tenants::get_context_tenant_id($context);
+                    if ($tenantid) {
+                        $usertenantid = \tool_olms_tenant\tenant_users::get_user_tenant_id($user->id);
+                        if ($usertenantid && $usertenantid != $tenantid) {
+                            $errors['users'] = get_string('error');
+                            break;
+                        }
+                    }
+                }
             }
         }
 

@@ -812,4 +812,97 @@ final class local_allocation_test extends \advanced_testcase {
         $this->assertSame($admin->id, $record->snapshotby);
         $this->assertSame('some explanation', $record->explanation);
     }
+
+    public function test_get_my_allocations() {
+        global $DB;
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program2 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program3 = $generator->create_program(['archived' => 1, 'sources' => ['manual' => []]]);
+        $program4 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program5 = $generator->create_program(['sources' => ['manual' => []]]);
+
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user2->id]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program2->id, $source2->id, [$user1->id]);
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program2->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $allocation2->archived = 1;
+        allocation::update_user($allocation2);
+        $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program3->id, $source3->id, [$user1->id]);
+        $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program3->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $source4 = $DB->get_record('enrol_programs_sources', ['programid' => $program4->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program4->id, $source4->id, [$user1->id]);
+        $allocation4 = $DB->get_record('enrol_programs_allocations', ['programid' => $program4->id, 'userid' => $user1->id], '*', MUST_EXIST);
+
+        $this->setUser($user1);
+        $result = allocation::get_my_allocations();
+        $this->assertEquals([$allocation1->id, $allocation4->id], array_keys($result));
+    }
+
+    public function test_get_my_allocations_tenant() {
+        global $DB;
+
+        if (!\enrol_programs\local\tenant::is_available()) {
+            $this->markTestSkipped('tenant support not available');
+        }
+
+        \tool_olms_tenant\tenants::activate_tenants();
+
+        /** @var \tool_olms_tenant_generator $generator */
+        $tenantgenerator = $this->getDataGenerator()->get_plugin_generator('tool_olms_tenant');
+
+        $tenant1 = $tenantgenerator->create_tenant();
+        $tenant2 = $tenantgenerator->create_tenant();
+
+        $user1 = $this->getDataGenerator()->create_user(['tenantid' => $tenant1->id]);
+
+        $catcontext1 = \context_coursecat::instance($tenant1->categoryid);
+        $catcontext2 = \context_coursecat::instance($tenant2->categoryid);
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['contextid' => $catcontext1->id, 'sources' => ['manual' => []]]);
+        $program2 = $generator->create_program(['contextid' => $catcontext2->id, 'sources' => ['manual' => []]]);
+        $program3 = $generator->create_program(['archived' => 1, 'sources' => ['manual' => []]]);
+        $program4 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program5 = $generator->create_program(['sources' => ['manual' => []]]);
+
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program2->id, $source2->id, [$user1->id]);
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program2->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program3->id, $source3->id, [$user1->id]);
+        $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program3->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $source4 = $DB->get_record('enrol_programs_sources', ['programid' => $program4->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program4->id, $source4->id, [$user1->id]);
+        $allocation4 = $DB->get_record('enrol_programs_allocations', ['programid' => $program4->id, 'userid' => $user1->id], '*', MUST_EXIST);
+
+        $this->setUser($user1);
+        $result = allocation::get_my_allocations();
+        $this->assertEquals([$allocation1->id, $allocation4->id], array_keys($result));
+
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant2->id);
+        $result = allocation::get_my_allocations();
+        $this->assertEquals([$allocation2->id, $allocation4->id], array_keys($result));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+
+        \tool_olms_tenant\tenancy::force_tenant_id(null);
+        $result = allocation::get_my_allocations();
+        $this->assertEquals([$allocation1->id, $allocation2->id, $allocation4->id], array_keys($result));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+    }
 }

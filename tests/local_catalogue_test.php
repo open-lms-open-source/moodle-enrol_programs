@@ -130,7 +130,7 @@ final class local_catalogue_test extends \advanced_testcase {
         /** @var \enrol_programs_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
 
-        $program1 = $generator->create_program(['fullname' => 'hokus', 'public' => 1]);
+        $program1 = $generator->create_program(['public' => 1]);
         $program2 = $generator->create_program(['idnumber' => 'pokus', 'cohorts' => [$cohort1->id, $cohort2->id]]);
         $program3 = $generator->create_program(['public' => 1, 'archived' => 1, 'cohorts' => [$cohort1->id, $cohort2->id], 'sources' => ['manual' => []]]);
         $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
@@ -167,6 +167,179 @@ final class local_catalogue_test extends \advanced_testcase {
         $programs = $catalogue->get_programs();
         $this->assertSame([(int)$program4->id, (int)$program6->id], array_keys($programs));
         $this->assertSame(4, $catalogue->count_programs());
+    }
+
+    public function test_get_programs_tenant() {
+        global $DB;
+
+        if (!\enrol_programs\local\tenant::is_available()) {
+            $this->markTestSkipped('tenant support not available');
+        }
+
+        \tool_olms_tenant\tenants::activate_tenants();
+
+        /** @var \tool_olms_tenant_generator $generator */
+        $tenantgenerator = $this->getDataGenerator()->get_plugin_generator('tool_olms_tenant');
+
+        $tenant1 = $tenantgenerator->create_tenant();
+        $tenant2 = $tenantgenerator->create_tenant();
+
+        $user1 = $this->getDataGenerator()->create_user(['tenantid' => $tenant1->id]);
+        $user2 = $this->getDataGenerator()->create_user(['tenantid' => $tenant2->id]);
+        $user3 = $this->getDataGenerator()->create_user();
+
+        $catcontext1 = \context_coursecat::instance($tenant1->categoryid);
+        $catcontext2 = \context_coursecat::instance($tenant2->categoryid);
+
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+        $cohort2 = $this->getDataGenerator()->create_cohort();
+        $cohort3 = $this->getDataGenerator()->create_cohort();
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['public' => 1]);
+        $program2 = $generator->create_program(['idnumber' => 'pokus', 'cohorts' => [$cohort1->id, $cohort2->id]]);
+        $program3 = $generator->create_program(['public' => 1, 'archived' => 1, 'cohorts' => [$cohort1->id, $cohort2->id], 'sources' => ['manual' => []]]);
+        $program4 = $generator->create_program(['cohorts' => [$cohort1->id]]);
+        $program5 = $generator->create_program(['archived' => 1, 'cohorts' => [$cohort2->id]]);
+        $program6 = $generator->create_program(['sources' => ['manual' => []]]);
+
+        cohort_add_member($cohort1->id, $user2->id);
+        cohort_add_member($cohort1->id, $user3->id);
+        $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program3->id, $source3->id, [$user3->id]);
+        $source6 = $DB->get_record('enrol_programs_sources', ['programid' => $program6->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program6->id, $source6->id, [$user3->id]);
+
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id], array_keys($programs));
+        $this->assertSame(1, $catalogue->count_programs());
+
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant2->id);
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id], array_keys($programs));
+        $this->assertSame(1, $catalogue->count_programs());
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+
+        \tool_olms_tenant\tenancy::force_tenant_id(null);
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id], array_keys($programs));
+        $this->assertSame(1, $catalogue->count_programs());
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+
+        $this->setUser($user2);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id, (int)$program2->id, (int)$program4->id], array_keys($programs));
+        $this->assertSame(3, $catalogue->count_programs());
+
+        $this->setUser($user3);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id, (int)$program2->id, (int)$program4->id, (int)$program6->id], array_keys($programs));
+        $this->assertSame(4, $catalogue->count_programs());
+
+        $program1->contextid = $catcontext1->id;
+        $program1 = program::update_program_general($program1);
+        $program2->contextid = $catcontext1->id;
+        $program2 = program::update_program_general($program2);
+        $program3->contextid = $catcontext1->id;
+        $program3 = program::update_program_general($program3);
+        $program4->contextid = $catcontext1->id;
+        $program4 = program::update_program_general($program4);
+        $program5->contextid = $catcontext1->id;
+        $program5 = program::update_program_general($program5);
+        $program6->contextid = $catcontext1->id;
+        $program6 = program::update_program_general($program6);
+
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id], array_keys($programs));
+        $this->assertSame(1, $catalogue->count_programs());
+
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant2->id);
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([], array_keys($programs));
+        $this->assertSame(0, $catalogue->count_programs());
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+
+        \tool_olms_tenant\tenancy::force_tenant_id(null);
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id], array_keys($programs));
+        $this->assertSame(1, $catalogue->count_programs());
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+
+        $this->setUser($user2);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([], array_keys($programs));
+        $this->assertSame(0, $catalogue->count_programs());
+
+        $this->setUser($user3);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id, (int)$program2->id, (int)$program4->id, (int)$program6->id], array_keys($programs));
+        $this->assertSame(4, $catalogue->count_programs());
+
+        $program1->contextid = $catcontext2->id;
+        $program1 = program::update_program_general($program1);
+        $program2->contextid = $catcontext2->id;
+        $program2 = program::update_program_general($program2);
+        $program3->contextid = $catcontext2->id;
+        $program3 = program::update_program_general($program3);
+        $program4->contextid = $catcontext2->id;
+        $program4 = program::update_program_general($program4);
+        $program5->contextid = $catcontext2->id;
+        $program5 = program::update_program_general($program5);
+        $program6->contextid = $catcontext2->id;
+        $program6 = program::update_program_general($program6);
+
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([], array_keys($programs));
+        $this->assertSame(0, $catalogue->count_programs());
+
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant2->id);
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id], array_keys($programs));
+        $this->assertSame(1, $catalogue->count_programs());
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+
+        \tool_olms_tenant\tenancy::force_tenant_id(null);
+        $this->setUser($user1);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id], array_keys($programs));
+        $this->assertSame(1, $catalogue->count_programs());
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+
+        $this->setUser($user2);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id, (int)$program2->id, (int)$program4->id], array_keys($programs));
+        $this->assertSame(3, $catalogue->count_programs());
+
+        $this->setUser($user3);
+        $catalogue = new catalogue([]);
+        $programs = $catalogue->get_programs();
+        $this->assertSame([(int)$program1->id, (int)$program2->id, (int)$program4->id, (int)$program6->id], array_keys($programs));
+        $this->assertSame(4, $catalogue->count_programs());
+
     }
 
     public function test_is_program_visible() {
@@ -223,6 +396,201 @@ final class local_catalogue_test extends \advanced_testcase {
         $this->assertFalse(catalogue::is_program_visible($program5, $user2->id));
         $this->assertFalse(catalogue::is_program_visible($program6, $user2->id));
 
+        $this->assertTrue(catalogue::is_program_visible($program1, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program2, $user3->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program4, $user3->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program6, $user3->id));
+    }
+
+    public function test_is_program_visible_tenant() {
+        global $DB;
+
+        if (!\enrol_programs\local\tenant::is_available()) {
+            $this->markTestSkipped('tenant support not available');
+        }
+
+        \tool_olms_tenant\tenants::activate_tenants();
+
+        /** @var \tool_olms_tenant_generator $generator */
+        $tenantgenerator = $this->getDataGenerator()->get_plugin_generator('tool_olms_tenant');
+
+        $tenant1 = $tenantgenerator->create_tenant();
+        $tenant2 = $tenantgenerator->create_tenant();
+
+        $user1 = $this->getDataGenerator()->create_user(['tenantid' => $tenant1->id]);
+        $user2 = $this->getDataGenerator()->create_user(['tenantid' => $tenant2->id]);
+        $user3 = $this->getDataGenerator()->create_user();
+
+        $catcontext1 = \context_coursecat::instance($tenant1->categoryid);
+        $catcontext2 = \context_coursecat::instance($tenant2->categoryid);
+
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+        $cohort2 = $this->getDataGenerator()->create_cohort();
+        $cohort3 = $this->getDataGenerator()->create_cohort();
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['fullname' => 'hokus', 'public' => 1]);
+        $program2 = $generator->create_program(['idnumber' => 'pokus', 'cohorts' => [$cohort1->id, $cohort2->id]]);
+        $program3 = $generator->create_program(['public' => 1, 'archived' => 1, 'cohorts' => [$cohort1->id, $cohort2->id], 'sources' => ['manual' => []]]);
+        $program4 = $generator->create_program(['cohorts' => [$cohort1->id]]);
+        $program5 = $generator->create_program(['archived' => 1, 'cohorts' => [$cohort2->id]]);
+        $program6 = $generator->create_program(['sources' => ['manual' => []]]);
+        cohort_add_member($cohort1->id, $user2->id);
+        cohort_add_member($cohort1->id, $user3->id);
+        $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program3->id, $source3->id, [$user3->id]);
+        $source6 = $DB->get_record('enrol_programs_sources', ['programid' => $program6->id, 'type' => 'manual'], '*', MUST_EXIST);
+        \enrol_programs\local\source\manual::allocate_users($program6->id, $source6->id, [$user3->id]);
+
+        $this->setUser($user1);
+        $this->assertTrue(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        $this->assertTrue(catalogue::is_program_visible($program1));
+        $this->assertFalse(catalogue::is_program_visible($program2));
+        $this->assertFalse(catalogue::is_program_visible($program3));
+        $this->assertFalse(catalogue::is_program_visible($program4));
+        $this->assertFalse(catalogue::is_program_visible($program5));
+        $this->assertFalse(catalogue::is_program_visible($program6));
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant2->id);
+        $this->assertTrue(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+        \tool_olms_tenant\tenancy::force_tenant_id(null);
+        $this->assertTrue(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+        $this->assertTrue(catalogue::is_program_visible($program1, $user2->id));
+        $this->assertTrue(catalogue::is_program_visible($program2, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user2->id));
+        $this->assertTrue(catalogue::is_program_visible($program4, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user2->id));
+        $this->assertTrue(catalogue::is_program_visible($program1, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program2, $user3->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program4, $user3->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program6, $user3->id));
+
+        $program1->contextid = $catcontext1->id;
+        $program1 = program::update_program_general($program1);
+        $program2->contextid = $catcontext1->id;
+        $program2 = program::update_program_general($program2);
+        $program3->contextid = $catcontext1->id;
+        $program3 = program::update_program_general($program3);
+        $program4->contextid = $catcontext1->id;
+        $program4 = program::update_program_general($program4);
+        $program5->contextid = $catcontext1->id;
+        $program5 = program::update_program_general($program5);
+        $program6->contextid = $catcontext1->id;
+        $program6 = program::update_program_general($program6);
+
+        $this->setUser($user1);
+        $this->assertTrue(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        $this->assertTrue(catalogue::is_program_visible($program1));
+        $this->assertFalse(catalogue::is_program_visible($program2));
+        $this->assertFalse(catalogue::is_program_visible($program3));
+        $this->assertFalse(catalogue::is_program_visible($program4));
+        $this->assertFalse(catalogue::is_program_visible($program5));
+        $this->assertFalse(catalogue::is_program_visible($program6));
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant2->id);
+        $this->assertFalse(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+        \tool_olms_tenant\tenancy::force_tenant_id(null);
+        $this->assertTrue(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+        $this->assertFalse(catalogue::is_program_visible($program1, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user2->id));
+        $this->assertTrue(catalogue::is_program_visible($program1, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program2, $user3->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program4, $user3->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user3->id));
+        $this->assertTrue(catalogue::is_program_visible($program6, $user3->id));
+
+        $program1->contextid = $catcontext2->id;
+        $program1 = program::update_program_general($program1);
+        $program2->contextid = $catcontext2->id;
+        $program2 = program::update_program_general($program2);
+        $program3->contextid = $catcontext2->id;
+        $program3 = program::update_program_general($program3);
+        $program4->contextid = $catcontext2->id;
+        $program4 = program::update_program_general($program4);
+        $program5->contextid = $catcontext2->id;
+        $program5 = program::update_program_general($program5);
+        $program6->contextid = $catcontext2->id;
+        $program6 = program::update_program_general($program6);
+
+        $this->setUser($user1);
+        $this->assertFalse(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program1));
+        $this->assertFalse(catalogue::is_program_visible($program2));
+        $this->assertFalse(catalogue::is_program_visible($program3));
+        $this->assertFalse(catalogue::is_program_visible($program4));
+        $this->assertFalse(catalogue::is_program_visible($program5));
+        $this->assertFalse(catalogue::is_program_visible($program6));
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant2->id);
+        $this->assertTrue(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+        \tool_olms_tenant\tenancy::force_tenant_id(null);
+        $this->assertTrue(catalogue::is_program_visible($program1, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program2, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program4, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user1->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user1->id));
+        \tool_olms_tenant\tenancy::clear_forced_tenant_id();
+        $this->assertTrue(catalogue::is_program_visible($program1, $user2->id));
+        $this->assertTrue(catalogue::is_program_visible($program2, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program3, $user2->id));
+        $this->assertTrue(catalogue::is_program_visible($program4, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program5, $user2->id));
+        $this->assertFalse(catalogue::is_program_visible($program6, $user2->id));
         $this->assertTrue(catalogue::is_program_visible($program1, $user3->id));
         $this->assertTrue(catalogue::is_program_visible($program2, $user3->id));
         $this->assertFalse(catalogue::is_program_visible($program3, $user3->id));
