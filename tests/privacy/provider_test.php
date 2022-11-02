@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Privacy provider tests.
- *
- * @package    enrol_programs
- * @category   test
- * @copyright  2022 Chris Tranel <chris.tranel@openlms.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 namespace enrol_programs\privacy;
 
 defined('MOODLE_INTERNAL') || die();
@@ -33,9 +25,12 @@ use enrol_programs\privacy\provider;
 use enrol_programs\local\certificate;
 
 /**
- * Privacy provider test for enrol_programs.
+ * Privacy provider tests for enrol_programs.
  *
- * @copyright  2022 Chris Tranel <chris.tranel@openlms.net>
+ * @group      openlms
+ * @package    enrol_programs
+ * @copyright  2022 Open LMS (https://www.openlms.net/)
+ * @author     Chris Tranel
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider_test extends \core_privacy\tests\provider_testcase {
