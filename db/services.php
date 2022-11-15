@@ -20,7 +20,7 @@ defined('MOODLE_INTERNAL') || die();
  * Program enrolment external functions.
  *
  * @package    enrol_programs
- * @copyright  Copyright (c] 2022 Open LMS (https://www.openlms.net/]
+ * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
