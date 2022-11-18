@@ -263,11 +263,11 @@ Feature: Programs navigation behat steps test
     Given I log in as "student1"
 
     When I am on Program catalogue page
-      Then I should see "Program catalogue"
-      And I should see "Program 001"
-      And I should not see "Program 000"
-      And I should not see "Program 002"
-      And I should not see "Program 003"
+    Then I should see "Program catalogue"
+    And I should see "Program 001"
+    And I should not see "Program 000"
+    And I should not see "Program 002"
+    And I should not see "Program 003"
 
   @javascript
   Scenario: Student navigates to Program catalogue the normal way

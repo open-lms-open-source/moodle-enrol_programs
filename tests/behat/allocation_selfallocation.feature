@@ -174,4 +174,3 @@ Feature: Program selfallocation tests
     And I am on Program catalogue page
     And I follow "Program 001"
     Then I should see "Maximum number of users self-allocated already"
-

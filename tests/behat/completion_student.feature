@@ -148,4 +148,3 @@ Feature: Program completion by students tests
     And I am on My programs page
     And I follow "Program 000"
     Then I should see "Completed" in the "Program status:" definition list item
-
