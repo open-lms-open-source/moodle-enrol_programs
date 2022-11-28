@@ -59,7 +59,7 @@ final class program_deleted extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_program_deleted', 'enrol_program');
+        return get_string('event_program_deleted', 'enrol_programs');
     }
 
     /**

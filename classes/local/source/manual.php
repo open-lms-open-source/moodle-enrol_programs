@@ -41,9 +41,10 @@ final class manual extends base {
     /**
      * Manual allocation source cannot be completely prevented.
      *
+     * @param stdClass $program
      * @return bool
      */
-    public static function is_new_allowed(): bool {
+    public static function is_new_allowed(\stdClass $program): bool {
         return true;
     }
 

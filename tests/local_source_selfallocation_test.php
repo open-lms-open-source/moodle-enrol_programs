@@ -41,9 +41,13 @@ final class local_source_selfallocation_test extends \advanced_testcase {
     }
 
     public function test_is_new_alloved() {
-        $this->assertTrue(selfallocation::is_new_allowed());
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+        $program = $generator->create_program();
+
+        $this->assertTrue(selfallocation::is_new_allowed($program));
         set_config('source_selfallocation_allownew', 0, 'enrol_programs');
-        $this->assertFalse(selfallocation::is_new_allowed());
+        $this->assertFalse(selfallocation::is_new_allowed($program));
     }
 
     public function test_can_user_request() {

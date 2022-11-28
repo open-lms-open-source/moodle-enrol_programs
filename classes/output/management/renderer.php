@@ -690,7 +690,7 @@ class renderer extends \plugin_renderer_base {
         $sourceclasses = \enrol_programs\local\allocation::get_source_classes();
         foreach ($sourceclasses as $sourcetype => $sourceclass) {
             $sourcerecord = $DB->get_record('enrol_programs_sources', ['type' => $sourcetype, 'programid' => $program->id]);
-            if (!$sourcerecord && !$sourceclass::is_new_allowed()) {
+            if (!$sourcerecord && !$sourceclass::is_new_allowed($program)) {
                 continue;
             }
             if (!$sourcerecord) {

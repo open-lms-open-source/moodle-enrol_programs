@@ -54,11 +54,25 @@ abstract class base {
      * NOTE: Existing enabled sources in programs cannot be deleted/hidden
      * if there are any allocated users to program.
      *
+     * @param stdClass $program
      * @return bool
      */
-    public static function is_new_allowed(): bool {
+    public static function is_new_allowed(\stdClass $program): bool {
         $type = static::get_type();
         return (bool)get_config('enrol_programs', 'source_' . $type . '_allownew');
+    }
+
+    /**
+     * Can existing source of this type be updated or deleted to programs?
+     *
+     * NOTE: Existing enabled sources in programs cannot be deleted/hidden
+     * if there are any allocated users to program.
+     *
+     * @param stdClass $program
+     * @return bool
+     */
+    public static function is_update_allowed(stdClass $program): bool {
+        return true;
     }
 
     /**
@@ -141,9 +155,10 @@ abstract class base {
      * @param int $userid
      * @param array $sourcedata
      * @param array $dateoverrides
+     * @param int|null $sourceinstanceid
      * @return stdClass user allocation record
      */
-    final protected static function allocate_user(\stdClass $program, \stdClass $source, int $userid, array $sourcedata, array $dateoverrides = []): \stdClass {
+    final protected static function allocate_user(\stdClass $program, \stdClass $source, int $userid, array $sourcedata, array $dateoverrides = [], ?int $sourceinstanceid = null): \stdClass {
         global $DB;
 
         if ($userid <= 0 || isguestuser($userid)) {
@@ -160,6 +175,7 @@ abstract class base {
         $record->sourceid = $source->id;
         $record->archived = 0;
         $record->sourcedatajson = \enrol_programs\local\util::json_encode($sourcedata);
+        $record->sourceinstanceid = $sourceinstanceid;
         $record->timeallocated = $now;
         $record->timecreated = $now;
 
@@ -245,6 +261,18 @@ abstract class base {
     }
 
     /**
+     * Callback method for source updates.
+     *
+     * @param stdClass|null $oldsource
+     * @param stdClass $data
+     * @param stdClass|null $source
+     * @return void
+     */
+    public static function after_update(?stdClass $oldsource, stdClass $data, ?stdClass $source): void {
+        // Override if necessary.
+    }
+
+    /**
      * Returns class for editing of source settings in program.
      *
      * @return string
@@ -291,7 +319,7 @@ abstract class base {
         $result = static::render_status_details($program, $source);
 
         $context = \context::instance_by_id($program->contextid);
-        if (has_capability('enrol/programs:edit', $context)) {
+        if (has_capability('enrol/programs:edit', $context) && static::is_update_allowed($program)) {
             $label = get_string('updatesource', 'enrol_programs', static::get_name());
             $editurl = new \moodle_url('/enrol/programs/management/program_source_edit.php', ['programid' => $program->id, 'type' => $type]);
             $editbutton = new \local_openlms\output\dialog_form\icon($editurl, 'i/settings', $label);
@@ -321,6 +349,12 @@ abstract class base {
 
         $program = $DB->get_record('enrol_programs_programs', ['id' => $data->programid], '*', MUST_EXIST);
         $source = $DB->get_record('enrol_programs_sources', ['type' => $sourcetype, 'programid' => $program->id]);
+        if ($source) {
+            $oldsource = clone($source);
+        } else {
+            $source = null;
+            $oldsource = null;
+        }
         if ($source && $source->type !== $data->type) {
             throw new \coding_exception('Invalid source type');
         }
@@ -336,6 +370,7 @@ abstract class base {
                 $source->datajson = $sourceclass::encode_datajson($data);
                 $source->id = $DB->insert_record('enrol_programs_sources', $source);
             }
+            $source = $DB->get_record('enrol_programs_sources', ['id' => $source->id], '*', MUST_EXIST);
         } else {
             if ($source) {
                 if ($DB->record_exists('enrol_programs_allocations', ['sourceid' => $source->id])) {
@@ -346,12 +381,7 @@ abstract class base {
                 $source = null;
             }
         }
-
-        if ($source) {
-            $source = $DB->get_record('enrol_programs_sources', ['id' => $source->id], '*', MUST_EXIST);
-        } else {
-            $source = null;
-        }
+        $sourceclass::after_update($oldsource, $data, $source);
 
         \enrol_programs\local\program::make_snapshot($data->programid, 'update_source');
 

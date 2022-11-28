@@ -62,18 +62,21 @@ $sourceclass = $sourceclasses[$type];
 management::setup_program_page($currenturl, $context, $program);
 
 if ($source) {
+    if (!$sourceclass::is_update_allowed($program)) {
+        redirect($returnurl);
+    }
     $source->enable = 1;
     $source->hasallocations = $DB->record_exists('enrol_programs_allocations', ['sourceid' => $source->id]);
 } else {
+    if (!$sourceclass::is_new_allowed($program)) {
+        redirect($returnurl);
+    }
     $source = new stdClass();
     $source->id = null;
     $source->type = $type;
     $source->programid = $program->id;
     $source->enable = 0;
     $source->hasallocations = false;
-    if (!$sourceclass::is_new_allowed()) {
-        redirect($returnurl);
-    }
 }
 $source = $sourceclass::decode_datajson($source);
 

@@ -21,6 +21,7 @@ use enrol_programs\local\source\base;
 use enrol_programs\local\source\cohort;
 use enrol_programs\local\source\manual;
 use enrol_programs\local\source\selfallocation;
+use enrol_programs\local\source\udplans;
 use enrol_programs\local\content\course;
 use enrol_programs\local\content\top;
 use enrol_programs\local\content\set;
@@ -43,12 +44,18 @@ final class allocation {
      */
     public static function get_source_classes(): array {
         // Note: in theory this could be extended to load arbitrary classes.
-        return [
+        $types = [
             manual::get_type() => manual::class,
             selfallocation::get_type() => selfallocation::class,
             approval::get_type() => approval::class,
             cohort::get_type() => cohort::class,
         ];
+
+        if (file_exists(__DIR__ . '/../../../../admin/tool/udplans/version.php')) {
+            $types[udplans::get_type()] = udplans::class;
+        }
+
+        return $types;
     }
 
     /**
@@ -431,7 +438,7 @@ final class allocation {
              LEFT JOIN {enrol_programs_completions} pc ON pc.allocationid = pa.id AND pc.itemid = pi.id
                  WHERE pc.id IS NULL AND cc.reaggregate = 0 AND cc.timecompleted > 0
                        AND p.archived = 0 AND pa.archived = 0
-                       AND (pa.timestart IS NULL OR pa.timestart <= :now1)
+                       AND (pa.timestart <= :now1)
                        AND (pa.timeend IS NULL OR pa.timeend > :now2)
                        $programselect $userselect";
         $DB->execute($sql, $params);

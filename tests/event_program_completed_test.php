@@ -68,6 +68,7 @@ final class event_program_completed_test extends \advanced_testcase {
         $this->assertSame('c', $event->crud);
         $this->assertSame($event::LEVEL_PARTICIPATING, $event->edulevel);
         $this->assertSame('enrol_programs_allocations', $event->objecttable);
+        $this->assertSame('Program completed', $event::get_name());
         $description = $event->get_description();
         $programurl = new \moodle_url('/enrol/programs/management/user_allocation.php', ['id' => $allocation->id]);
         $this->assertSame($programurl->out(false), $event->get_url()->out(false));

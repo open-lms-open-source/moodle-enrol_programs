@@ -68,6 +68,27 @@ $capabilities = [
         ],
     ],
 
+    /* Add program to plans. */
+    'enrol/programs:addtoplan' => [
+        'captype' => 'read', // This does not allow to change any data by itself.
+        'contextlevel' => CONTEXT_COURSECAT,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
+        ],
+    ],
+
+    /* Configure allowed frameworks for adding of programs to plans. */
+    'enrol/programs:configframeworks' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSECAT,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
+        ],
+    ],
+
     /* Add course to program. This is used to find courses that user can add to programs */
     'enrol/programs:addcourse' => [
         'captype' => 'read',

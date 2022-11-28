@@ -116,4 +116,63 @@ final class external_search_candidate_test extends \advanced_testcase {
         $this->assertSame(false, $result['overflow']);
         $this->assertCount(6, $result['list']);
     }
+
+    public function test_execution_tenant() {
+        global $DB, $CFG;
+        require_once("$CFG->dirroot/lib/externallib.php");
+
+        if (!\enrol_programs\local\tenant::is_available()) {
+            $this->markTestSkipped('tenant support not available');
+        }
+
+        \tool_olms_tenant\tenants::activate_tenants();
+
+        /** @var \tool_olms_tenant_generator $generator */
+        $tenantgenerator = $this->getDataGenerator()->get_plugin_generator('tool_olms_tenant');
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $tenant1 = $tenantgenerator->create_tenant();
+        $tenant1context = \context_tenant::instance($tenant1->id);
+        $tenant1catcontext = \context_coursecat::instance($tenant1->categoryid);
+        $tenant2 = $tenantgenerator->create_tenant();
+        $tenant2context = \context_tenant::instance($tenant2->id);
+        $tenant2catcontext = \context_coursecat::instance($tenant2->categoryid);
+
+        $program0 = $generator->create_program(['fullname' => 'prg0', 'sources' => ['manual' => []]]);
+        $source0 = $DB->get_record('enrol_programs_sources', ['programid' => $program0->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $program1 = $generator->create_program(['idnumber' => 'prg2', 'contextid' => $tenant1catcontext->id, 'sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $program2 = $generator->create_program(['idnumber' => 'prg3', 'contextid' => $tenant2catcontext->id, 'sources' => ['manual' => []]]);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $admin = get_admin();
+        $user0 = $this->getDataGenerator()->create_user(['lastname' => 'Prijmeni 1', 'tenantid' => 0]);
+        $user1 = $this->getDataGenerator()->create_user(['lastname' => 'Prijmeni 1', 'tenantid' => $tenant1->id]);
+        $user2 = $this->getDataGenerator()->create_user(['lastname' => 'Prijmeni 2', 'tenantid' => $tenant2->id]);
+
+        $admin = get_admin();
+        $this->setUser($admin);
+
+        $result = \enrol_programs\external\search_candidate::execute('', $program0->id);
+        $this->assertEquals([$user0->id, $user1->id, $user2->id, $admin->id], array_keys($result['list']));
+
+        $result = \enrol_programs\external\search_candidate::execute('', $program1->id);
+        $this->assertEquals([$user0->id, $user1->id, $admin->id], array_keys($result['list']));
+
+        $result = \enrol_programs\external\search_candidate::execute('', $program2->id);
+        $this->assertEquals([$user0->id, $user2->id, $admin->id], array_keys($result['list']));
+
+        \tool_olms_tenant\tenancy::force_tenant_id($tenant1->id);
+
+        $result = \enrol_programs\external\search_candidate::execute('', $program0->id);
+        $this->assertEquals([$user1->id], array_keys($result['list']));
+
+        $result = \enrol_programs\external\search_candidate::execute('', $program1->id);
+        $this->assertEquals([$user1->id], array_keys($result['list']));
+
+        $result = \enrol_programs\external\search_candidate::execute('', $program2->id);
+        $this->assertEquals([], array_keys($result['list']));
+    }
 }

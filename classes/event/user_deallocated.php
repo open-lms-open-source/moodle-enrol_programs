@@ -63,7 +63,7 @@ final class user_deallocated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_user_deallocated', 'enrol_program');
+        return get_string('event_user_deallocated', 'enrol_programs');
     }
 
     /**

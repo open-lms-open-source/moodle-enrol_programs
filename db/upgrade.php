@@ -81,5 +81,59 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022081400, 'enrol', 'programs');
     }
 
+    if ($oldversion < 2022121600) {
+
+        // Define field sourceinstanceid to be added to enrol_programs_allocations.
+        $table = new xmldb_table('enrol_programs_allocations');
+        $field = new xmldb_field('sourceinstanceid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'sourcedatajson');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define index sourceinstanceid (not unique) to be added to enrol_programs_allocations.
+        $table = new xmldb_table('enrol_programs_allocations');
+        $index = new xmldb_index('sourceinstanceid', XMLDB_INDEX_NOTUNIQUE, ['sourceinstanceid']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Define field sourceinstanceid to be added to enrol_programs_usr_snapshots.
+        $table = new xmldb_table('enrol_programs_usr_snapshots');
+        $field = new xmldb_field('sourceinstanceid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'sourcedatajson');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2022121600, 'enrol', 'programs');
+    }
+
+    if ($oldversion < 2022121700) {
+
+        // Define table enrol_programs_frameworks to be created.
+        $table = new xmldb_table('enrol_programs_frameworks');
+
+        // Adding fields to table enrol_programs_frameworks.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('sourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('frameworkid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('requirecap', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table enrol_programs_frameworks.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('sourceid', XMLDB_KEY_FOREIGN, ['sourceid'], 'enrol_programs_sources', ['id']);
+
+        // Adding indexes to table enrol_programs_frameworks.
+        $table->add_index('frameworkid-sourceid', XMLDB_INDEX_UNIQUE, ['frameworkid', 'sourceid']);
+
+        // Conditionally launch create table for enrol_programs_frameworks.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2022121700, 'enrol', 'programs');
+    }
+
     return true;
 }

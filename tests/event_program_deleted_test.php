@@ -57,6 +57,7 @@ final class event_program_deleted_test extends \advanced_testcase {
         $this->assertSame('d', $event->crud);
         $this->assertSame($event::LEVEL_OTHER, $event->edulevel);
         $this->assertSame('enrol_programs_programs', $event->objecttable);
+        $this->assertSame('Program deleted', $event::get_name());
         $description = $event->get_description();
         $programurl = new \moodle_url('/enrol/programs/management/index.php', ['contextid' => $program->contextid]);
         $this->assertSame($programurl->out(false), $event->get_url()->out(false));

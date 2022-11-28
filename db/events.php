@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Program enrolment plugin capabilities.
+ * Program enrolment plugin events.
  *
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)

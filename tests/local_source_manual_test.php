@@ -40,9 +40,13 @@ final class local_source_manual_test extends \advanced_testcase {
     }
 
     public function test_ai_new_alloved() {
-        $this->assertTrue(manual::is_new_allowed());
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+        $program = $generator->create_program();
+
+        $this->assertTrue(manual::is_new_allowed($program));
         set_config('source_manual_allownew', 0, 'enrol_programs');
-        $this->assertTrue(manual::is_new_allowed());
+        $this->assertTrue(manual::is_new_allowed($program));
     }
 
     public function test_is_allocation_possible() {

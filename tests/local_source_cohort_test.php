@@ -41,9 +41,13 @@ final class local_source_cohort_test extends \advanced_testcase {
     }
 
     public function test_is_new_alloved() {
-        $this->assertTrue(cohort::is_new_allowed());
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+        $program = $generator->create_program();
+
+        $this->assertTrue(cohort::is_new_allowed($program));
         set_config('source_cohort_allownew', 0, 'enrol_programs');
-        $this->assertFalse(cohort::is_new_allowed());
+        $this->assertFalse(cohort::is_new_allowed($program));
     }
 
     public function test_allocations() {

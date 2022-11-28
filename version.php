@@ -27,11 +27,11 @@ defined('MOODLE_INTERNAL') || die();
 
 /** @var stdClass $plugin */
 
-$plugin->version   = 2022111500;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2023012200;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2021051704;        // Requires this Moodle version.
 $plugin->component = 'enrol_programs';
 $plugin->maturity  = MATURITY_RC;
 $plugin->release   = 'v1.0.9+';
 $plugin->supported = [311, 400];
 
-$plugin->dependencies = ['local_openlms' => 2022111500];
+$plugin->dependencies = ['local_openlms' => 2023012200];

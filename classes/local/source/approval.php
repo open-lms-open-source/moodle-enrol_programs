@@ -182,6 +182,7 @@ final class approval extends base {
         $source->approval_allowrequest = 1;
 
         if (isset($source->datajson)) {
+            $data = (object)json_decode($source->datajson);
             if (isset($data->allowrequest)) {
                 $source->approval_allowrequest = (int)(bool)$data->allowrequest;
             }

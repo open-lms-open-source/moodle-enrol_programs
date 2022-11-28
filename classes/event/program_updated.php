@@ -59,7 +59,7 @@ final class program_updated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_program_updated', 'enrol_program');
+        return get_string('event_program_updated', 'enrol_programs');
     }
 
     /**

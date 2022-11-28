@@ -61,7 +61,7 @@ final class catalogue_program_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_catalogue_program_viewed', 'enrol_program');
+        return get_string('event_catalogue_program_viewed', 'enrol_programs');
     }
 
     /**

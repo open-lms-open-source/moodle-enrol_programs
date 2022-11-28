@@ -32,7 +32,8 @@ use external_value;
  * NOTE: this code is based on search identity in core and OLMS tenant plugin.
  *
  * @package     enrol_programs
- * @copyright   2022 Petr Skoda
+ * @copyright   2022 Open LMS (https://www.openlms.net/)
+ * @author      Petr Skoda
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class search_candidate extends external_api {
@@ -74,14 +75,14 @@ class search_candidate extends external_api {
         if (\enrol_programs\local\tenant::is_active()) {
             $tenantid = \tool_olms_tenant\tenants::get_context_tenant_id($context);
             if ($tenantid) {
-                $tenantjoin = "LEFT JOIN {tool_olms_tenant_user} tu ON tu.userid = usr.id";
-                $tenantwhere = "AND tu.id IS NULL OR tu.tenantid = :tenantid";
+                $tenantjoin .= " LEFT JOIN {tool_olms_tenant_user} tu ON tu.userid = usr.id";
+                $tenantwhere .= " AND (tu.id IS NULL OR tu.tenantid = :tenantid)";
                 $params['tenantid'] = $tenantid;
             }
             $currenttenantid = \tool_olms_tenant\tenancy::get_tenant_id();
             if ($currenttenantid) {
-                $tenantjoin = "LEFT JOIN {tool_olms_tenant_user} ctu ON ctu.userid = usr.id";
-                $tenantwhere = "AND ctu.tenantid = :currenttenantid";
+                $tenantjoin .= " JOIN {tool_olms_tenant_user} ctu ON ctu.userid = usr.id";
+                $tenantwhere .= " AND ctu.tenantid = :currenttenantid";
                 $params['currenttenantid'] = $currenttenantid;
             }
         }

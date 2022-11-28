@@ -19,7 +19,8 @@
  * NOTE: the code was copied from search identity in core and OLMS tenant plugin.
  *
  * @module      enrol_programs/form_candidate_selector
- * @copyright   2022 Petr Skoda
+ * @copyright   2022 Open LMS (https://www.openlms.net/)
+ * @author      Petr Skoda
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

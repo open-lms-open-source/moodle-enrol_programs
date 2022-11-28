@@ -63,7 +63,7 @@ final class user_allocated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_user_allocated', 'enrol_program');
+        return get_string('event_user_allocated', 'enrol_programs');
     }
 
     /**
