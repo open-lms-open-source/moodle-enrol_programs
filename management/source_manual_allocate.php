@@ -48,17 +48,12 @@ $program = $DB->get_record('enrol_programs_programs', ['id' => $source->programi
 $context = context::instance_by_id($program->contextid);
 require_capability('enrol/programs:allocate', $context);
 
-$currenturl = new moodle_url('/enrol/programs/management/source_manual_allocate.php', ['id' => $program->id]);
+$currenturl = new moodle_url('/enrol/programs/management/source_manual_allocate.php', ['sourceid' => $source->id]);
 $returnurl = new moodle_url('/enrol/programs/management/program_users.php', ['id' => $program->id]);
 
 if (!manual::is_allocation_possible($program, $source)) {
     redirect($returnurl);
 }
-
-if ($DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $USER->id])) {
-    redirect($returnurl);
-}
-
 
 management::setup_program_page($currenturl, $context, $program);
 
