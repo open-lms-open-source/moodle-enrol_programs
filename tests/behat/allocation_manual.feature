@@ -179,7 +179,7 @@ Feature: Manual program allocation tests
     Then "Tenant 1 Student" row "Source" column of "program_allocations" table should contain "Manual allocation"
 
   @javascript @_file_upload
-  Scenario: Manager may upload CSV file with manual allocations
+  Scenario: Manager may upload CSV file with manual allocations without dates
     Given I log in as "manager1"
     And I am on all programs management page
     And I follow "Program 000"
@@ -246,3 +246,59 @@ Feature: Manual program allocation tests
     And "Student 3" row "Source" column of "program_allocations" table should contain "Manual allocation"
     And "Student 4" row "Source" column of "program_allocations" table should contain "Manual allocation"
     And "Student 5" row "Source" column of "program_allocations" table should contain "Manual allocation"
+
+  @javascript @_file_upload
+  Scenario: Manager may upload CSV file with manual allocations including program dates
+    Given I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Allocation settings"
+    And I click on "Update scheduling" "link"
+    And I set the following fields to these values:
+      | Program start              | At a fixed date |
+      | programstart_date[year]    | 2022 |
+      | programstart_date[month]   | 11   |
+      | programstart_date[day]     | 5    |
+      | programstart_date[hour]    | 09   |
+      | programstart_date[minute]  | 00   |
+      | Program due                | At a fixed date |
+      | programdue_date[year]      | 2023 |
+      | programdue_date[month]     | 1    |
+      | programdue_date[day]       | 22   |
+      | programdue_date[hour]      | 09   |
+      | programdue_date[minute]    | 00   |
+      | Program end                | At a fixed date |
+      | programend_date[year]      | 2023 |
+      | programend_date[month]     | 12   |
+      | programend_date[day]       | 31   |
+      | programend_date[hour]      | 09   |
+      | programend_date[minute]    | 00   |
+    And I press dialog form button "Update scheduling"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I should see "Active" in the "Manual allocation:" definition list item
+    And I follow "Users"
+
+    When I press "Upload allocations"
+    And I upload "enrol/programs/tests/fixtures/upload4.csv" file to "CSV file" filemanager
+    And I set the following fields to these values:
+      | CSV separator | ,     |
+      | Encoding      | UTF-8 |
+    And I press dialog form button "Continue"
+    And the following fields match these values:
+      | User identification column | username           |
+      | User mapping via           | Username           |
+    And I set the following fields to these values:
+      | Time start column          | startdate          |
+      | Time due column            | duedate            |
+      | Time end column            | enddate            |
+    And I press dialog form button "Upload allocations"
+    Then I should see "3 users were assigned to program."
+    And I should see "3 errors detected when assigning programs."
+    Then the following should exist in the "program_allocations" table:
+      | First name          | Program start   | Due date        | Program end     | Source            |
+      | Student 1           | 5/11/22, 09:00  | 22/01/23, 09:00 | 31/12/23, 09:00 | Manual allocation |
+      | Student 2           | 11/10/22, 00:00 | 31/12/22, 00:00 | 31/01/23, 23:52 | Manual allocation |
+      | Student 3           | 11/10/22, 00:00 | 22/01/23, 09:00 | 31/12/23, 09:00 | Manual allocation |

@@ -92,3 +92,48 @@ Feature: Program allocation via tool_userupload
     And I follow "Users"
     And I should not see "Student 1"
     And I should see "Student 2"
+
+  @javascript @_file_upload
+  Scenario: Set program allocation dates via tool_uploaduser
+    Given I log in as "admin"
+    And I am on all programs management page
+    And I follow "Program 001"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I am on all programs management page
+    And I follow "Program 002"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I should see "Active" in the "Manual allocation:" definition list item
+    And I follow "Users"
+    When I press "Allocate users"
+    And I set the following fields to these values:
+      | Users | Student 4 |
+    And I press dialog form button "Allocate users"
+    And I navigate to "Users > Accounts > Upload users" in site administration
+
+    When I upload "enrol/programs/tests/fixtures/useruploadprogdates.csv" file to "File" filemanager
+    And I press "Upload users"
+    And I set the following fields to these values:
+      | Upload type | Update existing users only |
+    And I press "Upload users"
+    Then I should see "Allocated to 'Program 001'" in the "student1" "table_row"
+    And I am on all programs management page
+    And I follow "Program 001"
+    And I click on "Users" "link"
+    And I should see "Student 1"
+    And I follow "Update allocation"
+    And I should see "Program start date" in the "[data-groupname='timestart']" "css_element"
+    And I should see "2022" in the "[name='timestart[year]']" "css_element"
+    And I should see "November" in the "[name='timestart[month]']" "css_element"
+    And I should see "11" in the "[name='timestart[day]']" "css_element"
+    And I should see "Program end date" in the "[data-groupname='timeend']" "css_element"
+    And I should see "2023" in the "[name='timeend[year]']" "css_element"
+    And I should see "January" in the "[name='timeend[month]']" "css_element"
+    And I should see "2" in the "[name='timeend[day]']" "css_element"

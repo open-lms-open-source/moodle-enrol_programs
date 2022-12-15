@@ -46,9 +46,9 @@ final class source_manual_upload_options extends \local_openlms\dialog_form {
         }
         $mform->addElement('static', 'preview', get_string('preview'), \html_writer::table($preview));
 
-        $options = reset($filedata);
-        $mform->addElement('select', 'usercolumn', get_string('source_manual_usercolumn', 'enrol_programs'), $options);
-        $firstcolumn = reset($options);
+        $fileoptions = reset($filedata);
+        $mform->addElement('select', 'usercolumn', get_string('source_manual_usercolumn', 'enrol_programs'), $fileoptions);
+        $firstcolumn = reset($fileoptions);
 
         $options = [
             'username' => get_string('username'),
@@ -65,6 +65,11 @@ final class source_manual_upload_options extends \local_openlms\dialog_form {
             $mform->setDefault('hasheaders', 1);
         }
 
+        $options = [-1 => get_string('choose')] + $fileoptions;
+        $mform->addElement('select', 'timestartcolumn', get_string('source_manual_timestartcolumn', 'enrol_programs'), $options);
+        $mform->addElement('select', 'timeduecolumn', get_string('source_manual_timeduecolumn', 'enrol_programs'), $options);
+        $mform->addElement('select', 'timeendcolumn', get_string('source_manual_timeendcolumn', 'enrol_programs'), $options);
+
         $mform->addElement('hidden', 'sourceid');
         $mform->setType('sourceid', PARAM_INT);
         $mform->setDefault('sourceid', $source->id);
@@ -78,6 +83,16 @@ final class source_manual_upload_options extends \local_openlms\dialog_form {
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+        $usedfields = [];
+
+        $columns = ['timestartcolumn', 'timeduecolumn', 'timeendcolumn', 'usermapping'];
+        foreach ($columns as $column) {
+            if ($data[$column] != -1 && in_array($data[$column], $usedfields)) {
+                $errors[$column] = get_string('columnusedalready', 'enrol_programs');
+            } else {
+                $usedfields[] = $data[$column];
+            }
+        }
 
         return $errors;
     }

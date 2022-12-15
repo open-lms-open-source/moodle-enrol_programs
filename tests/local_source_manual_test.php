@@ -395,6 +395,84 @@ final class local_source_manual_test extends \advanced_testcase {
         $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user4->id]));
     }
 
+    public function test_process_uploaded_data_with_dates() {
+        global $CFG, $DB;
+        require_once("$CFG->libdir/filelib.php");
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $admin = get_admin();
+        $this->setUser($admin);
+
+        $admin = get_admin();
+        $user1 = $this->getDataGenerator()->create_user(['username' => 'user1', 'email' => 'user1@example.com', 'idnumber' => 'u1']);
+        $user2 = $this->getDataGenerator()->create_user(['username' => 'user2', 'email' => 'user2@example.com', 'idnumber' => 'u2']);
+        $user3 = $this->getDataGenerator()->create_user(['username' => 'user3', 'email' => 'user3@example.com', 'idnumber' => 'u3']);
+        $user4 = $this->getDataGenerator()->create_user(['username' => 'user4', 'email' => 'user4@example.com', 'idnumber' => 'u4']);
+        $user5 = $this->getDataGenerator()->create_user(['username' => 'user5', 'email' => 'user4@example.com', 'idnumber' => 'u5']);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $timestart = time();
+        $tz = new \DateTimeZone(get_user_timezone());
+        $pdata = (object)[
+            'id' => $program1->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timestart,
+            'programdue_type' => 'date',
+            'programdue_date' => $timestart + (20 * 60 * 60 * 24),
+            'programend_type' => 'date',
+            'programend_date' => $timestart + (30 * 60 * 60 * 24),
+        ];
+        $program1 = program::update_program_scheduling($pdata);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $draftid = file_get_unused_draft_itemid();
+
+        $timestart2 = new \DateTime('@' . ($timestart - (10 * 60 * 60 * 24)));
+        $timedue3 = new \DateTime('@' . ($timestart + (1 * 60 * 60 * 24)));
+        $timeend3 = new \DateTime('@' . ($timestart + (2 * 60 * 60 * 24)));
+        $csvdata = [
+            ['u1', '', '', ''],
+            ['u2', $timestart2->format(\DateTime::ATOM), '', ''],
+            ['u3', '', $timedue3->format(\DateTime::ATOM), $timeend3->format(\DateTime::COOKIE)],
+            ['u4', 'abc', '', ''],
+            ['u5', '', '', '01/01/2001'],
+        ];
+        $data = (object)[
+            'sourceid' => $source1->id,
+            'usermapping' => 'idnumber',
+            'usercolumn' => 0,
+            'timestartcolumn' => 1,
+            'timeduecolumn' => 2,
+            'timeendcolumn' => 3,
+            'hasheaders' => 0,
+            'userfile' => $draftid,
+        ];
+        $expected = [
+            'assigned' => 3,
+            'skipped' => 0,
+            'errors' => 2,
+        ];
+        $result = manual::process_uploaded_data($data, $csvdata);
+        $this->assertSame($expected, $result);
+
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertEquals($pdata->programstart_date, $allocation1->timestart);
+        $this->assertEquals($pdata->programdue_date, $allocation1->timedue);
+        $this->assertEquals($pdata->programend_date, $allocation1->timeend);
+
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id]);
+        $this->assertEquals($timestart2->getTimestamp(), $allocation2->timestart);
+        $this->assertEquals($pdata->programdue_date, $allocation2->timedue);
+        $this->assertEquals($pdata->programend_date, $allocation2->timeend);
+
+        $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id]);
+        $this->assertEquals($pdata->programstart_date, $allocation3->timestart);
+        $this->assertEquals($timedue3->getTimestamp(), $allocation3->timedue);
+        $this->assertEquals($timeend3->getTimestamp(), $allocation3->timeend);
+    }
+
     public function test_cleanup_uploaded_data() {
         global $CFG, $DB;
         require_once("$CFG->libdir/filelib.php");

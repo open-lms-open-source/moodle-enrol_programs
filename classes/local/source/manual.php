@@ -271,6 +271,14 @@ final class manual extends base {
             unset($filedata[0]);
         }
 
+        $datefields = ['timestartcolumn' => 'timestart', 'timeduecolumn' => 'timedue', 'timeendcolumn' => 'timeend'];
+        $datecolumns = [];
+        foreach ($datefields as $key => $value) {
+            if (isset($data->{$key}) && $data->{$key} != -1) {
+                $datecolumns[$value] = $data->{$key};
+            }
+        }
+
         $userids = [];
         foreach ($filedata as $i => $row) {
             $userident = $row[$data->usercolumn];
@@ -292,13 +300,28 @@ final class manual extends base {
                 $result['skipped']++;
                 continue;
             }
+
+            $dateoverrides = [];
+            foreach ($datecolumns as $key => $value) {
+                if (!empty($row[$value])) {
+                    $dateoverrides[$key] = strtotime($row[$value]);
+                    if ($dateoverrides[$key] === false) {
+                        $result['errors']++;
+                        continue 2;
+                    }
+                }
+            }
+            if (!base::is_valid_dateoverrides($program, $dateoverrides)) {
+                $result['errors']++;
+                continue;
+            }
+            self::allocate_user($program, $source, $user->id, [], $dateoverrides);
+            \enrol_programs\local\allocation::fix_user_enrolments($program->id, $user->id);
+            \enrol_programs\local\notification::trigger_notifications($program->id, $user->id);
             $userids[] = $user->id;
         }
 
-        if ($userids) {
-            manual::allocate_users($program->id, $source->id, $userids);
-            $result['assigned'] = count($userids);
-        }
+        $result['assigned'] = count($userids);
 
         if (!empty($data->csvfile)) {
             $fs = get_file_storage();
@@ -345,6 +368,8 @@ final class manual extends base {
         if (!preg_match('/^program\d+$/', $column)) {
             return;
         }
+        // Offset is 7 to get the number after the word program.
+        $number = substr($column, 7);
         if (empty($user->{$column})) {
             return;
         }
@@ -362,7 +387,9 @@ final class manual extends base {
                 if (has_capability('enrol/programs:allocate', $context)) {
                     $source = $DB->get_record('enrol_programs_sources', ['type' => 'manual', 'programid' => $program->id]);
                     if ($source && self::is_allocation_possible($program, $source)) {
-                        $programcache[$programid] = (object)['id' => $program->id, 'sourceid' => $source->id, 'name' => format_string($program->fullname)];
+                        $program->sourceid = $source->id;
+                        $program->name = format_string($program->fullname);
+                        $programcache[$programid] = $program;
                     }
                 }
             }
@@ -376,12 +403,37 @@ final class manual extends base {
             return;
         }
 
-        if ($DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id])) {
+        // This only works if the user is not already allocated in the program.
+        $dateoverrides = [];
+        $datefields = ['timestart' => 'pstartdate'.$number, 'timedue' => 'pduedate'.$number, 'timeend' => 'penddate'.$number];
+
+        foreach ($datefields as $key => $datefield) {
+            if (!empty($user->{$datefield})) {
+                $dateoverrides[$key] = strtotime($user->{$datefield});
+                if ($dateoverrides[$key] === false) {
+                    $upt->track('enrolments', $program, 'error');
+                    return;
+                }
+            }
+        }
+
+        $existingrecord = $DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id]);
+        if ($existingrecord) {
             $upt->track('enrolments', get_string('source_manual_userupload_alreadyallocated', 'enrol_programs', $program->name), 'info');
             return;
         }
 
-        self::allocate_users($program->id, $program->sourceid, [$user->id]);
+        if (!base::is_valid_dateoverrides($program, $dateoverrides)) {
+            $upt->track('enrolments', get_string('invalidallocationdates', 'enrol_programs', $program->name), 'error');
+            return;
+        }
+
+        $source = $DB->get_record('enrol_programs_sources', ['id' => $program->sourceid], '*', MUST_EXIST);
+        $programrec = $DB->get_record('enrol_programs_programs', ['id' => $program->id], '*', MUST_EXIST);
+        self::allocate_user($programrec, $source, $user->id, [], $dateoverrides);
+        \enrol_programs\local\allocation::fix_user_enrolments($program->id, $user->id);
+        \enrol_programs\local\notification::trigger_notifications($program->id, $user->id);
+
         $upt->track('enrolments', get_string('source_manual_userupload_allocated', 'enrol_programs', $program->name), 'info');
     }
 }

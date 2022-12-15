@@ -50,6 +50,7 @@ $string['cohorts'] = 'Visible to cohorts';
 $string['cohorts_help'] = 'Non-public programs can be made visible to specified cohort members.
 
 Visibility status does not affect already allocated programs.';
+$string['columnusedalready'] = 'Column is used already';
 $string['completiondate'] = 'Completion date';
 $string['creategroups'] = 'Course groups';
 $string['creategroups_help'] = 'If enabled a group will be created in each course added to program and all allocated users will be added as group members.';
@@ -79,6 +80,7 @@ $string['event_user_deallocated'] = 'User deallocated from program';
 $string['evidence'] = 'Other evidence';
 $string['evidence_details'] = 'Details';
 $string['fixeddate'] = 'At a fixed date';
+$string['invalidallocationdates'] = 'Invaid allocation dates';
 $string['item'] = 'Item';
 $string['itemcompletion'] = 'Program item completion';
 $string['management'] = 'Program management';
@@ -307,6 +309,9 @@ $string['source_manual_potusers'] = 'Allocation candidates';
 $string['source_manual_result_assigned'] = '{$a} users were assigned to program.';
 $string['source_manual_result_errors'] = '{$a} errors detected when assigning programs.';
 $string['source_manual_result_skipped'] = '{$a} users were already assigned to program.';
+$string['source_manual_timeduecolumn'] = 'Time due column';
+$string['source_manual_timeendcolumn'] = 'Time end column';
+$string['source_manual_timestartcolumn'] = 'Time start column';
 $string['source_manual_uploadusers'] = 'Upload allocations';
 $string['source_manual_usercolumn'] = 'User identification column';
 $string['source_manual_usermapping'] = 'User mapping via';
