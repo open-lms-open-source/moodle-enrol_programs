@@ -412,8 +412,8 @@ EOT;
                        AND (p.public = 1 OR pa.id IS NOT NULL OR EXISTS (
                             SELECT cm.id
                               FROM {cohort_members} cm
-                              JOIN {enrol_programs_cohorts} pc ON pc.cohortid = cm.cohortid AND pc.programid = p.id
-                             WHERE cm.userid = :userid2))
+                              JOIN {enrol_programs_cohorts} pc ON pc.cohortid = cm.cohortid
+                             WHERE cm.userid = :userid2 AND pc.programid = p.id))
               ORDER BY t.name ASC";
         $params = ['userid1' => $userid, 'userid2' => $userid];
 
