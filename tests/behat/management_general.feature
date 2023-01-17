@@ -131,7 +131,6 @@ Feature: General program management tests
     And I set the following fields to these values:
       | Program name  | Program 002 |
       | ID number     | PR02        |
-    And I open the autocomplete suggestions list in the "Context" "fieldset"
     And I set the field "Context" to "Cat 1"
     And I set the field "Tags" to "Logic"
     And I press dialog form button "Add program"
