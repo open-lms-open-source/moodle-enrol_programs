@@ -193,6 +193,7 @@ final class allocation {
         }
         $sql = "SELECT pi.courseid, pi.programid, p.fullname, pg.id
                   FROM {enrol_programs_items} pi
+                  JOIN {course} c ON c.id = pi.courseid    
                   JOIN {enrol_programs_programs} p ON p.id = pi.programid
              LEFT JOIN {enrol_programs_groups} pg ON pg.programid = p.id AND pg.courseid = pi.courseid
              LEFT JOIN {groups} g ON g.id = pg.groupid
