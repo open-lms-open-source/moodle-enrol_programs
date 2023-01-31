@@ -16,6 +16,8 @@
 
 namespace enrol_programs\local\source;
 
+use enrol_programs\local\allocation;
+
 use stdClass;
 
 /**
@@ -148,6 +150,29 @@ abstract class base {
     }
 
     /**
+     * Are the date overrides valid for a new program allocation in near future?
+     *
+     * NOTE: This is intended for validation of external date such as upload of allocations.
+     *
+     * @param stdClass $program
+     * @param array $dateoverrides
+     * @return bool
+     */
+    final public static function is_valid_dateoverrides(stdClass $program, array $dateoverrides): bool {
+        $timeallocated = time();
+
+        $timestart = empty($dateoverrides['timestart']) ?
+            allocation::get_default_timestart($program, $timeallocated) : $dateoverrides['timestart'];
+        $timedue = empty($dateoverrides['timedue']) ?
+            allocation::get_default_timedue($program, $timeallocated, $timestart) : $dateoverrides['timedue'];
+        $timeend = empty($dateoverrides['timeend']) ?
+            allocation::get_default_timeend($program, $timeallocated, $timestart) : $dateoverrides['timeend'];
+
+        $errors = allocation::validate_allocation_dates($timestart, $timedue, $timeend);
+        return empty($errors);
+    }
+
+    /**
      * Allocate user to program.
      *
      * @param stdClass $program
@@ -176,53 +201,25 @@ abstract class base {
         $record->archived = 0;
         $record->sourcedatajson = \enrol_programs\local\util::json_encode($sourcedata);
         $record->sourceinstanceid = $sourceinstanceid;
-        $record->timeallocated = $now;
+        $record->timeallocated = empty($dateoverrides['timeallocated']) ? $now : $dateoverrides['timeallocated'];
         $record->timecreated = $now;
 
-        $startdate = (object)json_decode($program->startdatejson);
-        if ($startdate->type === 'allocation') {
-            $record->timestart = $record->timeallocated;
-        } else if ($startdate->type === 'date') {
-            $record->timestart = $startdate->date;
-        } else if ($startdate->type === 'delay') {
-            $d = new \DateTime('@' . $record->timeallocated);
-            $d->add(new \DateInterval($startdate->delay));
-            $record->timestart = $d->getTimestamp();
-        } else {
-            throw new \coding_exception('invalid program start');
-        }
+        $record->timestart = empty($dateoverrides['timestart']) ?
+            allocation::get_default_timestart($program, $record->timeallocated) : $dateoverrides['timestart'];
+        $record->timedue = empty($dateoverrides['timedue']) ?
+            allocation::get_default_timedue($program, $record->timeallocated, $record->timestart) : $dateoverrides['timedue'];
+        $record->timeend = empty($dateoverrides['timeend']) ?
+            allocation::get_default_timeend($program, $record->timeallocated, $record->timestart) : $dateoverrides['timeend'];
 
-        $duedate = (object)json_decode($program->duedatejson);
-        if ($duedate->type === 'notset') {
-            $record->timedue = null;
-        } else if ($duedate->type === 'date') {
-            $record->timedue = $duedate->date;
-        } else if ($duedate->type === 'delay') {
-            $d = new \DateTime('@' . $record->timeallocated);
-            $d->add(new \DateInterval($duedate->delay));
-            $record->timedue = $d->getTimestamp();
-        } else {
-            throw new \coding_exception('invalid program due');
+        // NOTE: do not validate dates here, the reason is that we the defaults validity may change over time.
+        if ($record->timeend && $record->timeend <= $record->timestart) {
+            $record->timeend = $record->timestart + 1;
         }
-
-        $enddate = (object)json_decode($program->enddatejson);
-        if ($enddate->type === 'notset') {
-            $record->timeend = null;
-        } else if ($enddate->type === 'date') {
-            $record->timeend = $enddate->date;
-        } else if ($enddate->type === 'delay') {
-            $d = new \DateTime('@' . $record->timeallocated);
-            $d->add(new \DateInterval($enddate->delay));
-            $record->timeend = $d->getTimestamp();
-        } else {
-            throw new \coding_exception('invalid program end');
+        if ($record->timedue && $record->timedue <= $record->timestart) {
+            $record->timedue = $record->timestart + 1;
         }
-
-        foreach ($dateoverrides as $k => $v) {
-            if ($k !== 'timeallocated' && $k !== 'timestart' && $k !== 'timedue' && $k !== 'timeend') {
-                throw new \coding_exception('invalid date override');
-            }
-            $record->{$k} = $v;
+        if ($record->timedue && $record->timeend && $record->timedue > $record->timeend) {
+            $record->timedue = $record->timeend;
         }
 
         $record->id = $DB->insert_record('enrol_programs_allocations', $record);

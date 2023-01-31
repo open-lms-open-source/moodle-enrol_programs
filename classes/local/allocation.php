@@ -76,6 +76,104 @@ final class allocation {
     }
 
     /**
+     * Returns default allocated program start date.
+     *
+     * @param stdClass $program
+     * @param int $timeallocated
+     * @return int
+     */
+    public static function get_default_timestart(stdClass $program, int $timeallocated): int {
+        $startdate = (object)json_decode($program->startdatejson);
+        if ($startdate->type === 'allocation') {
+            return $timeallocated;
+        } else if ($startdate->type === 'date') {
+            return (int)$startdate->date;
+        } else if ($startdate->type === 'delay') {
+            $d = new \DateTime('@' . $timeallocated);
+            $d->add(new \DateInterval($startdate->delay));
+            return $d->getTimestamp();
+        } else {
+            throw new \coding_exception('invalid program start');
+        }
+    }
+
+    /**
+     * Returns default allocated program due date.
+     *
+     * @param stdClass $program
+     * @param int $timeallocated
+     * @param int $timestart
+     * @return int
+     */
+    public static function get_default_timedue(stdClass $program, int $timeallocated, int $timestart): ?int {
+        $duedate = (object)json_decode($program->duedatejson);
+        if ($duedate->type === 'notset') {
+            return null;
+        } else if ($duedate->type === 'date') {
+            return (int)$duedate->date;
+        } else if ($duedate->type === 'delay') {
+            $d = new \DateTime('@' . $timeallocated);
+            $d->add(new \DateInterval($duedate->delay));
+            return $d->getTimestamp();
+        } else {
+            throw new \coding_exception('invalid program due');
+        }
+    }
+
+    /**
+     * Returns default allocated program end date.
+     *
+     * @param stdClass $program
+     * @param int $timeallocated
+     * @param int $timestart
+     * @return int
+     */
+    public static function get_default_timeend(stdClass $program, int $timeallocated, int $timestart): ?int {
+        $enddate = (object)json_decode($program->enddatejson);
+        if ($enddate->type === 'notset') {
+            return null;
+        } else if ($enddate->type === 'date') {
+            return (int)$enddate->date;
+        } else if ($enddate->type === 'delay') {
+            $d = new \DateTime('@' . $timeallocated);
+            $d->add(new \DateInterval($enddate->delay));
+            return $d->getTimestamp();
+        } else {
+            throw new \coding_exception('invalid program end');
+        }
+    }
+
+    /**
+     * Validate program allocation dates.
+     *
+     * @param int $timestart
+     * @param int|null $timedue
+     * @param int|null $timeend
+     * @return array of errors
+     */
+    public static function validate_allocation_dates(int $timestart, ?int $timedue, ?int $timeend): array {
+        $errors = [];
+
+        if (!$timestart) {
+            $errors['timestart'] = get_string('required');
+        }
+
+        if ($timedue && $timedue <= $timestart) {
+            $errors['timedue'] = get_string('error');
+        }
+
+        if ($timeend && $timeend <= $timestart) {
+            $errors['timeend'] = get_string('error');
+        }
+
+        if ($timeend && $timedue && $timedue > $timeend) {
+            $errors['timedue'] = get_string('error');
+        }
+
+        return $errors;
+    }
+
+    /**
      * Add and delete course enrolment instances for programs.
      *
      * @param int|null $programid

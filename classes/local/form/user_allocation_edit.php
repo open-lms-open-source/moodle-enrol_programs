@@ -60,17 +60,8 @@ final class user_allocation_edit extends \local_openlms\dialog_form {
     public function validation($allocation, $files) {
         $errors = parent::validation($allocation, $files);
 
-        if ($allocation['timedue'] && $allocation['timedue'] <= $allocation['timestart']) {
-            $errors['timedue'] = get_string('error');
-        }
-
-        if ($allocation['timeend'] && $allocation['timeend'] <= $allocation['timestart']) {
-            $errors['timeend'] = get_string('error');
-        }
-
-        if ($allocation['timeend'] && $allocation['timedue'] && $allocation['timedue'] > $allocation['timeend']) {
-            $errors['timedue'] = get_string('error');
-        }
+        $errors = array_merge($errors, \enrol_programs\local\allocation::validate_allocation_dates(
+            $allocation['timestart'], $allocation['timedue'], $allocation['timeend']));
 
         return $errors;
     }

@@ -61,6 +61,185 @@ final class local_allocation_test extends \advanced_testcase {
         $this->assertArrayNotHasKey('base', $sources);
     }
 
+    public function test_get_default_timestart() {
+        $syscontext = \context_system::instance();
+        $data = (object)[
+            'fullname' => 'Some program',
+            'idnumber' => 'SP1',
+            'contextid' => $syscontext->id,
+        ];
+        $program = program::add_program($data);
+        $timeallocation = time();
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'allocation',
+            'programdue_type' => 'notset',
+            'programend_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame($timeallocation, allocation::get_default_timestart($program, $timeallocation));
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timeallocation + 60 * 60,
+            'programdue_type' => 'notset',
+            'programend_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame($data->programstart_date, allocation::get_default_timestart($program, $timeallocation));
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'delay',
+            'programstart_delay' => ['type' => 'hours', 'value' => 3],
+            'programdue_type' => 'notset',
+            'programend_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame($timeallocation + (60 * 60 * 3), allocation::get_default_timestart($program, $timeallocation));
+    }
+
+    public function test_get_default_timedue() {
+        $syscontext = \context_system::instance();
+        $data = (object)[
+            'fullname' => 'Some program',
+            'idnumber' => 'SP1',
+            'contextid' => $syscontext->id,
+        ];
+        $program = program::add_program($data);
+        $timeallocation = time();
+        $timestart = $timeallocation + (60 * 60);
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timestart,
+            'programdue_type' => 'notset',
+            'programend_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame(null, allocation::get_default_timedue($program, $timeallocation, $timestart));
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timestart,
+            'programdue_type' => 'date',
+            'programdue_date' => $timestart + 20,
+            'programend_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame($data->programdue_date, allocation::get_default_timedue($program, $timeallocation, $timestart));
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timestart,
+            'programdue_type' => 'delay',
+            'programdue_delay' => ['type' => 'hours', 'value' => 3],
+            'programend_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame($timeallocation + (60 * 60 * 3), allocation::get_default_timedue($program, $timeallocation, $timestart));
+    }
+
+    public function test_get_default_timeend() {
+        $syscontext = \context_system::instance();
+        $data = (object)[
+            'fullname' => 'Some program',
+            'idnumber' => 'SP1',
+            'contextid' => $syscontext->id,
+        ];
+        $program = program::add_program($data);
+        $timeallocation = time();
+        $timestart = $timeallocation + (60 * 60);
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timestart,
+            'programend_type' => 'notset',
+            'programdue_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame(null, allocation::get_default_timeend($program, $timeallocation, $timestart));
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timestart,
+            'programend_type' => 'date',
+            'programend_date' => $timestart + 20,
+            'programdue_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame($data->programend_date, allocation::get_default_timeend($program, $timeallocation, $timestart));
+
+        $data = (object)[
+            'id' => $program->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $timestart,
+            'programend_type' => 'delay',
+            'programend_delay' => ['type' => 'hours', 'value' => 3],
+            'programdue_type' => 'notset',
+        ];
+        $program = program::update_program_scheduling($data);
+        $this->assertSame($timeallocation + (60 * 60 * 3), allocation::get_default_timeend($program, $timeallocation, $timestart));
+    }
+
+    public function test_validate_allocation_dates() {
+        $now = time();
+
+        $errors = allocation::validate_allocation_dates($now, null, null);
+        $this->assertSame([], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, 0, 0);
+        $this->assertSame([], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now + 20, null);
+        $this->assertSame([], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now + 20, 0);
+        $this->assertSame([], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now + 20, $now + 20);
+        $this->assertSame([], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now + 20, $now + 30);
+        $this->assertSame([], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, null, $now + 30);
+        $this->assertSame([], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, 0, $now + 30);
+        $this->assertSame([], $errors);
+
+        // Errors from now on.
+
+        $errors = allocation::validate_allocation_dates('0', null, null);
+        $this->assertSame(['timestart' => 'Required'], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now, null);
+        $this->assertSame(['timedue' => 'Error'], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now - 1, null);
+        $this->assertSame(['timedue' => 'Error'], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, null, $now);
+        $this->assertSame(['timeend' => 'Error'], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, null, $now - 1);
+        $this->assertSame(['timeend' => 'Error'], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now, $now);
+        $this->assertSame(['timedue' => 'Error', 'timeend' => 'Error'], $errors);
+
+        $errors = allocation::validate_allocation_dates($now, $now + 2, $now + 1);
+        $this->assertSame(['timedue' => 'Error'], $errors);
+    }
+
     public function test_fix_enrol_instances() {
         global $DB;
 

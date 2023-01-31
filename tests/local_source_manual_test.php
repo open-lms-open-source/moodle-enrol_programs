@@ -99,6 +99,7 @@ final class local_source_manual_test extends \advanced_testcase {
         $guest = guest_user();
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
 
         $program1 = $generator->create_program(['sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
@@ -116,6 +117,24 @@ final class local_source_manual_test extends \advanced_testcase {
         $this->assertSame($user2->id, $allocations[1]->userid);
         $this->assertSame($program1->id, $allocations[1]->programid);
         $this->assertSame($source1->id, $allocations[1]->sourceid);
+
+        // Invalid default dates get fixed.
+        $now = time();
+        $data = (object)[
+            'id' => $program1->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $now,
+            'programdue_type' => 'date',
+            'programdue_date' => $now - 10,
+            'programend_type' => 'date',
+            'programend_date' => $now - 20,
+        ];
+        $program1 = program::update_program_scheduling($data);
+        manual::allocate_users($program1->id, $source1->id, [$user3->id]);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id]);
+        $this->assertEquals($now, $allocation->timestart);
+        $this->assertEquals($now + 1, $allocation->timedue);
+        $this->assertEquals($now + 1, $allocation->timeend);
     }
 
     public function test_notify_allocation() {
