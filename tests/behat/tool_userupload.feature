@@ -31,9 +31,10 @@ Feature: Program allocation via tool_userupload
       | enrol/programs:delete          | Allow      | pmanager | System       |           |
       | enrol/programs:addcourse       | Allow      | pmanager | System       |           |
       | enrol/programs:allocate        | Allow      | pmanager | System       |           |
+      | enrol/programs:manageevidence  | Allow      | pmanager | System       |           |
       | moodle/cohort:view             | Allow      | pmanager | System       |           |
       | moodle/site:uploadusers        | Allow      | pmanager | System       |           |
-      | moodle/site:configview        | Allow      | pmanager | System       |           |
+      | moodle/site:configview         | Allow      | pmanager | System       |           |
     And the following "role assigns" exist:
       | user      | role          | contextlevel | reference |
       | manager1  | pmanager      | System       |           |
@@ -73,7 +74,7 @@ Feature: Program allocation via tool_userupload
     And I press "Upload users"
     Then I should see "Allocated to 'Program 001'" in the "student1" "table_row"
     And I should see "Allocated to 'Program 002'" in the "student2" "table_row"
-    And I should see "Cannot allocate to 'PR3'" in the "student2" "table_row"
+    And I should see "Cannot allocate to 'Program 003'" in the "student2" "table_row"
     And I should see "Cannot allocate to 'XX1'" in the "student3" "table_row"
     And I should see "Cannot allocate to '-10'" in the "student3" "table_row"
     And I should see "Allocated to 'Program 001'" in the "student4" "table_row"
@@ -92,6 +93,54 @@ Feature: Program allocation via tool_userupload
     And I follow "Users"
     And I should not see "Student 1"
     And I should see "Student 2"
+
+  @javascript @_file_upload
+  Scenario: Manager may complete programs via tool_uploaduser
+    Given I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 001"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I am on all programs management page
+    And I follow "Program 002"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I follow "Users"
+    And I press "Allocate users"
+    And I set the following fields to these values:
+      | Users | Student 2 |
+    And I press dialog form button "Allocate users"
+    And I navigate to "Users > Accounts > Upload users" in site administration
+
+    When I upload "enrol/programs/tests/fixtures/useruploadcompletion.csv" file to "File" filemanager
+    And I press "Upload users"
+    And I set the following fields to these values:
+      | Upload type | Update existing users only |
+    And I press "Upload users"
+    Then I should see "Allocated to 'Program 001'" in the "student1" "table_row"
+    And I should see "Program completion was updated" in the "student1" "table_row"
+    And I should see "Program completion was updated" in the "student2" "table_row"
+    And I should see "Allocated to 'Program 001'" in the "student3" "table_row"
+    And I should see "Invalid program completion date" in the "student3" "table_row"
+    And I should see "Cannot allocate to 'XXX'" in the "student4" "table_row"
+
+    When I am on all programs management page
+    And I follow "Program 001"
+    And I follow "Users"
+    And I follow "Student 1"
+    Then I should see "20 October 2023, 12:00" in the "Completion date:" definition list item
+
+    When I am on all programs management page
+    And I follow "Program 002"
+    And I follow "Users"
+    And I follow "Student 2"
+    Then I should see "21 November 2023, 12:00" in the "Completion date:" definition list item
 
   @javascript @_file_upload
   Scenario: Set program allocation dates via tool_uploaduser

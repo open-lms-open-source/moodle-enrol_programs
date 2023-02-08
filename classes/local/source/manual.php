@@ -359,10 +359,9 @@ final class manual extends base {
      * @param stdClass $user
      * @param string $column
      * @param \uu_progress_tracker $upt
-     * @param array $programcache
      * @return void
      */
-    public static function tool_uploaduser_process(stdClass $user, string $column, \uu_progress_tracker $upt, array &$programcache): void {
+    public static function tool_uploaduser_process(stdClass $user, string $column, \uu_progress_tracker $upt): void {
         global $DB;
 
         if (!preg_match('/^program\d+$/', $column)) {
@@ -375,31 +374,30 @@ final class manual extends base {
         }
 
         $programid = $user->{$column};
+        if (is_number($programid)) {
+            $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
+        } else {
+            $program = $DB->get_record('enrol_programs_programs', ['idnumber' => $programid]);
+        }
+        if (!$program) {
+            $upt->track('enrolments', get_string('source_manual_userupload_invalidprogram', 'enrol_programs', s($programid)), 'error');
+            return;
+        }
+        $programname = format_string($program->fullname);
 
-        if (!isset($programcache[$programid])) {
-            if (is_number($programid)) {
-                $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
-            } else {
-                $program = $DB->get_record('enrol_programs_programs', ['idnumber' => $programid]);
-            }
-            if ($program) {
-                $context = \context::instance_by_id($program->contextid);
-                if (has_capability('enrol/programs:allocate', $context)) {
-                    $source = $DB->get_record('enrol_programs_sources', ['type' => 'manual', 'programid' => $program->id]);
-                    if ($source && self::is_allocation_possible($program, $source)) {
-                        $program->sourceid = $source->id;
-                        $program->name = format_string($program->fullname);
-                        $programcache[$programid] = $program;
-                    }
-                }
-            }
+        $context = \context::instance_by_id($program->contextid, IGNORE_MISSING);
+        if (!$context || !has_capability('enrol/programs:allocate', $context)) {
+            $upt->track('enrolments', get_string('source_manual_userupload_invalidprogram', 'enrol_programs', $programname), 'error');
+            return;
         }
-        if (!isset($programcache[$programid])) {
-            $programcache[$programid] = get_string('source_manual_userupload_invalidprogram', 'enrol_programs', s($programid));
+        $source = $DB->get_record('enrol_programs_sources', ['type' => 'manual', 'programid' => $program->id]);
+        if (!$source || !self::is_allocation_possible($program, $source)) {
+            $upt->track('enrolments', get_string('source_manual_userupload_invalidprogram', 'enrol_programs', $programname), 'error');
+            return;
         }
-        $program = $programcache[$programid];
-        if (!is_object($program)) {
-            $upt->track('enrolments', $program, 'error');
+
+        if ($DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id])) {
+            $upt->track('enrolments', get_string('source_manual_userupload_alreadyallocated', 'enrol_programs', $programname), 'info');
             return;
         }
 
@@ -411,30 +409,22 @@ final class manual extends base {
             if (!empty($user->{$datefield})) {
                 $dateoverrides[$key] = strtotime($user->{$datefield});
                 if ($dateoverrides[$key] === false) {
-                    $upt->track('enrolments', $program, 'error');
+                    $upt->track('enrolments', get_string('invalidallocationdates', 'enrol_programs', $programname), 'error');
                     return;
                 }
             }
         }
 
-        $existingrecord = $DB->record_exists('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id]);
-        if ($existingrecord) {
-            $upt->track('enrolments', get_string('source_manual_userupload_alreadyallocated', 'enrol_programs', $program->name), 'info');
-            return;
-        }
-
         if (!base::is_valid_dateoverrides($program, $dateoverrides)) {
-            $upt->track('enrolments', get_string('invalidallocationdates', 'enrol_programs', $program->name), 'error');
+            $upt->track('enrolments', get_string('invalidallocationdates', 'enrol_programs', $programname), 'error');
             return;
         }
 
-        $source = $DB->get_record('enrol_programs_sources', ['id' => $program->sourceid], '*', MUST_EXIST);
-        $programrec = $DB->get_record('enrol_programs_programs', ['id' => $program->id], '*', MUST_EXIST);
-        self::allocate_user($programrec, $source, $user->id, [], $dateoverrides);
+        self::allocate_user($program, $source, $user->id, [], $dateoverrides);
         \enrol_programs\local\allocation::fix_user_enrolments($program->id, $user->id);
         \enrol_programs\local\notification::trigger_notifications($program->id, $user->id);
 
-        $upt->track('enrolments', get_string('source_manual_userupload_allocated', 'enrol_programs', $program->name), 'info');
+        $upt->track('enrolments', get_string('source_manual_userupload_allocated', 'enrol_programs', $programname), 'info');
     }
 }
 

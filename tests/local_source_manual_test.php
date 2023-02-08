@@ -507,4 +507,213 @@ final class local_source_manual_test extends \advanced_testcase {
         $files = $fs->get_area_files($context->id, 'enrol_programs', 'upload', $draftid, 'id ASC', false);
         $this->assertCount(0, $files);
     }
+
+    public function test_tool_uploaduser_process() {
+        global $CFG, $DB;
+        require_once("$CFG->dirroot/admin/tool/uploaduser/locallib.php");
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program2 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $now = time();
+        $data = (object)[
+            'id' => $program2->id,
+            'programstart_type' => 'date',
+            'programstart_date' => $now,
+            'programdue_type' => 'date',
+            'programdue_date' => $now + 60*60,
+            'programend_type' => 'date',
+            'programend_date' => $now + 60*60*2,
+        ];
+        $program2 = program::update_program_scheduling($data);
+
+        $program3 = $generator->create_program();
+
+        $user1 = $this->getDataGenerator()->create_user(['username' => 'user1', 'email' => 'user1@example.com', 'idnumber' => 'u1']);
+        $user2 = $this->getDataGenerator()->create_user(['username' => 'user2', 'email' => 'user2@example.com', 'idnumber' => 'u2']);
+        $manager = $this->getDataGenerator()->create_user();
+
+        $syscontext = \context_system::instance();
+        $managerroleid = $this->getDataGenerator()->create_role();
+        assign_capability('enrol/programs:allocate', CAP_ALLOW, $managerroleid, $syscontext);
+        role_assign($managerroleid, $manager->id, $syscontext->id);
+        $this->setUser($manager);
+
+        $upt = new class extends \uu_progress_tracker {
+            public $result;
+            public function reset() {
+                $this->result = [];
+                return $this;
+            }
+            public function track($col, $msg, $level = 'normal', $merge = true) {
+                if (!in_array($col, $this->columns)) {
+                    throw new \Exception('Incorrect column:'.$col);
+                }
+                if (!$merge) {
+                    $this->result[$col][$level] = [];
+                }
+                $this->result[$col][$level][] = $msg;
+            }
+        };
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program1->idnumber,
+        ];
+        manual::tool_uploaduser_process($data, 'xyz', $upt->reset());
+        $this->assertSame([], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program1->idnumber,
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['info' => ['Allocated to \'Program 1\'']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertTimeCurrent($allocation->timeallocated);
+        $this->assertTimeCurrent($allocation->timeallocated, $allocation->timestart);
+        $this->assertSame(null, $allocation->timedue);
+        $this->assertSame(null, $allocation->timeend);
+        manual::deallocate_user($program1, $source1, $allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program9' => $program1->id,
+            'pstartdate9' => '10/29/2022',
+            'penddate9' => '2022-12-29',
+            'pduedate9' => '21.11.2022',
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'program9', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['info' => ['Allocated to \'Program 1\'']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertTimeCurrent($allocation->timeallocated);
+        $this->assertSame(strtotime($data->pstartdate9), (int)$allocation->timestart);
+        $this->assertSame(strtotime($data->pduedate9), (int)$allocation->timedue);
+        $this->assertSame(strtotime($data->penddate9), (int)$allocation->timeend);
+        manual::deallocate_user($program1, $source1, $allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program2' => $program2->id,
+            'pstartdate2' => '10/29/2022',
+            'penddate2' => '',
+            'pduedate2' => '',
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'program2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['info' => ['Allocated to \'Program 2\'']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program2->id, 'userid' => $user1->id]);
+        $this->assertTimeCurrent($allocation->timeallocated);
+        $this->assertSame(strtotime($data->pstartdate2), (int)$allocation->timestart);
+        $this->assertSame($now + 60*60, (int)$allocation->timedue);
+        $this->assertSame($now + 60*60*2, (int)$allocation->timeend);
+        manual::deallocate_user($program2, $source2, $allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => '999',
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Cannot allocate to \'999\'']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program3->id,
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Cannot allocate to \'Program 3\'']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program3->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program1->id,
+            'pstartdate1' => 'xx',
+            'penddate1' => '',
+            'pduedate1' => '',
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Invalid program allocation dates']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program1->id,
+            'pstartdate1' => '10/29/2022',
+            'penddate1' => '2022-09-29',
+            'pduedate1' => '21.11.2022',
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Invalid program allocation dates']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program3->idnumber,
+        ];
+        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Cannot allocate to \'Program 3\'']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program3->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program2' => $program2->id,
+            'pstartdate2' => '10/29/2035',
+            'penddate2' => '',
+            'pduedate2' => '',
+        ];
+        manual::tool_uploaduser_process($data, 'program2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Invalid program allocation dates']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program2->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+
+        $this->setUser($user2);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program1->idnumber,
+        ];
+        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Cannot allocate to \'Program 1\'']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
+        $this->assertFalse($allocation);
+    }
 }

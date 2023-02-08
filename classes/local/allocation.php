@@ -1067,4 +1067,95 @@ final class allocation {
               ORDER BY p.fullname ASC";
         return $DB->get_records_sql($sql, $params);
     }
+
+    /**
+     * Called from \tool_uploaduser\process::process_line()
+     * right after manual::tool_uploaduser_process().
+     *
+     * @param stdClass $user
+     * @param string $column
+     * @param \uu_progress_tracker $upt
+     * @return void
+     */
+    public static function tool_uploaduser_process(stdClass $user, string $column, \uu_progress_tracker $upt): void {
+        global $DB;
+
+        if (!preg_match('/^program\d+$/', $column)) {
+            return;
+        }
+        // Offset is 7 to get the number after the word program.
+        $number = substr($column, 7);
+        if (empty($user->{$column})) {
+            return;
+        }
+
+        $programid = $user->{$column};
+        if (is_number($programid)) {
+            $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
+        } else {
+            $program = $DB->get_record('enrol_programs_programs', ['idnumber' => $programid]);
+        }
+        if (!$program) {
+            // No need to duplicate errors here,
+            // the manual allocation should have already complained.
+            return;
+        }
+        $programname = format_string($program->fullname);
+
+        $context = \context::instance_by_id($program->contextid, IGNORE_MISSING);
+        if (!$context) {
+            $upt->track('enrolments', get_string('userupload_completion_error', 'enrol_programs', $programname), 'error');
+            return;
+        }
+        if (!has_capability('enrol/programs:manageevidence', $context) && !has_capability('enrol/programs:admin', $context)) {
+            $upt->track('enrolments', get_string('userupload_completion_error', 'enrol_programs', $programname), 'error');
+            return;
+        }
+
+        $completionfield = 'pcompletiondate'.$number;
+        if (empty($user->{$completionfield})) {
+            return;
+        }
+        $timecompleted = strtotime($user->{$completionfield});
+        if ($timecompleted === false) {
+            $upt->track('enrolments', get_string('invalidcompletiondate', 'enrol_programs', $programname), 'error');
+            return;
+        }
+        $completionevidence = 'pcompletionevidence'.$number;
+        $evidence = $user->{$completionevidence} ?? '';
+
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id]);
+        if (!$allocation) {
+            $upt->track('enrolments', get_string('userupload_completion_error', 'enrol_programs', $programname), 'error');
+            return;
+        }
+        if ($program->archived || $allocation->archived) {
+            $upt->track('enrolments', get_string('userupload_completion_error', 'enrol_programs', $programname), 'error');
+            return;
+        }
+        $item = $DB->get_record('enrol_programs_items', ['topitem' => 1, 'programid' => $allocation->programid]);
+        if (!$item) {
+            $upt->track('enrolments', get_string('userupload_completion_error', 'enrol_programs', $programname), 'error');
+            return;
+        }
+
+        $data = [
+            'itemid' => $item->id,
+            'allocationid' => $allocation->id,
+            'timecompleted' => $timecompleted,
+            'evidencetimecompleted' => $timecompleted,
+        ];
+        if (trim($evidence) !== '') {
+            $data['evidencedetails'] = clean_text($evidence);
+        } else {
+            $data['evidencedetails'] = '';
+        }
+        self::update_item_completion((object)$data);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id], '*', MUST_EXIST);
+        if ($allocation->timecompleted != $timecompleted) {
+            $allocation->timecompleted = $timecompleted;
+            self::update_user($allocation);
+        }
+        $upt->track('enrolments', get_string('userupload_completion_updated', 'enrol_programs', $programname), 'info');
+    }
 }

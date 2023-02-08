@@ -1084,4 +1084,164 @@ final class local_allocation_test extends \advanced_testcase {
         $this->assertEquals([$allocation1->id, $allocation2->id, $allocation4->id], array_keys($result));
         \tool_olms_tenant\tenancy::clear_forced_tenant_id();
     }
+
+    public function test_tool_uploaduser_process() {
+        global $CFG, $DB;
+        require_once("$CFG->dirroot/admin/tool/uploaduser/locallib.php");
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $topitem1 = $DB->get_record('enrol_programs_items', ['programid' => $program1->id, 'topitem' => 1], '*', MUST_EXIST);
+
+        $program2 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $topitem2 = $DB->get_record('enrol_programs_items', ['programid' => $program2->id, 'topitem' => 1], '*', MUST_EXIST);
+
+        $program3 = $generator->create_program();
+        $topitem3 = $DB->get_record('enrol_programs_items', ['programid' => $program3->id, 'topitem' => 1], '*', MUST_EXIST);
+
+        $user1 = $this->getDataGenerator()->create_user(['username' => 'user1', 'email' => 'user1@example.com', 'idnumber' => 'u1']);
+        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        $user2 = $this->getDataGenerator()->create_user(['username' => 'user2', 'email' => 'user2@example.com', 'idnumber' => 'u2']);
+        $manager = $this->getDataGenerator()->create_user();
+
+        $syscontext = \context_system::instance();
+        $managerroleid = $this->getDataGenerator()->create_role();
+        assign_capability('enrol/programs:manageevidence', CAP_ALLOW, $managerroleid, $syscontext);
+        role_assign($managerroleid, $manager->id, $syscontext->id);
+        $this->setUser($manager);
+
+        $upt = new class extends \uu_progress_tracker {
+            public $result;
+            public function reset() {
+                $this->result = [];
+                return $this;
+            }
+            public function track($col, $msg, $level = 'normal', $merge = true) {
+                if (!in_array($col, $this->columns)) {
+                    throw new \Exception('Incorrect column:'.$col);
+                }
+                if (!$merge) {
+                    $this->result[$col][$level] = [];
+                }
+                $this->result[$col][$level][] = $msg;
+            }
+        };
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program1' => $program1->idnumber,
+            'pcompletiondate' => '2033-10-20',
+        ];
+        allocation::tool_uploaduser_process($data, 'xyz', $upt->reset());
+        $this->assertSame([], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertSame(null, $allocation->timecompleted);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program22' => $program1->idnumber,
+            'pcompletiondate22' => '2033-10-20',
+        ];
+        allocation::tool_uploaduser_process($data, 'program22', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['info' => ['Program completion was updated']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertSame(strtotime('2033-10-20'), (int)$allocation->timecompleted);
+        $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $topitem1->id, 'allocationid' => $allocation->id]);
+        $this->assertSame($allocation->timecompleted, $completion->timecompleted);
+        $evidence = $DB->get_record('enrol_programs_evidences', ['itemid' => $topitem1->id, 'userid' => $user1->id]);
+        $this->assertSame('{"details":""}', $evidence->evidencejson);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program22' => $program1->idnumber,
+            'pcompletiondate22' => '',
+        ];
+        allocation::tool_uploaduser_process($data, 'program22', $upt->reset());
+        $this->assertSame([], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertSame(strtotime('2033-10-20'), (int)$allocation->timecompleted);
+        $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $topitem1->id, 'allocationid' => $allocation->id]);
+        $this->assertSame($allocation->timecompleted, $completion->timecompleted);
+        $evidence = $DB->get_record('enrol_programs_evidences', ['itemid' => $topitem1->id, 'userid' => $user1->id]);
+        $this->assertSame('{"details":""}', $evidence->evidencejson);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program2' => $program1->idnumber,
+            'pcompletiondate2' => '2034-10-20',
+            'pcompletionevidence2' => 'yes yes'
+        ];
+        allocation::tool_uploaduser_process($data, 'program2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['info' => ['Program completion was updated']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertSame(strtotime('2034-10-20'), (int)$allocation->timecompleted);
+        $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $topitem1->id, 'allocationid' => $allocation->id]);
+        $this->assertSame($allocation->timecompleted, $completion->timecompleted);
+        $evidence = $DB->get_record('enrol_programs_evidences', ['itemid' => $topitem1->id, 'userid' => $user1->id]);
+        $this->assertSame('{"details":"yes yes"}', $evidence->evidencejson);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program2' => $program2->idnumber,
+            'pcompletiondate2' => '2034-10-20',
+            'pcompletionevidence2' => 'yes yes'
+        ];
+        allocation::tool_uploaduser_process($data, 'program2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Program completion cannot be updated']],
+        ], $upt->result);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program2' => $program3->idnumber,
+            'pcompletiondate2' => '2034-10-20',
+            'pcompletionevidence2' => 'yes yes'
+        ];
+        allocation::tool_uploaduser_process($data, 'program2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Program completion cannot be updated']],
+        ], $upt->result);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program2' => $program1->idnumber,
+            'pcompletiondate2' => 'abc',
+        ];
+        allocation::tool_uploaduser_process($data, 'program2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Invalid program completion date']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertSame(strtotime('2034-10-20'), (int)$allocation->timecompleted);
+        $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $topitem1->id, 'allocationid' => $allocation->id]);
+        $this->assertSame($allocation->timecompleted, $completion->timecompleted);
+        $evidence = $DB->get_record('enrol_programs_evidences', ['itemid' => $topitem1->id, 'userid' => $user1->id]);
+        $this->assertSame('{"details":"yes yes"}', $evidence->evidencejson);
+
+        $this->setUser($user2);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'program2' => $program1->idnumber,
+            'pcompletiondate2' => '2032-10-20',
+        ];
+        allocation::tool_uploaduser_process($data, 'program2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Program completion cannot be updated']],
+        ], $upt->result);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertSame(strtotime('2034-10-20'), (int)$allocation->timecompleted);
+        $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $topitem1->id, 'allocationid' => $allocation->id]);
+        $this->assertSame($allocation->timecompleted, $completion->timecompleted);
+        $evidence = $DB->get_record('enrol_programs_evidences', ['itemid' => $topitem1->id, 'userid' => $user1->id]);
+        $this->assertSame('{"details":"yes yes"}', $evidence->evidencejson);
+    }
 }
