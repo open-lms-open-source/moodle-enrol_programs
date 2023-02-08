@@ -31,7 +31,7 @@ $plugin->version   = 2023012200;        // The current plugin version (Date: YYY
 $plugin->requires  = 2021051704;        // Requires this Moodle version.
 $plugin->component = 'enrol_programs';
 $plugin->maturity  = MATURITY_RC;
-$plugin->release   = 'v1.0.9+';
+$plugin->release   = 'v1.0.10';
 $plugin->supported = [311, 400];
 
 $plugin->dependencies = ['local_openlms' => 2023012200];
