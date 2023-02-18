@@ -251,7 +251,7 @@ final class udplans extends base {
             $userselect = "AND pl.userid = :userid";
             $params['userid'] = $userid;
         }
-        $sql = "SELECT pl.*, ps.id AS sourceid
+        $sql = "SELECT pl.*, ps.id AS sourceid, i.timedue AS itemtimedue
                   FROM {tool_udplans_plans} pl
                   JOIN {user} u ON u.id = pl.userid AND u.deleted = 0 AND u.confirmed = 1
                   JOIN {tool_udplans_frameworks} f ON f.id = pl.frameworkid
@@ -267,6 +267,8 @@ final class udplans extends base {
               ORDER BY pl.timestart ASC, pl.id ASC";
         $rs = $DB->get_recordset_sql($sql, $params);
         foreach ($rs as $plan) {
+            $timedue = $plan->itemtimedue ?? $plan->timedue;
+            unset($plan->itemtimedue);
             $source = $DB->get_record('enrol_programs_sources', ['id' => $plan->sourceid]);
             unset($plan->sourceid);
             $program = $DB->get_record('enrol_programs_programs', ['id' => $source->programid]);
@@ -276,7 +278,7 @@ final class udplans extends base {
             }
             $dateoverrides = [
                 'timestart' => $plan->timestart,
-                'timedue' => $plan->timedue,
+                'timedue' => $timedue,
                 'timeend' => $plan->timeend,
             ];
             self::allocate_user($program, $source, $plan->userid, [], $dateoverrides, $plan->id);
@@ -316,7 +318,7 @@ final class udplans extends base {
             $userselect = "AND pa.userid = :userid";
             $params['userid'] = $userid;
         }
-        $sql = "SELECT pa.*, pl.timestart, pl.timedue, pl.timeend
+        $sql = "SELECT pa.*, pl.timestart, COALESCE(pi.timedue, pl.timedue) AS timedue, pl.timeend
                   FROM {enrol_programs_allocations} pa
                   JOIN {enrol_programs_sources} ps ON ps.id = pa.sourceid AND ps.type = 'udplans'
                   JOIN {tool_udplans_plans} pl ON pl.id = pa.sourceinstanceid AND pl.userid = pa.userid AND pl.archived = 0
@@ -325,9 +327,9 @@ final class udplans extends base {
                  WHERE (
                             (pa.archived = 1)
                             OR (pl.timestart <> pa.timestart)
-                            OR (pl.timedue IS NULL AND pa.timedue IS NOT NULL)
-                            OR (pl.timedue IS NOT NULL AND pa.timedue IS NULL)
-                            OR (pl.timedue <> pa.timedue) 
+                            OR (COALESCE(pi.timedue, pl.timedue) IS NULL AND pa.timedue IS NOT NULL)
+                            OR (COALESCE(pi.timedue, pl.timedue) IS NOT NULL AND pa.timedue IS NULL)
+                            OR (COALESCE(pi.timedue, pl.timedue) <> pa.timedue) 
                             OR (pl.timeend IS NULL AND pa.timeend IS NOT NULL)
                             OR (pl.timeend IS NOT NULL AND pa.timeend IS NULL)
                             OR (pl.timeend <> pa.timeend) 
