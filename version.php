@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /** @var stdClass $plugin */
 
-$plugin->version   = 2023012201;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2023031502;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2021051704;        // Requires this Moodle version.
 $plugin->component = 'enrol_programs';
 $plugin->maturity  = MATURITY_RC;

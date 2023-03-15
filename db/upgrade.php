@@ -135,5 +135,63 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022121700, 'enrol', 'programs');
     }
 
+    if ($oldversion < 2023031500) {
+
+        // Define field auxint1 to be added to enrol_programs_sources.
+        $table = new xmldb_table('enrol_programs_sources');
+        $field = new xmldb_field('auxint1', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'notifyallocation');
+
+        // Conditionally launch add field auxint1.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('auxint2', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'auxint1');
+
+        // Conditionally launch add field auxint2.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('auxint3', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'auxint2');
+
+        // Conditionally launch add field auxint3.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2023031500, 'enrol', 'programs');
+    }
+
+    if ($oldversion < 2023031502) {
+
+        // Define table enrol_programs_src_cohorts to be created.
+        $table = new xmldb_table('enrol_programs_src_cohorts');
+
+        // Adding fields to table enrol_programs_src_cohorts.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('sourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('cohortid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table enrol_programs_src_cohorts.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('cohortid', XMLDB_KEY_FOREIGN, ['cohortid'], 'cohort', ['id']);
+        $table->add_key('sourceid', XMLDB_KEY_FOREIGN, ['sourceid'], 'enrol_programs_sources', ['id']);
+
+        // Adding indexes to table enrol_programs_src_cohorts.
+        $table->add_index('sourceid-cohortid', XMLDB_INDEX_UNIQUE, ['sourceid', 'cohortid']);
+
+        // Conditionally launch create table for enrol_programs_src_cohorts.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $DB->set_field('enrol_programs_sources', 'auxint1', '1', ['type' => 'cohort']);
+
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2023031502, 'enrol', 'programs');
+    }
+
     return true;
 }

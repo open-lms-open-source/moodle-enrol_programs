@@ -50,6 +50,81 @@ final class local_source_cohort_test extends \advanced_testcase {
         $this->assertFalse(cohort::is_new_allowed($program));
     }
 
+    public function test_allocations_only_specific_cohorts() {
+        global $DB;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $guest = guest_user();
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
+
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+        $cohort2 = $this->getDataGenerator()->create_cohort();
+
+        $program1 = $generator->create_program(['sources' => ['manual' => [], 'cohort' => ['auxint1' => 0, 'cohorts' => [$cohort1->id]]]]);
+        $source1m = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $source1c = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'cohort'], '*', MUST_EXIST);
+
+        cohort_add_member($cohort1->id, $user1->id);
+        cohort_add_member($cohort2->id, $user1->id);
+        cohort_add_member($cohort2->id, $user2->id);
+        $program1 = program::update_program_visibility(
+            (object)['id' => $program1->id, 'public' => 1, 'cohorts' => [$cohort1->id, $cohort2->id]]);
+        $allocations = $DB->get_records('enrol_programs_allocations', ['programid' => $program1->id], 'userid ASC');
+        $this->assertCount(1, $allocations);
+
+        $program1 = program::update_program_visibility(
+            (object)['id' => $program1->id, 'public' => 1, 'cohorts' => []]);
+        $allocations = $DB->get_records('enrol_programs_allocations', ['programid' => $program1->id], 'userid ASC');
+        $this->assertCount(1, $allocations);
+
+        $program1 = program::update_program_visibility(
+            (object)['id' => $program1->id, 'public' => 1, 'cohorts' => [$cohort1->id, $cohort2->id]]);
+        $source1c->auxint1 = 1;
+        $source1c->enable = 1;
+        local\source\cohort::update_source($source1c);
+        $allocations = $DB->get_records('enrol_programs_allocations', ['programid' => $program1->id], 'userid ASC');
+        $this->assertCount(2, $allocations);
+    }
+
+    public function test_fetch_allocation_cohorts_menu() {
+        global $DB;
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $cohort1 = $this->getDataGenerator()->create_cohort(['name' => 'Cohort A']);
+        $cohort2 = $this->getDataGenerator()->create_cohort(['name' => 'Cohort B']);
+        $cohort3 = $this->getDataGenerator()->create_cohort(['name' => 'Cohort C']);
+
+        $program1 = $generator->create_program(['sources' => ['cohort' => ['auxint1' => 0, 'cohorts' => [$cohort1->id, $cohort2->id]]]]);
+        $program2 = $generator->create_program(['sources' => ['cohort' => ['auxint1' => 0, 'cohorts' => [$cohort1->id]]]]);
+        $program3 = $generator->create_program();
+
+        $source1id = $DB->get_field('enrol_programs_sources', 'id', ['programid' => $program1->id, 'type' => 'cohort']);
+        $source2id = $DB->get_field('enrol_programs_sources', 'id', ['programid' => $program2->id, 'type' => 'cohort']);
+        $source3id = $DB->get_field('enrol_programs_sources', 'id', ['programid' => $program3->id, 'type' => 'cohort']);
+
+        $expected = [
+            $cohort1->id => $cohort1->name,
+            $cohort2->id => $cohort2->name,
+        ];
+        $menu = cohort::fetch_allocation_cohorts_menu($source1id);
+        $this->assertSame($expected, $menu);
+
+        $expected = [
+            $cohort1->id => $cohort1->name
+        ];
+        $menu = cohort::fetch_allocation_cohorts_menu($source2id);
+        $this->assertSame($expected, $menu);
+
+        $menu = cohort::fetch_allocation_cohorts_menu($source3id);
+        $this->assertSame([], $menu);
+    }
+
     public function test_allocations() {
         global $DB;
 
@@ -65,7 +140,7 @@ final class local_source_cohort_test extends \advanced_testcase {
         $cohort1 = $this->getDataGenerator()->create_cohort();
         $cohort2 = $this->getDataGenerator()->create_cohort();
 
-        $program1 = $generator->create_program(['sources' => ['manual' => [], 'cohort' => []]]);
+        $program1 = $generator->create_program(['sources' => ['manual' => [], 'cohort' => ['auxint1' => 1]]]);
         $source1m = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
         $source1c = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'cohort'], '*', MUST_EXIST);
 
@@ -239,7 +314,7 @@ final class local_source_cohort_test extends \advanced_testcase {
         $cohort2 = $this->getDataGenerator()->create_cohort();
         $cohort3 = $this->getDataGenerator()->create_cohort();
 
-        $program1 = $generator->create_program(['sources' => ['manual' => [], 'cohort' => []], 'cohorts' => [$cohort1->id, $cohort2->id]]);
+        $program1 = $generator->create_program(['sources' => ['manual' => [], 'cohort' => ['auxint1' => 1]], 'cohorts' => [$cohort1->id, $cohort2->id]]);
         $source1m = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
         $source1c = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'cohort'], '*', MUST_EXIST);
 
@@ -331,7 +406,7 @@ final class local_source_cohort_test extends \advanced_testcase {
         $cohort1 = $this->getDataGenerator()->create_cohort();
         $cohort2 = $this->getDataGenerator()->create_cohort();
 
-        $program1 = $generator->create_program(['sources' => ['cohort' => []], 'cohorts' => [$cohort1->id]]);
+        $program1 = $generator->create_program(['sources' => ['cohort' => ['auxint1' => 1]], 'cohorts' => [$cohort1->id]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'cohort'], '*', MUST_EXIST);
 
         $program2 = $generator->create_program(['sources' => ['cohort' => []]]);

@@ -112,3 +112,40 @@ Feature: Visible cohorts program allocation tests
     When I click on "Delete program allocation" "link" in the "Student 4" "table_row"
     And I press dialog form button "Delete program allocation"
     Then I should not see "Student 4"
+
+  @javascript
+  Scenario: Manager may enable automatic cohort allocation separate from visible cohorts
+    Given I log in as "manager1"
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Visibility settings"
+    And I press "Edit"
+    And I set the following fields to these values:
+      | Visible to cohorts | Cohort 1, Cohort 2 |
+    And I press dialog form button "Update program"
+    And I follow "Allocation settings"
+    And I click on "Update Automatic cohort allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I set the following fields to these values:
+      | Automatically allocate to visible cohorts | No |
+    And I set the following fields to these values:
+      | Allocate to cohorts | Cohort 1 |
+    And I press dialog form button "Update"
+    And I follow "Users"
+    And I should not see "Student 4"
+    And I should see "Student 1"
+    And I should see "Student 2"
+    And I should see "Student 3"
+    And I am on all programs management page
+    And I follow "Program 000"
+    And I follow "Visibility settings"
+    And I press "Edit"
+    And I set the following fields to these values:
+      | Visible to cohorts |  Cohort 2 |
+    And I press dialog form button "Update program"
+    And I follow "Users"
+    And I should not see "Student 4"
+    And I should see "Student 1"
+    And I should see "Student 2"
+    And I should see "Student 3"

@@ -359,12 +359,18 @@ abstract class base {
         if ($data->enable) {
             if ($source) {
                 $source->datajson = $sourceclass::encode_datajson($data);
+                $source->auxint1 = $data->auxint1 ?? null;
+                $source->auxint2 = $data->auxint2 ?? null;
+                $source->auxint3 = $data->auxint3 ?? null;
                 $DB->update_record('enrol_programs_sources', $source);
             } else {
                 $source = new \stdClass();
                 $source->programid = $data->programid;
                 $source->type = $sourcetype;
                 $source->datajson = $sourceclass::encode_datajson($data);
+                $source->auxint1 = $data->auxint1 ?? null;
+                $source->auxint2 = $data->auxint2 ?? null;
+                $source->auxint3 = $data->auxint3 ?? null;
                 $source->id = $DB->insert_record('enrol_programs_sources', $source);
             }
             $source = $DB->get_record('enrol_programs_sources', ['id' => $source->id], '*', MUST_EXIST);

@@ -66,6 +66,51 @@ final class cohort extends base {
     }
 
     /**
+     * Callback method for source updates.
+     *
+     * @param stdClass|null $oldsource
+     * @param stdClass $data
+     * @param stdClass|null $source
+     * @return void
+     */
+    public static function after_update(?stdClass $oldsource, stdClass $data, ?stdClass $source): void {
+        global $DB;
+        $oldcohorts = cohort::fetch_allocation_cohorts_menu($source->id);
+        $sourceid = $DB->get_field('enrol_programs_sources', 'id', ['programid' => $data->programid, 'type' => 'cohort']);
+        $data->cohorts = $data->cohorts ?? [];
+        foreach ($data->cohorts as $cid) {
+            if (isset($oldcohorts[$cid])) {
+                unset($oldcohorts[$cid]);
+                continue;
+            }
+            $record = (object)['sourceid' => $sourceid, 'cohortid' => $cid];
+            $DB->insert_record('enrol_programs_src_cohorts', $record);
+        }
+        foreach ($oldcohorts as $cid => $unused) {
+            $DB->delete_records('enrol_programs_src_cohorts', ['sourceid' => $sourceid, 'cohortid' => $cid]);
+        }
+    }
+
+    /**
+     * Fetch cohorts that allow program allocation automatically.
+     *
+     * @param int $programid
+     * @return array
+     */
+    public static function fetch_allocation_cohorts_menu(int $sourceid): array {
+        global $DB;
+
+        $sql = "SELECT c.id, c.name
+                  FROM {cohort} c
+                  JOIN {enrol_programs_src_cohorts} pc ON c.id = pc.cohortid                                    
+                 WHERE pc.sourceid = :sourceid
+              ORDER BY c.name ASC, c.id ASC";
+        $params = ['sourceid' => $sourceid];
+
+        return $DB->get_records_sql_menu($sql, $params);
+    }
+
+    /**
      * Make sure users are allocated properly.
      *
      * This is expected to be called from cron and when
@@ -103,6 +148,45 @@ final class cohort extends base {
              LEFT JOIN {enrol_programs_allocations} pa ON pa.programid = p.id AND pa.userid = cm.userid
                  WHERE (pa.id IS NULL OR (pa.archived = 1 AND pa.sourceid = s.id))
                        AND p.archived = 0
+                       AND s.auxint1 = 1
+                       AND (p.timeallocationstart IS NULL OR p.timeallocationstart <= :now1)
+                       AND (p.timeallocationend IS NULL OR p.timeallocationend > :now2)
+                       $programselect $userselect
+              ORDER BY p.id ASC, s.id ASC";
+        $rs = $DB->get_recordset_sql($sql, $params);
+        $lastprogram = null;
+        $lastsource = null;
+        foreach ($rs as $record) {
+            if ($record->allocationid) {
+                $DB->set_field('enrol_programs_allocations', 'archived', 0, ['id' => $record->allocationid]);
+            } else {
+                if ($lastprogram && $lastprogram->id == $record->id) {
+                    $program = $lastprogram;
+                } else {
+                    $program = $DB->get_record('enrol_programs_programs', ['id' => $record->id], '*', MUST_EXIST);
+                    $lastprogram = $program;
+                }
+                if ($lastsource && $lastsource->id == $record->sourceid) {
+                    $source = $lastsource;
+                } else {
+                    $source = $DB->get_record('enrol_programs_sources', ['id' => $record->sourceid], '*', MUST_EXIST);
+                    $lastsource = $source;
+                }
+                self::allocate_user($program, $source, $record->userid, []);
+                $updated = true;
+            }
+        }
+        $rs->close();
+
+        $sql = "SELECT DISTINCT p.id, cm.userid, s.id AS sourceid, pa.id AS allocationid
+                  FROM {cohort_members} cm
+                  JOIN {enrol_programs_src_cohorts} psc ON psc.cohortid = cm.cohortid
+                  JOIN {enrol_programs_sources} s ON s.id = psc.sourceid
+                  JOIN {enrol_programs_programs} p ON p.id = s.programid
+             LEFT JOIN {enrol_programs_allocations} pa ON pa.programid = p.id AND pa.userid = cm.userid
+                 WHERE (pa.id IS NULL OR (pa.archived = 1 AND pa.sourceid = s.id))
+                       AND p.archived = 0
+                       AND s.auxint1 = 0
                        AND (p.timeallocationstart IS NULL OR p.timeallocationstart <= :now1)
                        AND (p.timeallocationend IS NULL OR p.timeallocationend > :now2)
                        $programselect $userselect
@@ -156,7 +240,13 @@ final class cohort extends base {
                             SELECT 1
                               FROM {cohort_members} cm
                               JOIN {enrol_programs_cohorts} pc ON pc.cohortid = cm.cohortid
-                             WHERE cm.userid = pa.userid AND pc.programid = p.id
+                             WHERE cm.userid = pa.userid AND pc.programid = p.id AND s.auxint1 = 1
+                       )
+                       AND NOT EXISTS (
+                            SELECT 1
+                              FROM {cohort_members} cm
+                              JOIN {enrol_programs_src_cohorts} psc ON psc.cohortid = cm.cohortid
+                             WHERE cm.userid = pa.userid AND psc.sourceid = s.id AND s.auxint1 = 0
                        )
                        AND (p.timeallocationstart IS NULL OR p.timeallocationstart <= :now1)
                        AND (p.timeallocationend IS NULL OR p.timeallocationend > :now2)
