@@ -129,6 +129,16 @@ $capabilities = [
         'archetypes' => [
         ],
     ],
+
+    /* To copy over content and allocation settings to other programs */
+    'enrol/programs:clone' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_COURSECAT,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 ];
 
 // Compatibility hacks for vanilla Moodle.

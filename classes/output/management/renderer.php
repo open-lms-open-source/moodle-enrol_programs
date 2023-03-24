@@ -384,6 +384,13 @@ class renderer extends \plugin_renderer_base {
             }
         }
 
+        if ($canedit) {
+            $importurl = new moodle_url('/enrol/programs/management/program_import.php', ['targetprogram' => $programid]);
+            $importaction = new \local_openlms\output\dialog_form\button($importurl, get_string('importprogramcontent',
+                'enrol_programs'));
+            $result .= $dialogformoutput->render($importaction);
+        }
+
         $result .= \html_writer::table($table);
 
         return $result;

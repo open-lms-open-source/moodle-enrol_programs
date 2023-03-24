@@ -16,6 +16,10 @@
 
 namespace enrol_programs\local;
 
+use enrol_programs\local\content\course;
+use enrol_programs\local\content\item;
+use enrol_programs\local\content\set;
+use enrol_programs\local\content\top;
 use moodle_url, stdClass;
 
 /**
@@ -264,5 +268,33 @@ final class management {
         $PAGE->navbar->add(format_string($program->fullname));
 
         $PAGE->set_docs_path("$CFG->wwwroot/enrol/programs/documentation.php/management.md");
+    }
+
+    /**
+     * Copy over content from one program to the other
+     *
+     * @param stdClass $fromprogram
+     * @param stdClass $toprogram
+     * @return void
+     */
+    public static function copy_program_content(stdClass $fromprogram, stdClass $toprogram) {
+        $topprogram1 = top::load($fromprogram->id);
+        $topprogram2 = top::load($toprogram->id);
+        if (empty($topprogram2->get_children())) {
+            $topprogram2->update_set($topprogram2, $topprogram2->get_fullname(), $topprogram1->get_sequencetype(), $topprogram1->get_minprerequisites());
+        }
+        $copyover_item = function ($item, $newparent, $programtop) use (&$copyover_item) {
+            if ($item instanceof course) {
+                $programtop->append_course($newparent, $item->get_courseid());
+            } else if ($item instanceof set) {
+                $newset = $programtop->append_set($newparent, $item->get_fullname(), $item->get_sequencetype(), $item->get_minprerequisites());
+                foreach ($item->get_children() as $child) {
+                    $copyover_item($child, $newset, $programtop);
+                }
+            }
+        };
+        foreach ($topprogram1->get_children() as $item) {
+            $copyover_item($item, $topprogram2, $topprogram2);
+        }
     }
 }

@@ -33,6 +33,13 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'enrol_programs_form_import_program_content' => [
+        'classname' => enrol_programs\external\form_import_program_content::class,
+        'description' => 'Return list of programs that can be used as source.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
     'enrol_programs_get_programs' => [
         'classname' => enrol_programs\external\get_programs::class,
         'description' => 'Return list of programs that match the search parameters.',

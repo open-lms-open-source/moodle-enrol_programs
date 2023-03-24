@@ -16,6 +16,9 @@
 
 namespace enrol_programs;
 
+use enrol_programs\local\content\course;
+use enrol_programs\local\content\set;
+use enrol_programs\local\content\top;
 use enrol_programs\local\management;
 use enrol_programs\local\program;
 
@@ -312,5 +315,99 @@ final class local_management_test extends \advanced_testcase {
             $syscontext,
             $program1
         );
+    }
+
+    public function test_copycontent() {
+        global $DB;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['fullname' => 'hokus']);
+        $program2 = $generator->create_program(['fullname' => 'pokus']);
+
+        $course1 = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+        $course3 = $this->getDataGenerator()->create_course();
+        $course4 = $this->getDataGenerator()->create_course();
+        $course5 = $this->getDataGenerator()->create_course();
+
+        $top = top::load($program1->id);
+        $top->append_course($top, $course1->id);
+        /** @var course $courseitem1 */
+        $courseitem1 = $top->get_children()[0];
+        $top->append_set($top, 'Nice set', set::SEQUENCE_TYPE_ALLINORDER);
+        /** @var set $setitem1 */
+        $setitem1 = $top->get_children()[1];
+        $top->append_set($setitem1, 'Other set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        /** @var set $setitem2 */
+        $setitem2 = $setitem1->get_children()[0];
+        $top->append_set($setitem2, 'Third set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        /** @var set $setitem3 */
+        $setitem3 = $setitem2->get_children()[0];
+        $top->append_course($setitem1, $course2->id);
+        /** @var course $courseitem2 */
+        $courseitem2 = $setitem1->get_children()[1];
+        $top->append_course($setitem1, $course3->id);
+        /** @var course $courseitem3 */
+        $courseitem3 = $setitem1->get_children()[2];
+        $top->append_course($setitem2, $course4->id);
+        /** @var course $courseitem4 */
+        $courseitem4 = $setitem2->get_children()[1];
+        $top->append_course($setitem3, $course5->id);
+        /** @var course $courseitem5 */
+        $courseitem5 = $setitem3->get_children()[0];
+
+        management::copy_program_content($program1, $program2);
+
+        $topprogram1 = top::load($program1->id);
+        $topprogram2 = top::load($program2->id);
+        $childrenfromprogram1 = $topprogram1->get_children();
+        $childrenfromprogram2 = $topprogram2->get_children();
+
+        $this->assertSame($childrenfromprogram1[0]->get_fullname(), $childrenfromprogram2[0]->get_fullname());
+
+        $this->assertSame($childrenfromprogram1[0]->is_course(), $childrenfromprogram2[0]->is_course());
+
+        $firstsetchildren = $childrenfromprogram1[1]->get_children();
+        $secondsetchildren = $childrenfromprogram2[1]->get_children();
+
+        $this->assertSame($firstsetchildren[0]->get_fullname(), $secondsetchildren[0]->get_fullname());
+        $this->assertSame($firstsetchildren[0]->is_course(), $secondsetchildren[0]->is_course());
+        $this->assertSame($firstsetchildren[1]->get_fullname(), $secondsetchildren[1]->get_fullname());
+        $this->assertSame($firstsetchildren[1]->is_course(), $secondsetchildren[1]->is_course());
+        $this->assertSame($firstsetchildren[2]->get_fullname(), $secondsetchildren[2]->get_fullname());
+        $this->assertSame($firstsetchildren[2]->is_course(), $secondsetchildren[2]->is_course());
+
+        $firstnestedsetchildren = $firstsetchildren[0]->get_children();
+        $secondnestedsetchildren = $secondsetchildren[0]->get_children();
+
+        $this->assertSame($firstnestedsetchildren[0]->get_fullname(), $secondnestedsetchildren[0]->get_fullname());
+        $this->assertSame($firstnestedsetchildren[0]->is_course(), $secondnestedsetchildren[0]->is_course());
+        $this->assertSame($firstnestedsetchildren[1]->get_fullname(), $secondnestedsetchildren[1]->get_fullname());
+        $this->assertSame($firstnestedsetchildren[1]->is_course(), $secondnestedsetchildren[1]->is_course());
+
+        $assertObjectsHaveSameStructure = function($expectedarray, $actualarray) use (&$assertObjectsHaveSameStructure) {
+            // Check that both arrays have the same number of elements
+            $this->assertCount(count($expectedarray), $actualarray);
+
+            // Recursively check the structure of each object in the array
+            foreach ($expectedarray as $index => $expectedobject) {
+                $actualobject = $actualarray[$index];
+
+                // Check that both objects have the same class
+                $this->assertInstanceOf(get_class($expectedobject), $actualobject);
+
+                // If the object is a set, recursively check the structure of its children
+                if ($expectedobject instanceof set) {
+                    $assertObjectsHaveSameStructure($expectedobject->get_children(), $actualobject->get_children());
+                } else {
+                    $this->assertEquals($expectedobject->get_fullname(), $actualobject->get_fullname());
+                }
+            }
+        };
+
+        $assertObjectsHaveSameStructure($childrenfromprogram1, $childrenfromprogram2);
+
     }
 }
