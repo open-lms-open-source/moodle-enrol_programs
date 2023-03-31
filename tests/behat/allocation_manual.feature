@@ -257,14 +257,14 @@ Feature: Manual program allocation tests
     And I set the following fields to these values:
       | Program start              | At a fixed date |
       | programstart_date[year]    | 2022 |
-      | programstart_date[month]   | 11   |
       | programstart_date[day]     | 5    |
+      | programstart_date[month]   | 11   |
       | programstart_date[hour]    | 09   |
       | programstart_date[minute]  | 00   |
       | Program due                | At a fixed date |
       | programdue_date[year]      | 2023 |
-      | programdue_date[month]     | 1    |
       | programdue_date[day]       | 22   |
+      | programdue_date[month]     | 1    |
       | programdue_date[hour]      | 09   |
       | programdue_date[minute]    | 00   |
       | Program end                | At a fixed date |
