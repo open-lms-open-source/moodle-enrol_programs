@@ -15,23 +15,17 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Program enrolment plugin upgrade steps.
+ * Programs hook callbacks.
  *
- * @package    enrol_programs
- * @copyright  2022 Open LMS (https://www.openlms.net/)
+ * @package    enrol_progrmas
+ * @copyright  2023 Open LMS
  * @author     Petr Skoda
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-/** @var stdClass $plugin */
-
-$plugin->version   = 2023033000;
-$plugin->requires  = 2022112802.00; // 4.1.2 (Build: 20230313)
-$plugin->component = 'enrol_programs';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'v2.0';
-$plugin->supported = [401, 401];
-
-$plugin->dependencies = ['local_openlms' => 2023033000];
+$callbacks = [
+    [
+        'hook' => \local_olms_work\hook\core_navigation_primary::class,
+        'callback' => '\\enrol_programs\callback\core_navigation::core_navigation_primary',
+    ],
+];

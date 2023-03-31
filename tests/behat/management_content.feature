@@ -202,7 +202,7 @@ Feature: Program content management tests
 
     When I am on all programs management page
     And I follow "Program 000"
-    And I click on "Content" "link" in the ".nav-tabs" "css_element"
+    And I click on "Content" "link" in the "#region-main .nav-tabs" "css_element"
     And I click on "Append item" "link" in the "Program 000" "table_row"
     And I set the following fields to these values:
       | Courses | Course 1 |

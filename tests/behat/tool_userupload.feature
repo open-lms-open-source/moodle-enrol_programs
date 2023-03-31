@@ -82,7 +82,7 @@ Feature: Program allocation via tool_userupload
 
     And I am on all programs management page
     And I follow "Program 001"
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
     And I should see "Student 1"
     And I should not see "Student 2"
     And I should not see "Student 3"
@@ -90,7 +90,7 @@ Feature: Program allocation via tool_userupload
 
     And I am on all programs management page
     And I follow "Program 002"
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
     And I should not see "Student 1"
     And I should see "Student 2"
 
@@ -111,7 +111,7 @@ Feature: Program allocation via tool_userupload
     And I set the following fields to these values:
       | Active | Yes |
     And I press dialog form button "Update"
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
     And I press "Allocate users"
     And I set the following fields to these values:
       | Users | Student 2 |
@@ -132,13 +132,13 @@ Feature: Program allocation via tool_userupload
 
     When I am on all programs management page
     And I follow "Program 001"
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
     And I follow "Student 1"
     Then I should see "20 October 2023, 12:00" in the "Completion date:" definition list item
 
     When I am on all programs management page
     And I follow "Program 002"
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
     And I follow "Student 2"
     Then I should see "21 November 2023, 12:00" in the "Completion date:" definition list item
 
@@ -160,7 +160,7 @@ Feature: Program allocation via tool_userupload
       | Active | Yes |
     And I press dialog form button "Update"
     And I should see "Active" in the "Manual allocation:" definition list item
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
     When I press "Allocate users"
     And I set the following fields to these values:
       | Users | Student 4 |
@@ -175,7 +175,7 @@ Feature: Program allocation via tool_userupload
     Then I should see "Allocated to 'Program 001'" in the "student1" "table_row"
     And I am on all programs management page
     And I follow "Program 001"
-    And I click on "Users" "link"
+    And I click on "Users" "link" in the "#region-main" "css_element"
     And I should see "Student 1"
     And I follow "Update allocation"
     And I should see "Program start date" in the "[data-groupname='timestart']" "css_element"

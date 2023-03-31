@@ -129,8 +129,7 @@ Feature: Manual program allocation tests
       | Active | Yes |
     And I press dialog form button "Update"
     And I should see "Active" in the "Manual allocation:" definition list item
-    And I follow "Users"
-
+    And I click on "Users" "link" in the "#region-main" "css_element"
     When I press "Allocate users"
     And I set the following fields to these values:
       | Users | Student 1 |
@@ -145,7 +144,7 @@ Feature: Manual program allocation tests
       | Active | Yes |
     And I press dialog form button "Update"
     And I should see "Active" in the "Manual allocation:" definition list item
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
 
     When I press "Allocate users"
     And I set the following fields to these values:
@@ -160,7 +159,7 @@ Feature: Manual program allocation tests
 
     And I am on all programs management page
     And I follow "Program 000"
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
 
     When I press "Allocate users"
     And I set the following fields to these values:
@@ -170,7 +169,7 @@ Feature: Manual program allocation tests
 
     And I am on all programs management page
     And I follow "Program 001"
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
 
     When I press "Allocate users"
     And I set the following fields to these values:
@@ -189,7 +188,7 @@ Feature: Manual program allocation tests
       | Active | Yes |
     And I press dialog form button "Update"
     And I should see "Active" in the "Manual allocation:" definition list item
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
 
     When I press "Upload allocations"
     And I upload "enrol/programs/tests/fixtures/upload1.csv" file to "CSV file" filemanager
@@ -279,7 +278,7 @@ Feature: Manual program allocation tests
       | Active | Yes |
     And I press dialog form button "Update"
     And I should see "Active" in the "Manual allocation:" definition list item
-    And I follow "Users"
+    And I click on "Users" "link" in the "#region-main" "css_element"
 
     When I press "Upload allocations"
     And I upload "enrol/programs/tests/fixtures/upload4.csv" file to "CSV file" filemanager

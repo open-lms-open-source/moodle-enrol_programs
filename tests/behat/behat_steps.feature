@@ -69,7 +69,7 @@ Feature: Programs navigation behat steps test
   Scenario: Admin navigates to programs the normal way
     Given I log in as "admin"
 
-    When I navigate to "Site administration > Programs > Program management" in site administration
+    When I navigate to "Programs > Program management" in site administration
     Then I should see "Program management"
     And I should see "Program 000"
     And I should see "Program 001"
@@ -125,7 +125,7 @@ Feature: Programs navigation behat steps test
   Scenario: Full manager navigates to programs the normal way
     Given I log in as "admin"
 
-    When I navigate to "Site administration > Programs > Program management" in site administration
+    When I navigate to "Programs > Program management" in site administration
     Then I should see "Program management"
     And I should see "Program 000"
     And I should see "Program 001"
@@ -171,7 +171,7 @@ Feature: Programs navigation behat steps test
   Scenario: Category manager navigates to programs the normal way
     Given I log in as "manager2"
 
-    When I select "Program catalogue" from flat navigation drawer
+    When I select "Program catalogue" from primary navigation
     And I follow "Program management"
     Then I should see "Program management"
     And I should not see "Program 000"
@@ -207,7 +207,7 @@ Feature: Programs navigation behat steps test
   Scenario: Full viewer navigates to programs the normal way
     Given I log in as "viewer1"
 
-    When I select "Program catalogue" from flat navigation drawer
+    When I select "Program catalogue" from primary navigation
     And I follow "Program management"
     Then I should see "Program management"
     And I should see "Program 000"
@@ -251,7 +251,7 @@ Feature: Programs navigation behat steps test
   Scenario: Category viewer navigates to programs the normal way
     Given I log in as "manager2"
 
-    When I select "Program catalogue" from flat navigation drawer
+    When I select "Program catalogue" from primary navigation
     And I follow "Program management"
     Then I should see "Program management"
     And I should not see "Program 000"
@@ -273,7 +273,7 @@ Feature: Programs navigation behat steps test
   Scenario: Student navigates to Program catalogue the normal way
     Given I log in as "student1"
 
-    When I select "Program catalogue" from flat navigation drawer
+    When I select "Program catalogue" from primary navigation
     Then I should see "Program catalogue"
     And I should see "Program 001"
     And I should not see "Program 000"
@@ -291,6 +291,6 @@ Feature: Programs navigation behat steps test
   Scenario: Student navigates to My programs the normal way
     Given I log in as "student1"
 
-    When I select "My programs" from flat navigation drawer
+    When I select "My programs" from primary navigation
     Then I should see "My programs"
     And I should see "You are not allocated to any programs."
