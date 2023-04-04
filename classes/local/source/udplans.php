@@ -52,6 +52,16 @@ final class udplans extends base {
     }
 
     /**
+     * Allow to be imported
+     *
+     * @param stdClass $program
+     * @return bool
+     */
+    public static function is_import_allowed(\stdClass $program): bool {
+        return false;
+    }
+
+    /**
      * Can existing source of this type be updated or deleted from program?
      *
      * @param stdClass $program

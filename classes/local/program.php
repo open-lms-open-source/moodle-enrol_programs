@@ -176,6 +176,117 @@ final class program {
     }
 
     /**
+     * Import program date setting
+     *
+     * @param int $fromprogramid
+     * @param int $toprogramid
+     * @param stdClass $formdata
+     */
+    public static function import_program_dates(int $fromprogramid, int $toprogramid, stdClass $formdata) {
+        global $DB;
+
+        $fromprogram = $DB->get_record('enrol_programs_programs', ['id' => $fromprogramid]);
+        $toprogram = $DB->get_record('enrol_programs_programs', ['id' => $toprogramid]);
+
+        // Step 1 : Copy the allocation setting from program 1 to program 2 - this is the time start time end.
+        $flag = false;
+        $data = new \stdClass();
+        $data->id = $toprogram->id;
+        if (!empty($formdata->importallocationstart)) {
+            $flag = true;
+            $data->timeallocationstart = $fromprogram->timeallocationstart;
+        } else {
+            $data->timeallocationstart = $toprogram->timeallocationstart;
+        }
+        if (!empty($formdata->importallocationend)) {
+            $flag = true;
+            $data->timeallocationend = $fromprogram->timeallocationend;
+        } else {
+            $data->timeallocationend = $toprogram->timeallocationend;
+        }
+        if ($flag) {
+            self::update_program_allocation($data);
+        }
+
+
+        // Step 2 : Copy the allocation scheduling setting from program 1 to program 2 - this is the time start time end.
+        $flag = false;
+        $data = new \stdClass();
+        $data->id = $toprogram->id;
+
+        if (!empty($formdata->importprogramstart)) {
+            $startdateobj = json_decode($fromprogram->startdatejson);
+        } else {
+            $startdateobj = json_decode($toprogram->startdatejson);
+        }
+        $data->programstart_type =  $startdateobj->type;
+
+        if (!empty($formdata->importprogramdue)) {
+            $prgdueobj = json_decode($fromprogram->duedatejson);
+        } else {
+            $prgdueobj = json_decode($toprogram->duedatejson);
+        }
+        $data->programdue_type =  $prgdueobj->type;
+
+        if (!empty($formdata->importprogramend)) {
+            $enddateobj = json_decode($fromprogram->importprogramend);
+        } else {
+            $enddateobj = !empty($toprogram->importprogramend) ? json_decode($toprogram->importprogramend) : null;
+        }
+        if ($enddateobj) {
+            $data->programend_type =  $enddateobj->type;
+        } else {
+            $data->programend_type = 'notset';
+        }
+
+
+        if (isset($startdateobj->date)) {
+            $data->programstart_date = $startdateobj->date;
+        }
+        if (isset($prgdueobj->date)) {
+            $data->programdue_date = $prgdueobj->date;
+        }
+        if (isset($enddateobj->date)) {
+            $data->programend_date = $enddateobj->date;
+        }
+        if (isset($startdateobj->delay)) {
+            $data->programstart_delay = self::convert_program_allocation_delay_from_database($startdateobj->delay);
+        }
+        if (isset($prgdueobj->delay)) {
+            $data->programdue_delay = self::convert_program_allocation_delay_from_database($prgdueobj->delay);
+        }
+        if (isset($enddateobj->delay)) {
+            $data->programend_delay = self::convert_program_allocation_delay_from_database($enddateobj->delay);
+        }
+
+        self::update_program_scheduling($data);
+
+    }
+
+    /**
+     * Convert program delay from database.
+     *
+     * @param string $value
+     * @return array
+     */
+    protected static function convert_program_allocation_delay_from_database(string $value): array {
+        $duration = new \DateInterval($value);
+        $type = '';
+        $val = '';
+        if ($duration->d > 0) {
+            $type = 'days';
+            $val = $duration->d;
+        } elseif ($duration->m > 0) {
+            $type = 'months';
+            $val = $duration->m;
+        } elseif ($duration->h > 0) {
+            $type = 'hours';
+            $val = $duration->h;
+        }
+        return ['type' => $type, 'value' => $val];
+    }
+
+    /**
      * Update general program settings.
      *
      * @param stdClass $data

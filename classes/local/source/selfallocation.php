@@ -51,6 +51,16 @@ final class selfallocation extends base {
     }
 
     /**
+     * Allow to be imported
+     *
+     * @param stdClass $program
+     * @return bool
+     */
+    public static function is_import_allowed(\stdClass $program): bool {
+        return true;
+    }
+
+    /**
      * Is it possible to manually delete user allocation?
      *
      * @param stdClass $program

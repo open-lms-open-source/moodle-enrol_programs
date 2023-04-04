@@ -40,6 +40,13 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'enrol_programs_form_program_allocation_import_fromprogram' => [
+        'classname' => enrol_programs\external\form_program_allocation_import_fromprogram::class,
+        'description' => 'Return list of programs that can be used as source for importing program allocation.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
     'enrol_programs_get_programs' => [
         'classname' => enrol_programs\external\get_programs::class,
         'description' => 'Return list of programs that match the search parameters.',

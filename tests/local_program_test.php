@@ -440,4 +440,35 @@ final class local_program_test extends \advanced_testcase {
         $program2 = $DB->get_record('enrol_programs_programs', ['id' => $program2->id], '*', MUST_EXIST);
         $this->assertSame((string)$syscontext->id, $program2->contextid);
     }
+
+    public function test_import_program_dates() {
+        global $DB;
+
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $starttime = time();
+        $endtime = time() + YEARSECS;
+
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+        $cohort2 = $this->getDataGenerator()->create_cohort();
+        $cohort3 = $this->getDataGenerator()->create_cohort();
+
+        $program1 = $generator->create_program(['fullname' => 'hokus', 'timeallocationstart' => $starttime,
+            'timeallocationend' => $endtime, 'sources' => ['manual' => [], 'cohort' => ['auxint1' => 0, 'cohorts' => [$cohort1->id, $cohort2->id]]]]);
+
+        $program2 = $generator->create_program(['fullname' => 'pokus']);
+        $program2rec = $DB->get_record('enrol_programs_programs', ['id' => $program2->id]);
+
+        program::import_program_dates($program1->id, $program2->id, (object) ['importallocationstart' => 1]);
+        $program2rec = $DB->get_record('enrol_programs_programs', ['id' => $program2->id]);
+        $this->assertEquals($program1->timeallocationstart, $program2rec->timeallocationstart);
+        $this->assertNotEquals($program1->timeallocationend, $program2rec->timeallocationend);
+
+
+        program::import_program_dates($program1->id, $program2->id, (object) ['importallocationstart' => 1, 'importallocationend' => 1]);
+        $program2rec = $DB->get_record('enrol_programs_programs', ['id' => $program2->id]);
+        $this->assertEquals($program1->timeallocationstart, $program2rec->timeallocationstart);
+        $this->assertEquals($program1->timeallocationend, $program2rec->timeallocationend);
+    }
+    
 }

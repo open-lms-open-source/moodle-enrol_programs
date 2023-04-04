@@ -81,7 +81,15 @@ $string['event_user_deallocated'] = 'User deallocated from program';
 $string['evidence'] = 'Other evidence';
 $string['evidence_details'] = 'Details';
 $string['fixeddate'] = 'At a fixed date';
+$string['importallocationend'] = 'Import program allocation end setting';
+$string['importallocationsources'] = 'Import program allocation sources, check the sources you want to import';
+$string['importallocationstart'] = 'Import program allocation start setting';
+$string['importprogramallocation'] = 'Import program allocation';
+$string['importprogramallocationconfirmation'] = 'Importing program allocation settings from program {$a} please check and confirm all the settings you want to import';
 $string['importprogramcontent'] = 'Import program content';
+$string['importprogramdue'] = 'Import program due';
+$string['importprogramend'] = 'Import program end';
+$string['importprogramstart'] = 'Import program start';
 $string['invalidallocationdates'] = 'Invalid program allocation dates';
 $string['invalidcompletiondate'] = 'Invalid program completion date';
 $string['item'] = 'Item';
@@ -262,6 +270,7 @@ $string['public'] = 'Public';
 $string['public_help'] = 'Public programs are visible to all users.
 
 Visibility status does not affect already allocated programs.';
+$string['selectprogram'] = 'Select program';
 $string['sequencetype'] = 'Completion type';
 $string['sequencetype_allinorder'] = 'All in order';
 $string['sequencetype_allinanyorder'] = 'All in any order';

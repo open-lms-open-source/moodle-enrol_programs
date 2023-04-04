@@ -278,4 +278,5 @@ final class management {
 
         $PAGE->set_docs_path("$CFG->wwwroot/enrol/programs/documentation.php/management.md");
     }
+
 }

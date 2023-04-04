@@ -402,6 +402,16 @@ final class approval extends base {
     }
 
     /**
+     * Allow to be imported
+     *
+     * @param stdClass $program
+     * @return bool
+     */
+    public static function is_import_allowed(\stdClass $program): bool {
+        return true;
+    }
+
+    /**
      * Render details about this enabled source in a program management ui.
      *
      * @param stdClass $program

@@ -17,6 +17,7 @@
 namespace enrol_programs;
 
 use enrol_programs\local\allocation;
+use enrol_programs\local\management;
 use enrol_programs\local\program;
 
 /**

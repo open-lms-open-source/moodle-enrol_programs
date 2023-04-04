@@ -65,6 +65,17 @@ abstract class base {
     }
 
     /**
+     * Can this source be imported to other program?
+     *
+     * @param stdClass $program
+     * @return bool
+     */
+    public static function is_import_allowed(\stdClass $program): bool {
+        $type = static::get_type();
+        return (bool)get_config('enrol_programs', 'source_' . $type . '_allowimport');
+    }
+
+    /**
      * Can existing source of this type be updated or deleted to programs?
      *
      * NOTE: Existing enabled sources in programs cannot be deleted/hidden
@@ -281,6 +292,30 @@ abstract class base {
             throw new \coding_exception('source edit class not found, either override get_edit_form_class or add class: ' . $class);
         }
         return $class;
+    }
+
+    /**
+     * Import source data from one program to another.
+     *
+     * @param int $fromprogramid
+     * @param int $toprogramid
+     * @param string $sourcename
+     */
+    public static function import_source_data(int $fromprogramid, int $toprogramid, string $sourcename) {
+        global $DB;
+        $fromsource = $DB->get_record('enrol_programs_sources', ['programid' => $fromprogramid, 'type' => $sourcename], '*',MUST_EXIST);
+
+        $tosource = $DB->get_record('enrol_programs_sources', ['programid' => $toprogramid, 'type' => $sourcename]);
+
+        if ($tosource) {
+            $fromsource->id = $tosource->id;
+            $fromsource->programid = $toprogramid;
+            $DB->update_record('enrol_programs_sources', $fromsource);
+        } else {
+            unset($fromsource->id);
+            $fromsource->programid = $toprogramid;
+            $DB->insert_record('enrol_programs_sources', $fromsource);
+        }
     }
 
     /**
