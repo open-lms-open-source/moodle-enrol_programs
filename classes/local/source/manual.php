@@ -364,17 +364,21 @@ final class manual extends base {
     public static function tool_uploaduser_process(stdClass $user, string $column, \uu_progress_tracker $upt): void {
         global $DB;
 
-        if (!preg_match('/^program\d+$/', $column)) {
+        if (!preg_match('/^program(?:id)?\d+$/', $column)) {
             return;
         }
-        // Offset is 7 to get the number after the word program.
-        $number = substr($column, 7);
+        // Extract the program number from the column name.
+        $number = strpos($column, 'id') !== false ? substr($column, 9) : substr($column, 7);
+        if (empty($user->{$column})) {
+            return;
+        }
+        $isidcolumn = strpos($column, 'id') !== false;
         if (empty($user->{$column})) {
             return;
         }
 
         $programid = $user->{$column};
-        if (is_number($programid)) {
+        if (is_number($programid) && $isidcolumn) {
             $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
         } else {
             $program = $DB->get_record('enrol_programs_programs', ['idnumber' => $programid]);

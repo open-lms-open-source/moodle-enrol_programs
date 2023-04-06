@@ -515,10 +515,10 @@ final class local_source_manual_test extends \advanced_testcase {
         /** @var \enrol_programs_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
 
-        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program1 = $generator->create_program(['idnumber' => 123, 'sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
 
-        $program2 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program2 = $generator->create_program(['idnumber' => 342, 'sources' => ['manual' => []]]);
         $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
         $now = time();
         $data = (object)[
@@ -588,13 +588,13 @@ final class local_source_manual_test extends \advanced_testcase {
 
         $data = (object)[
             'id' => $user1->id,
-            'program9' => $program1->id,
+            'programid9' => $program1->id,
             'pstartdate9' => '10/29/2022',
             'penddate9' => '2022-12-29',
             'pduedate9' => '21.11.2022',
         ];
         $this->setCurrentTimeStart();
-        manual::tool_uploaduser_process($data, 'program9', $upt->reset());
+        manual::tool_uploaduser_process($data, 'programid9', $upt->reset());
         $this->assertSame([
             'enrolments' => ['info' => ['Allocated to \'Program 1\'']],
         ], $upt->result);
@@ -607,7 +607,7 @@ final class local_source_manual_test extends \advanced_testcase {
 
         $data = (object)[
             'id' => $user1->id,
-            'program2' => $program2->id,
+            'program2' => $program2->idnumber,
             'pstartdate2' => '10/29/2022',
             'penddate2' => '',
             'pduedate2' => '',
@@ -626,10 +626,10 @@ final class local_source_manual_test extends \advanced_testcase {
 
         $data = (object)[
             'id' => $user1->id,
-            'program1' => '999',
+            'programid1' => '999',
         ];
         $this->setCurrentTimeStart();
-        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        manual::tool_uploaduser_process($data, 'programid1', $upt->reset());
         $this->assertSame([
             'enrolments' => ['error' => ['Cannot allocate to \'999\'']],
         ], $upt->result);
@@ -638,10 +638,10 @@ final class local_source_manual_test extends \advanced_testcase {
 
         $data = (object)[
             'id' => $user1->id,
-            'program1' => $program3->id,
+            'programid1' => $program3->id,
         ];
         $this->setCurrentTimeStart();
-        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        manual::tool_uploaduser_process($data, 'programid1', $upt->reset());
         $this->assertSame([
             'enrolments' => ['error' => ['Cannot allocate to \'Program 3\'']],
         ], $upt->result);
@@ -650,13 +650,13 @@ final class local_source_manual_test extends \advanced_testcase {
 
         $data = (object)[
             'id' => $user1->id,
-            'program1' => $program1->id,
+            'programid1' => $program1->id,
             'pstartdate1' => 'xx',
             'penddate1' => '',
             'pduedate1' => '',
         ];
         $this->setCurrentTimeStart();
-        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        manual::tool_uploaduser_process($data, 'programid1', $upt->reset());
         $this->assertSame([
             'enrolments' => ['error' => ['Invalid program allocation dates']],
         ], $upt->result);
@@ -665,13 +665,13 @@ final class local_source_manual_test extends \advanced_testcase {
 
         $data = (object)[
             'id' => $user1->id,
-            'program1' => $program1->id,
+            'programid1' => $program1->id,
             'pstartdate1' => '10/29/2022',
             'penddate1' => '2022-09-29',
             'pduedate1' => '21.11.2022',
         ];
         $this->setCurrentTimeStart();
-        manual::tool_uploaduser_process($data, 'program1', $upt->reset());
+        manual::tool_uploaduser_process($data, 'programid1', $upt->reset());
         $this->assertSame([
             'enrolments' => ['error' => ['Invalid program allocation dates']],
         ], $upt->result);
@@ -691,12 +691,12 @@ final class local_source_manual_test extends \advanced_testcase {
 
         $data = (object)[
             'id' => $user1->id,
-            'program2' => $program2->id,
+            'programid2' => $program2->id,
             'pstartdate2' => '10/29/2035',
             'penddate2' => '',
             'pduedate2' => '',
         ];
-        manual::tool_uploaduser_process($data, 'program2', $upt->reset());
+        manual::tool_uploaduser_process($data, 'programid2', $upt->reset());
         $this->assertSame([
             'enrolments' => ['error' => ['Invalid program allocation dates']],
         ], $upt->result);
