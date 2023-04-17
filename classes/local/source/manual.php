@@ -378,7 +378,7 @@ final class manual extends base {
         }
 
         $programid = $user->{$column};
-        if (is_number($programid) && $isidcolumn) {
+        if ($isidcolumn) {
             $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
         } else {
             $program = $DB->get_record('enrol_programs_programs', ['idnumber' => $programid]);
