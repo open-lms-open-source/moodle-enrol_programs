@@ -716,4 +716,72 @@ final class local_source_manual_test extends \advanced_testcase {
         $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]);
         $this->assertFalse($allocation);
     }
+
+
+    public function test_tool_uploaduser_programid_col_process() {
+        global $CFG, $DB;
+        require_once("$CFG->dirroot/admin/tool/uploaduser/locallib.php");
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['idnumber' => 123, 'sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program2 = $generator->create_program(['idnumber' => 'PR2', 'sources' => ['manual' => []]]);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $now = time();
+        $user1 = $this->getDataGenerator()->create_user(['username' => 'user1', 'email' => 'user1@example.com', 'idnumber' => 'u1']);
+        $user2 = $this->getDataGenerator()->create_user(['username' => 'user2', 'email' => 'user2@example.com', 'idnumber' => 'u2']);
+        $manager = $this->getDataGenerator()->create_user();
+
+        $syscontext = \context_system::instance();
+        $managerroleid = $this->getDataGenerator()->create_role();
+        assign_capability('enrol/programs:allocate', CAP_ALLOW, $managerroleid, $syscontext);
+        role_assign($managerroleid, $manager->id, $syscontext->id);
+        $this->setUser($manager);
+
+        $upt = new class extends \uu_progress_tracker {
+            public $result;
+            public function reset() {
+                $this->result = [];
+                return $this;
+            }
+            public function track($col, $msg, $level = 'normal', $merge = true) {
+                if (!in_array($col, $this->columns)) {
+                    throw new \Exception('Incorrect column:'.$col);
+                }
+                if (!$merge) {
+                    $this->result[$col][$level] = [];
+                }
+                $this->result[$col][$level][] = $msg;
+            }
+        };
+
+        $data = (object)[
+            'id' => $user1->id,
+            'programid2' => $program2->idnumber,
+            'pstartdate2' => '10/29/2022',
+            'penddate2' => '',
+            'pduedate2' => '',
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'programid2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['error' => ['Cannot allocate to \'PR2\'']],
+        ], $upt->result);
+
+        $data = (object)[
+            'id' => $user1->id,
+            'programid2' => $program2->id,
+            'pstartdate2' => '10/29/2022',
+            'penddate2' => '',
+            'pduedate2' => '',
+        ];
+        $this->setCurrentTimeStart();
+        manual::tool_uploaduser_process($data, 'programid2', $upt->reset());
+        $this->assertSame([
+            'enrolments' => ['info' => ['Allocated to \'Program 2\'']],
+        ], $upt->result);
+    }
 }
