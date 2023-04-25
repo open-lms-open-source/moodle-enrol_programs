@@ -33,4 +33,32 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'enrol_programs_allocate_user' => [
+        'classname' => 'enrol_programs\external\allocate_user',
+        'description' => 'Allocates user to the program',
+        'type' => 'write',
+        'ajax' => false,
+        'loginrequired' => true,
+    ],
+    'enrol_programs_get_program_status' => [
+        'classname' => '\enrol_programs\external\get_program_status',
+        'description' => 'Gets program status for user and program',
+        'type' => 'read',
+        'ajax' => false,
+        'loginrequired' => true,
+    ],
+    'enrol_programs_get_allocation_source' => [
+        'classname' => '\enrol_programs\external\get_allocation_source',
+        'description' => 'Gets allocation source for user and program',
+        'type' => 'read',
+        'ajax' => false,
+        'loginrequired' => true,
+    ],
+    'enrol_programs_create_cohort_allocation' => [
+        'classname' => '\enrol_programs\external\create_cohort_allocation',
+        'description' => 'Create new cohort allocation for existing cohort',
+        'type' => 'write',
+        'ajax' => false,
+        'loginrequired' => true,
+    ],
 ];
