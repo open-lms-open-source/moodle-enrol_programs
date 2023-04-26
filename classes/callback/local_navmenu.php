@@ -14,18 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace enrol_programs\callback;
+
 /**
- * Programs hook callbacks.
+ * Callbacks from local_navmenu related code.
  *
- * @package    enrol_progrmas
+ * @package    enrol_programs
  * @copyright  2023 Open LMS
  * @author     Petr Skoda
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-$callbacks = [
-    [
-        'hook' => \local_navmenu\hook\item_classes::class,
-        'callback' => '\\enrol_programs\callback\local_navmenu::item_classes',
-    ],
-];
+class local_navmenu {
+    /**
+     * Callback method for discovering of primary navigation item classes.
+     */
+    public static function item_classes(\local_navmenu\hook\item_classes $hook): void {
+        $hook->add_class(\enrol_programs\local\navmenu\enrol_programs_catalogue::class);
+        $hook->add_class(\enrol_programs\local\navmenu\enrol_programs_myprograms::class);
+    }
+}

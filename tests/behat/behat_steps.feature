@@ -3,6 +3,10 @@ Feature: Programs navigation behat steps test
 
   Background:
     Given unnecessary Admin bookmarks block gets deleted
+    And the following "local_navmenu > items" exist:
+      | itemtype                  |
+      | enrol_programs_catalogue  |
+      | enrol_programs_myprograms |
     And the following "categories" exist:
       | name  | category | idnumber |
       | Cat 1 | 0        | CAT1     |
