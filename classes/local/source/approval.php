@@ -304,7 +304,7 @@ final class approval extends base {
         $trans->allow_commit();
 
         \enrol_programs\local\allocation::fix_user_enrolments($program->id, $user->id);
-        \enrol_programs\local\notification::trigger_notifications($program->id, $user->id);
+        \enrol_programs\local\notification_manager::trigger_notifications($program->id, $user->id);
 
         return $allocation;
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/programs/db" VERSION="20230316" COMMENT="XMLDB file for Open LMS enrol/programs"
+<XMLDB PATH="enrol/programs/db" VERSION="20230429" COMMENT="XMLDB file for Open LMS enrol/programs"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -21,14 +21,6 @@
         <FIELD NAME="startdatejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Calculation rules for user start date in program allocation"/>
         <FIELD NAME="duedatejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Calculation rules for user due date in program allocation"/>
         <FIELD NAME="enddatejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Calculation rules for user end date in program allocation"/>
-        <FIELD NAME="notifystart" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when program started"/>
-        <FIELD NAME="notifycompleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when program was completed"/>
-        <FIELD NAME="notifyduesoon" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users before their due date, unless already completed"/>
-        <FIELD NAME="notifydue" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users before their due date passed, unless already completed"/>
-        <FIELD NAME="notifyendsoon" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users before their end date, unless already completed"/>
-        <FIELD NAME="notifyendcompleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users at the end of program which they completed"/>
-        <FIELD NAME="notifyendfailed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users at the end of program which they failed"/>
-        <FIELD NAME="notifydeallocation" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when they are deallocated from program"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -111,7 +103,6 @@
         <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="Type of allocation - manual, self, cohort, certification, etc."/>
         <FIELD NAME="datajson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General source allocation settings"/>
-        <FIELD NAME="notifyallocation" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Notify users when they are allocated to program via this source"/>
         <FIELD NAME="auxint1" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="auxint2" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="auxint3" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
@@ -170,15 +161,6 @@
         <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Expected completion date"/>
         <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Date when program closes for this user (progress is fronzen after this date and enrolments are suspended)"/>
         <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User program completion date, NULL means program not completed"/>
-        <FIELD NAME="timenotifiedallocation" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about allocation via this source"/>
-        <FIELD NAME="timenotifiedstart" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about program that just started"/>
-        <FIELD NAME="timenotifiedcompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about their completion"/>
-        <FIELD NAME="timenotifiedduesoon" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about incoming due date if they did not complete yet"/>
-        <FIELD NAME="timenotifieddue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified that due date passed, but they did not complete yet"/>
-        <FIELD NAME="timenotifiedendsoon" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about program ending soon if they did not complete yet"/>
-        <FIELD NAME="timenotifiedendcompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about end of program that they completed"/>
-        <FIELD NAME="timenotifiedendfailed" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about end of program that they failed"/>
-        <FIELD NAME="timenotifieddeallocation" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time when user was notified about allocation via this source"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

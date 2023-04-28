@@ -60,14 +60,6 @@ final class local_program_test extends \advanced_testcase {
         $this->assertSame('{"type":"allocation"}', $program->startdatejson);
         $this->assertSame('{"type":"notset"}', $program->duedatejson);
         $this->assertSame('{"type":"notset"}', $program->enddatejson);
-        $this->assertSame('0', $program->notifystart);
-        $this->assertSame('0', $program->notifycompleted);
-        $this->assertSame('0', $program->notifyduesoon);
-        $this->assertSame('0', $program->notifydue);
-        $this->assertSame('0', $program->notifyendsoon);
-        $this->assertSame('0', $program->notifyendcompleted);
-        $this->assertSame('0', $program->notifyendfailed);
-        $this->assertSame('0', $program->notifydeallocation);
         $this->assertTimeCurrent($program->timecreated);
 
         $category = $this->getDataGenerator()->create_category([]);
@@ -84,14 +76,6 @@ final class local_program_test extends \advanced_testcase {
             'creategroups' => '1',
             'timeallocationstart' => (string)(time() - 60 * 60 * 24),
             'timeallocationend' => (string)(time() + 60 * 60 * 24),
-            'notifystart' => '1',
-            'notifycompleted' => '1',
-            'notifyduesoon' => '1',
-            'notifydue' => '1',
-            'notifyendsoon' => '1',
-            'notifyendcompleted' => '1',
-            'notifyendfailed' => '1',
-            'notifydeallocation' => '1',
         ];
 
         $this->setCurrentTimeStart();
@@ -111,14 +95,6 @@ final class local_program_test extends \advanced_testcase {
         $this->assertSame('{"type":"allocation"}', $program->startdatejson);
         $this->assertSame('{"type":"notset"}', $program->duedatejson);
         $this->assertSame('{"type":"notset"}', $program->enddatejson);
-        $this->assertSame($data->notifystart, $program->notifystart);
-        $this->assertSame($data->notifycompleted, $program->notifycompleted);
-        $this->assertSame($data->notifyduesoon, $program->notifyduesoon);
-        $this->assertSame($data->notifydue, $program->notifydue);
-        $this->assertSame($data->notifyendsoon, $program->notifyendsoon);
-        $this->assertSame($data->notifyendcompleted, $program->notifyendcompleted);
-        $this->assertSame($data->notifyendfailed, $program->notifyendfailed);
-        $this->assertSame($data->notifydeallocation, $program->notifydeallocation);
         $this->assertTimeCurrent($program->timecreated);
     }
 
@@ -153,14 +129,6 @@ final class local_program_test extends \advanced_testcase {
             'creategroups' => '1',
             'timeallocationstart' => (string)(time() - 60 * 60 * 24),
             'timeallocationend' => (string)(time() + 60 * 60 * 24),
-            'notifystart' => '1',
-            'notifycompleted' => '1',
-            'notifyduesoon' => '1',
-            'notifydue' => '1',
-            'notifyendsoon' => '1',
-            'notifyendcompleted' => '1',
-            'notifyendfailed' => '1',
-            'notifydeallocation' => '1',
         ];
 
         $program = program::update_program_general($data);
@@ -179,14 +147,6 @@ final class local_program_test extends \advanced_testcase {
         $this->assertSame('{"type":"allocation"}', $program->startdatejson);
         $this->assertSame('{"type":"notset"}', $program->duedatejson);
         $this->assertSame('{"type":"notset"}', $program->enddatejson);
-        $this->assertSame('0', $program->notifystart);
-        $this->assertSame('0', $program->notifycompleted);
-        $this->assertSame('0', $program->notifyduesoon);
-        $this->assertSame('0', $program->notifydue);
-        $this->assertSame('0', $program->notifyendsoon);
-        $this->assertSame('0', $program->notifyendcompleted);
-        $this->assertSame('0', $program->notifyendfailed);
-        $this->assertSame('0', $program->notifydeallocation);
         $this->assertSame($oldprogram->timecreated, $program->timecreated);
 
         $cohorts = $DB->get_records_menu('enrol_programs_cohorts', ['programid' => $program->id], 'cohortid ASC', 'id, cohortid');
@@ -224,14 +184,6 @@ final class local_program_test extends \advanced_testcase {
             'creategroups' => '1',
             'timeallocationstart' => (string)(time() - 60 * 60 * 24),
             'timeallocationend' => (string)(time() + 60 * 60 * 24),
-            'notifystart' => '1',
-            'notifycompleted' => '1',
-            'notifyduesoon' => '1',
-            'notifydue' => '1',
-            'notifyendsoon' => '1',
-            'notifyendcompleted' => '1',
-            'notifyendfailed' => '1',
-            'notifydeallocation' => '1',
         ];
 
         $program = program::update_program_visibility($data);
@@ -250,89 +202,10 @@ final class local_program_test extends \advanced_testcase {
         $this->assertSame('{"type":"allocation"}', $program->startdatejson);
         $this->assertSame('{"type":"notset"}', $program->duedatejson);
         $this->assertSame('{"type":"notset"}', $program->enddatejson);
-        $this->assertSame('0', $program->notifystart);
-        $this->assertSame('0', $program->notifycompleted);
-        $this->assertSame('0', $program->notifyduesoon);
-        $this->assertSame('0', $program->notifydue);
-        $this->assertSame('0', $program->notifyendsoon);
-        $this->assertSame('0', $program->notifyendcompleted);
-        $this->assertSame('0', $program->notifyendfailed);
-        $this->assertSame('0', $program->notifydeallocation);
         $this->assertSame($oldprogram->timecreated, $program->timecreated);
 
         $cohorts = $DB->get_records_menu('enrol_programs_cohorts', ['programid' => $program->id], 'cohortid ASC', 'id, cohortid');
         $this->assertSame($data->cohorts, array_values($cohorts));
-    }
-
-    public function test_update_program_notifications() {
-        global $DB;
-
-        $syscontext = \context_system::instance();
-        $data = (object)[
-            'fullname' => 'Some program',
-            'idnumber' => 'SP1',
-            'contextid' => $syscontext->id,
-        ];
-
-        $this->setCurrentTimeStart();
-        $oldprogram = program::add_program($data);
-
-        $category = $this->getDataGenerator()->create_category([]);
-        $cohort1 = $this->getDataGenerator()->create_cohort();
-        $cohort2 = $this->getDataGenerator()->create_cohort();
-        $catcontext = \context_coursecat::instance($category->id);
-        $data = (object)[
-            'id' => $oldprogram->id,
-            'fullname' => 'Some other program',
-            'idnumber' => 'SP2',
-            'contextid' => $catcontext->id,
-            'description' => 'Some desc',
-            'descriptionformat' => '2',
-            'presentation' => ['some' => 'test'],
-            'public' => '1',
-            'cohorts' => [$cohort1->id, $cohort2->id],
-            'archived' => '1',
-            'creategroups' => '1',
-            'timeallocationstart' => (string)(time() - 60 * 60 * 24),
-            'timeallocationend' => (string)(time() + 60 * 60 * 24),
-            'notifystart' => '1',
-            'notifycompleted' => '1',
-            'notifyduesoon' => '1',
-            'notifydue' => '1',
-            'notifyendsoon' => '1',
-            'notifyendcompleted' => '1',
-            'notifyendfailed' => '1',
-            'notifydeallocation' => '1',
-        ];
-
-        $program = program::update_program_notifications($data);
-        $this->assertInstanceOf('stdClass', $program);
-        $this->assertSame($oldprogram->contextid, $program->contextid);
-        $this->assertSame($oldprogram->fullname, $program->fullname);
-        $this->assertSame($oldprogram->idnumber, $program->idnumber);
-        $this->assertSame($oldprogram->description, $program->description);
-        $this->assertSame($oldprogram->descriptionformat, $program->descriptionformat);
-        $this->assertSame('[]', $program->presentationjson);
-        $this->assertSame($oldprogram->public, $program->public);
-        $this->assertSame($oldprogram->archived, $program->archived);
-        $this->assertSame($oldprogram->creategroups, $program->creategroups);
-        $this->assertSame(null, $program->timeallocationstart);
-        $this->assertSame(null, $program->timeallocationend);
-        $this->assertSame('{"type":"allocation"}', $program->startdatejson);
-        $this->assertSame('{"type":"notset"}', $program->duedatejson);
-        $this->assertSame('{"type":"notset"}', $program->enddatejson);
-        $this->assertSame('1', $program->notifystart);
-        $this->assertSame('1', $program->notifycompleted);
-        $this->assertSame('1', $program->notifyduesoon);
-        $this->assertSame('1', $program->notifydue);
-        $this->assertSame('1', $program->notifyendsoon);
-        $this->assertSame('1', $program->notifyendcompleted);
-        $this->assertSame('1', $program->notifyendfailed);
-        $this->assertSame('1', $program->notifydeallocation);
-        $this->assertSame($oldprogram->timecreated, $program->timecreated);
-
-        $cohorts = $DB->get_records_menu('enrol_programs_cohorts', ['programid' => $program->id], 'cohortid ASC', 'id, cohortid');
-        $this->assertSame([], array_values($cohorts));
     }
 
     public function test_update_program_allocation() {
@@ -366,14 +239,6 @@ final class local_program_test extends \advanced_testcase {
             'creategroups' => '1',
             'timeallocationstart' => (string)(time() - 60 * 60 * 24),
             'timeallocationend' => (string)(time() + 60 * 60 * 24),
-            'notifystart' => '1',
-            'notifycompleted' => '1',
-            'notifyduesoon' => '1',
-            'notifydue' => '1',
-            'notifyendsoon' => '1',
-            'notifyendcompleted' => '1',
-            'notifyendfailed' => '1',
-            'notifydeallocation' => '1',
         ];
 
         $program = program::update_program_allocation($data);
@@ -392,14 +257,6 @@ final class local_program_test extends \advanced_testcase {
         $this->assertSame('{"type":"allocation"}', $program->startdatejson);
         $this->assertSame('{"type":"notset"}', $program->duedatejson);
         $this->assertSame('{"type":"notset"}', $program->enddatejson);
-        $this->assertSame('0', $program->notifystart);
-        $this->assertSame('0', $program->notifycompleted);
-        $this->assertSame('0', $program->notifyduesoon);
-        $this->assertSame('0', $program->notifydue);
-        $this->assertSame('0', $program->notifyendsoon);
-        $this->assertSame('0', $program->notifyendcompleted);
-        $this->assertSame('0', $program->notifyendfailed);
-        $this->assertSame('0', $program->notifydeallocation);
         $this->assertSame($oldprogram->timecreated, $program->timecreated);
 
         $cohorts = $DB->get_records_menu('enrol_programs_cohorts', ['programid' => $program->id], 'cohortid ASC', 'id, cohortid');

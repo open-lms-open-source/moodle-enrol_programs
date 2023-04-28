@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'プログラム割り当て�
 $string['privacy:metadata:field:timestart'] = '開始日';
 $string['privacy:metadata:field:timedue'] = '終了日時';
 $string['privacy:metadata:field:timeend'] = '終了日';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'プログラム割り当ての通知時刻';
-$string['privacy:metadata:field:timenotifiedstart'] = '開始日の通知時刻';
-$string['privacy:metadata:field:timenotifiedcompleted'] = '完了日の通知時刻';
-$string['privacy:metadata:field:timenotifiedduesoon'] = '期日接近の通知時刻';
-$string['privacy:metadata:field:timenotifieddue'] = '期日到達の通知時刻';
-$string['privacy:metadata:field:timenotifiedendsoon'] = '終了日接近の通知時刻';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'プログラム完了の通知時刻';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'プログラム失敗の通知時刻';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'プログラム割り当て解除の通知時刻';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'プログラム割り当て証明書の発行';
 $string['privacy:metadata:field:issueid'] = '発行ID';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'リクエストを承認する';
 $string['source_approval_requestreject'] = 'リクエストを拒否する';
 $string['source_approval_requestdelete'] = 'リクエストを削除する';
 $string['source_approval_rejectionreason'] = '拒否の理由';
-$string['source_base_notification_allocation_subject'] = 'プログラム割り当て通知';
-$string['source_base_notification_allocation_body'] = '{$a->user_fullname} さん、こんにちは
+$string['notification_allocation_subject'] = 'プログラム割り当て通知';
+$string['notification_allocation_body'] = '{$a->user_fullname} さん、こんにちは
 
 あなたはプログラム"{$a->program_fullname}"に割り当てられました。開始日は {$a->program_startdate} です。
 ';
-$string['source_base_notification_deallocation_subject'] = 'プログラム割り当て解除通知';
-$string['source_base_notification_deallocation_body'] = '{$a->user_fullname} さん、こんにちは
+$string['notification_deallocation_subject'] = 'プログラム割り当て解除通知';
+$string['notification_deallocation_body'] = '{$a->user_fullname} さん、こんにちは
 
 あなたはプログラム"{$a->program_fullname}"から割り当て解除されました。
 ';

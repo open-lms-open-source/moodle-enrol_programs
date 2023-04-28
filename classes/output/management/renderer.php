@@ -16,6 +16,7 @@
 
 namespace enrol_programs\output\management;
 
+use enrol_programs\local\notification_manager;
 use enrol_programs\local\allocation;
 use enrol_programs\local\management;
 use enrol_programs\local\program;
@@ -133,51 +134,6 @@ class renderer extends \plugin_renderer_base {
         return $result;
     }
 
-    public function render_program_notifications(stdClass $program): string {
-        global $DB;
-
-        $result = '';
-
-        $result .= '<dl class="row">';
-        $result .= '<dt class="col-3">' . get_string('notification_allocation', 'enrol_programs') . ':</dt><dd class="col-9">';
-
-        $sources = [];
-        /** @var \enrol_programs\local\source\base[] $sourceclasses */
-        $sourceclasses = \enrol_programs\local\allocation::get_source_classes();
-        foreach ($sourceclasses as $sourcetype => $sourceclass) {
-            $sourcerecord = $DB->get_record('enrol_programs_sources', ['type' => $sourcetype, 'programid' => $program->id]);
-            if (!$sourcerecord || !$sourcerecord->notifyallocation) {
-                continue;
-            }
-            $sources[] = $sourceclass::get_name();
-        }
-        if ($sources) {
-            $result .= implode(', ', $sources);
-        } else {
-            $result .= get_string('no');
-        }
-        $result .= '</dd>';
-
-        $result .= '<dt class="col-3">' . get_string('notification_start', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifystart ? get_string('yes') : get_string('no')) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_completion', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifycompleted ? get_string('yes') : get_string('no')) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_duesoon', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifyduesoon ? get_string('yes') : get_string('no')) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_due', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifydue ? get_string('yes') : get_string('no')) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_endsoon', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifyendsoon ? get_string('yes') : get_string('no')) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_endcompleted', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifyendcompleted ? get_string('yes') : get_string('no')) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_endfailed', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifyendfailed ? get_string('yes') : get_string('no')) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_deallocation', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($program->notifydeallocation ? get_string('yes') : get_string('no')) . '</dd>';
-
-        return $result;
-    }
-
     public function render_program_visibility(stdClass $program): string {
         $result = '';
 
@@ -211,7 +167,7 @@ class renderer extends \plugin_renderer_base {
         $tabs[] = new tabobject('allocation', $url, get_string('taballocation', 'enrol_programs'));
 
         $url = new moodle_url('/enrol/programs/management/program_notifications.php', ['id' => $program->id]);
-        $tabs[] = new tabobject('notifications', $url, get_string('notifications'));
+        $tabs[] = new tabobject('notifications', $url, get_string('notifications', 'local_openlms'));
 
         /** @var \enrol_programs\local\source\base[] $sourceclasses */ // Class name hack.
         $sourceclasses = allocation::get_source_classes();
@@ -564,23 +520,20 @@ class renderer extends \plugin_renderer_base {
         $result = $this->output->heading(get_string('notificationdates', 'enrol_programs'), 4);
 
         $result .= '<dl class="row">';
-        $result .= '<dt class="col-3">' . get_string('notification_allocation', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . ($allocation->timenotifiedallocation ? userdate($allocation->timenotifiedallocation) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_start', 'enrol_programs')
-            . ':</dt><dd class="col-9">' . ($allocation->timenotifiedstart ? userdate($allocation->timenotifiedstart) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_completion', 'enrol_programs')
-            . ':</dt><dd class="col-9">' . ($allocation->timenotifiedcompleted ? userdate($allocation->timenotifiedcompleted) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_duesoon', 'enrol_programs')
-            . ':</dt><dd class="col-9">' . ($allocation->timenotifiedduesoon ? userdate($allocation->timenotifiedduesoon) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_due', 'enrol_programs')
-            . ':</dt><dd class="col-9">' . ($allocation->timenotifieddue ? userdate($allocation->timenotifieddue) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_endsoon', 'enrol_programs')
-            . ':</dt><dd class="col-9">' . ($allocation->timenotifiedendsoon ? userdate($allocation->timenotifiedendsoon) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_endcompleted', 'enrol_programs')
-            . ':</dt><dd class="col-9">' . ($allocation->timenotifiedendcompleted ? userdate($allocation->timenotifiedendcompleted) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('notification_endfailed', 'enrol_programs')
-            . ':</dt><dd class="col-9">' . ($allocation->timenotifiedendfailed ? userdate($allocation->timenotifiedendfailed) : $strnotset) . '</dd>';
-        $result .= '</dl>';
+
+        $types = notification_manager::get_all_types();
+        /** @var class-string<\enrol_programs\local\notification\base> $classname */
+        foreach ($types as $notificationtype => $classname) {
+            if ($notificationtype === 'deallocation') {
+                continue;
+            }
+            $result .= '<dt class="col-3">';
+            $result .= $classname::get_name();
+            $result .= ':</dt><dd class="col-9">';
+            $timenotified = notification_manager::get_timenotified($allocation->userid, $program->id, $notificationtype);
+            $result .= ($timenotified ? userdate($timenotified) : $strnotset);
+            $result .= '</dd>';
+        }
 
         return $result;
     }

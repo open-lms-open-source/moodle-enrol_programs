@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Datum přidělení programu';
 $string['privacy:metadata:field:timestart'] = 'Počáteční datum';
 $string['privacy:metadata:field:timedue'] = 'Termín';
 $string['privacy:metadata:field:timeend'] = 'Koncové datum';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Čas oznámení přidělení programu';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Čas oznámení data zahájení';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Čas oznámení data dokončení';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Čas oznámení blížícího se termínu splnění';
-$string['privacy:metadata:field:timenotifieddue'] = 'Čas oznámení příchodu data termínu splnění';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Čas oznámení blížícího se datu ukončení';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Čas oznámení dokončení programu';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Čas oznámení neúspěšného programu';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Čas oznámení přidělení programu';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Problémy s osvědčením o přidělení programu';
 $string['privacy:metadata:field:issueid'] = 'ID problému';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Schválit požadavek';
 $string['source_approval_requestreject'] = 'Zamítnout požadavek';
 $string['source_approval_requestdelete'] = 'Odstranit požadavek';
 $string['source_approval_rejectionreason'] = 'Důvod zamítnutí';
-$string['source_base_notification_allocation_subject'] = 'Oznámení o přidělení programu';
-$string['source_base_notification_allocation_body'] = 'Dobrý den, {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Oznámení o přidělení programu';
+$string['notification_allocation_body'] = 'Dobrý den, {$a->user_fullname},
 
 byli jste přiděleni do programu „{$a->program_fullname}“, datum začátku je {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Oznámení o zrušení přidělení programu';
-$string['source_base_notification_deallocation_body'] = 'Dobrý den, {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Oznámení o zrušení přidělení programu';
+$string['notification_deallocation_body'] = 'Dobrý den, {$a->user_fullname},
 
 vaše přiřazeni do programu „{$a->program_fullname}“ bylo zrušeno.
 ';

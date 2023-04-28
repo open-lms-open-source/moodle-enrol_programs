@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Ohjelman kohdistuspäivä';
 $string['privacy:metadata:field:timestart'] = 'Alkamispäivä';
 $string['privacy:metadata:field:timedue'] = 'Määräpäivä';
 $string['privacy:metadata:field:timeend'] = 'Päättymispäivä';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Ohjelman kohdistuksen ilmoitusaika';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Aloituspäivän ilmoitusaika';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Suorituspäivän ilmoitusaika';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Lähestyvän määräpäivän ilmoitusaika';
-$string['privacy:metadata:field:timenotifieddue'] = 'Määräpäivän ilmoitusaika';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Lähestyvän päättymispäivän ilmoitusaika';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Suoritetun ohjelman ilmoitusaika';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Hylätyn ohjelman ilmoitusaika';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Ohjelman kohdistuksen poiston ilmoitusaika';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Ohjelman kohdistuksen todistusten myönnöt';
 $string['privacy:metadata:field:issueid'] = 'Myöntötunnus';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Hyväksy pyyntö';
 $string['source_approval_requestreject'] = 'Hylkää pyyntö';
 $string['source_approval_requestdelete'] = 'Poista pyyntö';
 $string['source_approval_rejectionreason'] = 'Hylkäyksen syy';
-$string['source_base_notification_allocation_subject'] = 'Ilmoitus ohjelman kohdistuksesta';
-$string['source_base_notification_allocation_body'] = 'Hei {$a->user_fullname}!
+$string['notification_allocation_subject'] = 'Ilmoitus ohjelman kohdistuksesta';
+$string['notification_allocation_body'] = 'Hei {$a->user_fullname}!
 
 Sinut on kohdistettu ohjelmaan "{$a->program_fullname}", alkamispäivä on {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Ilmoitus ohjelman kohdistuksen poistosta';
-$string['source_base_notification_deallocation_body'] = 'Hei {$a->user_fullname}!
+$string['notification_deallocation_subject'] = 'Ilmoitus ohjelman kohdistuksen poistosta';
+$string['notification_deallocation_body'] = 'Hei {$a->user_fullname}!
 
 Kohdistuksesi on poistettu ohjelmasta "{$a->program_fullname}".
 ';

@@ -231,7 +231,7 @@ abstract class base {
         $event = \enrol_programs\event\user_allocated::create_from_allocation($allocation, $program);
         $event->trigger();
 
-        static::notify_allocation($user, $program, $source, $allocation);
+        \enrol_programs\local\notification\allocation::notify_now($user, $program, $source, $allocation);
 
         return $allocation;
     }
@@ -411,59 +411,6 @@ abstract class base {
     }
 
     /**
-     * Send notifications related to allocation.
-     *
-     * @param stdClass $user
-     * @param stdClass $program
-     * @param stdClass $source
-     * @param stdClass $allocation
-     * @return void
-     */
-    public static function notify_allocation(stdClass $user, stdClass $program, stdClass $source, stdClass $allocation): void {
-        global $DB;
-
-        if ($program->archived || $allocation->archived) {
-            // Never send notifications for archived stuff.
-            return;
-        }
-
-        if (!$source->notifyallocation) {
-            return;
-        }
-
-        $stringprefix = 'source_' . static::get_type() . '_notification_allocation';
-        if (!get_string_manager()->string_exists($stringprefix . '_subject', 'enrol_programs')) {
-            $stringprefix = 'source_base_notification_allocation';
-        }
-
-        $oldforcelang = force_current_language($user->lang);
-
-        $a = \enrol_programs\local\notification::get_standard_placeholders($program, $source, $allocation, $user);
-        $subject = get_string($stringprefix . '_subject', 'enrol_programs', $a);
-        $body = get_string($stringprefix . '_body', 'enrol_programs', $a);
-
-        $message = new \core\message\message();
-        $message->notification = 1;
-        $message->component = 'enrol_programs';
-        $message->name = 'allocation_notification';
-        $message->userfrom = static::get_allocator($program, $source, $allocation);
-        $message->userto = $user;
-        $message->subject = $subject;
-        $message->fullmessage = $body;
-        $message->fullmessageformat = FORMAT_MARKDOWN;
-        $message->fullmessagehtml = markdown_to_html($body);
-        $message->smallmessage = $subject;
-        $message->contexturlname = $a->program_fullname;
-        $message->contexturl = $a->program_url;
-
-        if (message_send($message)) {
-            $DB->set_field('enrol_programs_allocations', 'timenotifiedallocation', time(), ['id' => $allocation->id]);
-        }
-
-        force_current_language($oldforcelang);
-    }
-
-    /**
      * Deallocate user from a program.
      *
      * @param stdClass $program
@@ -483,6 +430,11 @@ abstract class base {
 
         \enrol_programs\local\allocation::make_snapshot($allocation->id, 'deallocation');
 
+        if ($user) {
+            \enrol_programs\local\notification\deallocation::notify_now($user, $program, $source, $allocation);
+        }
+        \enrol_programs\local\notification_manager::delete_allocation_notifications($allocation);
+
         $items = $DB->get_records('enrol_programs_items', ['programid' => $allocation->programid]);
         foreach ($items as $item) {
             $DB->delete_records('enrol_programs_evidences', ['itemid' => $item->id, 'userid' => $allocation->userid]);
@@ -498,63 +450,6 @@ abstract class base {
 
         $event = \enrol_programs\event\user_deallocated::create_from_allocation($allocation, $program);
         $event->trigger();
-
-        if ($user && !$user->deleted) {
-            static::notify_deallocation($user, $program, $source, $allocation);
-        }
-    }
-
-    /**
-     * Notify users about deallocation.
-     *
-     * @param stdClass $user
-     * @param stdClass $program
-     * @param stdClass $source
-     * @param stdClass $allocation
-     * @return void
-     */
-    public static function notify_deallocation(stdClass $user, stdClass $program, stdClass $source, stdClass $allocation): void {
-        global $DB;
-
-        if ($program->archived || $allocation->archived) {
-            // Never send notifications for archived stuff.
-            return;
-        }
-
-        if (!$program->notifydeallocation) {
-            return;
-        }
-
-        $stringprefix = 'source_' . static::get_type() . '_notification_deallocation';
-        if (!get_string_manager()->string_exists($stringprefix . '_subject', 'enrol_programs')) {
-            $stringprefix = 'source_base_notification_deallocation';
-        }
-
-        $oldforcelang = force_current_language($user->lang);
-
-        $a = \enrol_programs\local\notification::get_standard_placeholders($program, $source, $allocation, $user);
-        $subject = get_string($stringprefix . '_subject', 'enrol_programs', $a);
-        $body = get_string($stringprefix . '_body', 'enrol_programs', $a);
-
-        $message = new \core\message\message();
-        $message->notification = 1;
-        $message->component = 'enrol_programs';
-        $message->name = 'deallocation_notification';
-        $message->userfrom = static::get_allocator($program, $source, $allocation);
-        $message->userto = $user;
-        $message->subject = $subject;
-        $message->fullmessage = $body;
-        $message->fullmessageformat = FORMAT_MARKDOWN;
-        $message->fullmessagehtml = markdown_to_html($body);
-        $message->smallmessage = $subject;
-        $message->contexturlname = $a->program_fullname;
-        $message->contexturl = $a->program_url;
-
-        if (message_send($message)) {
-            $DB->set_field('enrol_programs_allocations', 'timenotifieddeallocation', time(), ['id' => $allocation->id]);
-        }
-
-        force_current_language($oldforcelang);
     }
 }
 

@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Data di assegnazione programm
 $string['privacy:metadata:field:timestart'] = 'Data di inizio';
 $string['privacy:metadata:field:timedue'] = 'Data di scadenza';
 $string['privacy:metadata:field:timeend'] = 'Data di fine';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Ora di notifica assegnazione programma';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Ora di notifica data di inizio';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Ora di notifica data di completamento';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Ora di notifica dell\'avvicinarsi della data di scadenza';
-$string['privacy:metadata:field:timenotifieddue'] = 'Ora di notifica dell\'arrivo della data di scadenza';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Ora di notifica dell\'avvicinarsi della data di fine';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Ora di notifica completamento programma';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Ora di notifica mancato completamento programma';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Ora di notifica rimozione assegnazione programma';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Problemi con il certificato di assegnazione programma';
 $string['privacy:metadata:field:issueid'] = 'ID problema';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Approva richiesta';
 $string['source_approval_requestreject'] = 'Rifiuta richiesta';
 $string['source_approval_requestdelete'] = 'Elimina richiesta';
 $string['source_approval_rejectionreason'] = 'Motivo rifiuto';
-$string['source_base_notification_allocation_subject'] = 'Notifica di assegnazione programma';
-$string['source_base_notification_allocation_body'] = 'Salve {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Notifica di assegnazione programma';
+$string['notification_allocation_body'] = 'Salve {$a->user_fullname},
 
 sei stato/a assegnato/a al programma "{$a->program_fullname}", la data di inizio è {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Notifica di rimozione assegnazione programma';
-$string['source_base_notification_deallocation_body'] = 'Salve {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Notifica di rimozione assegnazione programma';
+$string['notification_deallocation_body'] = 'Salve {$a->user_fullname},
 
 la tua assegnazione al programma "{$a->program_fullname}" è stata rimossa.
 ';

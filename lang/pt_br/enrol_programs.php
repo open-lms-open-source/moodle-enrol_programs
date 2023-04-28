@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Data de alocação do program
 $string['privacy:metadata:field:timestart'] = 'Data de início';
 $string['privacy:metadata:field:timedue'] = 'Data de encerramento';
 $string['privacy:metadata:field:timeend'] = 'Data de encerramento';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Horário notificado da alocação do programa';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Horário notificado da data de início';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Horário notificado da data de conclusão';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Horário notificado da data de vencimento próxima';
-$string['privacy:metadata:field:timenotifieddue'] = 'Horário notificado da chegada da data de vencimento';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Horário notificado da data final próxima';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Horário notificado do programa concluído';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Horário notificado de falha no programa';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Horário notificado da desalocação do programa';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Problemas de certificado de alocação do programa';
 $string['privacy:metadata:field:issueid'] = 'ID do problema';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Aprovar solicitação';
 $string['source_approval_requestreject'] = 'Rejeitar solicitação';
 $string['source_approval_requestdelete'] = 'Excluir solicitação';
 $string['source_approval_rejectionreason'] = 'Motivo da rejeição';
-$string['source_base_notification_allocation_subject'] = 'Notificação de alocação de programa';
-$string['source_base_notification_allocation_body'] = 'Olá, {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Notificação de alocação de programa';
+$string['notification_allocation_body'] = 'Olá, {$a->user_fullname},
 
 Você foi alocado para o programa "{$a->program_fullname}", a data de início é {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Notificação de desalocação de programa';
-$string['source_base_notification_deallocation_body'] = 'Olá, {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Notificação de desalocação de programa';
+$string['notification_deallocation_body'] = 'Olá, {$a->user_fullname},
 
 você foi desalocado do programa "{$a->program_fullname}".
 ';

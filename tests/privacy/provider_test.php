@@ -23,6 +23,7 @@ use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\writer;
 use enrol_programs\privacy\provider;
 use enrol_programs\local\certificate;
+use stdClass;
 
 /**
  * Privacy provider tests for enrol_programs.
@@ -67,7 +68,7 @@ class provider_test extends \core_privacy\tests\provider_testcase {
         $this->user2 = $generator->create_user();
         $this->user3 = $generator->create_user();
 
-        /** @var \enrol_programs_generator $generator */
+        /** @var \enrol_programs_generator $programgenerator */
         $programgenerator = $generator->get_plugin_generator('enrol_programs');
 
         // Set up and allocate users to programs.
@@ -300,10 +301,10 @@ class provider_test extends \core_privacy\tests\provider_testcase {
         $approvedlist1 = new approved_userlist($program1context, $component, $userlist1->get_userids());
         // Delete using delete_data_for_user.
         provider::delete_data_for_users($approvedlist1);
-        // Re-fetch users in program1context.
+        // Re-fetch users in $program1context.
         $userlist1 = new \core_privacy\local\request\userlist($program1context, $component);
         provider::get_users_in_context($userlist1);
-        // The user data in program1context should be deleted.
+        // The user data in $program1context should be deleted.
         $this->assertCount(0, $userlist1);
         // Check for enrol_programs_usr_snapshots with user3.
         $snapshots = $DB->get_records('enrol_programs_usr_snapshots', ['userid' => $this->user3->id]);
@@ -312,10 +313,10 @@ class provider_test extends \core_privacy\tests\provider_testcase {
         $requests = $DB->get_records('enrol_programs_requests', ['userid' => $this->user3->id]);
         $this->assertCount(0, $requests);
 
-        // Re-fetch users in program2context.
+        // Re-fetch users in $program2context.
         $userlist2 = new \core_privacy\local\request\userlist($program2context, $component);
         provider::get_users_in_context($userlist2);
-        // The user data in program2context should be still present.
+        // The user data in $program2context should be still present.
         $this->assertCount(2, $userlist2);
         // Check for enrol_programs_usr_snapshots.
         $snapshots = $DB->get_records('enrol_programs_usr_snapshots', ['userid' => $this->user2->id]);
@@ -326,7 +327,7 @@ class provider_test extends \core_privacy\tests\provider_testcase {
         $approvedlist2 = new approved_userlist($program2context, $component, $userlist2->get_userids());
         // Delete using delete_data_for_user.
         provider::delete_data_for_users($approvedlist2);
-        // Re-fetch users in program1context.
+        // Re-fetch users in $program1context.
         $userlist2 = new \core_privacy\local\request\userlist($program2context, $component);
         provider::get_users_in_context($userlist2);
         // The user data in systemcontext should not be deleted.

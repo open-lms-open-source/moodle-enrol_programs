@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Data przydziału programu';
 $string['privacy:metadata:field:timestart'] = 'Data początkowa';
 $string['privacy:metadata:field:timedue'] = 'Data zakończenia';
 $string['privacy:metadata:field:timeend'] = 'Data końcowa';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Czas powiadomienia o przydziale programu';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Czas powiadomienia o dacie początkowej';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Czas powiadomienia o dacie ukończenia';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Czas powiadomienia o zbliżającej się dacie zakończenia';
-$string['privacy:metadata:field:timenotifieddue'] = 'Czas powiadomienia o nadejściu daty zakończenia';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Czas powiadomienia o zbliżającej się dacie końcowej';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Czas powiadomienia o ukończeniu programu';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Czas powiadomienia o nieukończeniu programu';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Czas powiadomienia o wypisaniu z programu';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Problemy z certyfikatem przydział programów';
 $string['privacy:metadata:field:issueid'] = 'Identyfikator problemu';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Zatwierdź żądanie';
 $string['source_approval_requestreject'] = 'Odrzuć żądanie';
 $string['source_approval_requestdelete'] = 'Usuń żądanie';
 $string['source_approval_rejectionreason'] = 'Przyczyna odrzucenia';
-$string['source_base_notification_allocation_subject'] = 'Powiadomienie o przydziale do programu';
-$string['source_base_notification_allocation_body'] = 'Witaj {$a->user_fullname}!
+$string['notification_allocation_subject'] = 'Powiadomienie o przydziale do programu';
+$string['notification_allocation_body'] = 'Witaj {$a->user_fullname}!
 
 Przydzielono Cię do programu „{$a->program_fullname}”. Data rozpoczęcia to {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Powiadomienie o wypisaniu z programu';
-$string['source_base_notification_deallocation_body'] = 'Witaj {$a->user_fullname}!
+$string['notification_deallocation_subject'] = 'Powiadomienie o wypisaniu z programu';
+$string['notification_deallocation_body'] = 'Witaj {$a->user_fullname}!
 
 Wypisano Cię z programu „{$a->program_fullname}”.
 ';

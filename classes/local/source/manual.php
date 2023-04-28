@@ -177,7 +177,7 @@ final class manual extends base {
             $userid = null;
         }
         \enrol_programs\local\allocation::fix_user_enrolments($programid, $userid);
-        \enrol_programs\local\notification::trigger_notifications($programid, $userid);
+        \enrol_programs\local\notification_manager::trigger_notifications($programid, $userid);
     }
 
     /**
@@ -317,7 +317,7 @@ final class manual extends base {
             }
             self::allocate_user($program, $source, $user->id, [], $dateoverrides);
             \enrol_programs\local\allocation::fix_user_enrolments($program->id, $user->id);
-            \enrol_programs\local\notification::trigger_notifications($program->id, $user->id);
+            \enrol_programs\local\notification_manager::trigger_notifications($program->id, $user->id);
             $userids[] = $user->id;
         }
 
@@ -429,7 +429,7 @@ final class manual extends base {
 
         self::allocate_user($program, $source, $user->id, [], $dateoverrides);
         \enrol_programs\local\allocation::fix_user_enrolments($program->id, $user->id);
-        \enrol_programs\local\notification::trigger_notifications($program->id, $user->id);
+        \enrol_programs\local\notification_manager::trigger_notifications($program->id, $user->id);
 
         $upt->track('enrolments', get_string('source_manual_userupload_allocated', 'enrol_programs', $programname), 'info');
     }

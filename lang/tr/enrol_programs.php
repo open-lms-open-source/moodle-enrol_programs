@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Program atama tarihi';
 $string['privacy:metadata:field:timestart'] = 'Başlangıç tarihi';
 $string['privacy:metadata:field:timedue'] = 'Son tarih';
 $string['privacy:metadata:field:timeend'] = 'Bitiş tarihi';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Program ataması bildirimi saati';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Başlangıç tarihi bildirimi saati';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Tamamlanma tarihi bildirimi saati';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Son tarih yakın bildirimi saati';
-$string['privacy:metadata:field:timenotifieddue'] = 'Son tarih geldi bildirimi saati';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Bitiş tarihi yakın bildirimi saati';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Program tamamlama bildirimi saati';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Program başarısız bildirimi saati';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Program ataması kaldırma bildirimi saati';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Program atama sertifikası sorunları';
 $string['privacy:metadata:field:issueid'] = 'Sorun kimliği';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'İsteği onayla';
 $string['source_approval_requestreject'] = 'İsteği reddet';
 $string['source_approval_requestdelete'] = 'İsteği sil';
 $string['source_approval_rejectionreason'] = 'Ret nedeni';
-$string['source_base_notification_allocation_subject'] = 'Program atama bildirimi';
-$string['source_base_notification_allocation_body'] = 'Merhaba {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Program atama bildirimi';
+$string['notification_allocation_body'] = 'Merhaba {$a->user_fullname},
 
 "{$a->program_fullname}" programına atandınız, başlangıç tarihi: {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Program ataması kaldırma bildirimi';
-$string['source_base_notification_deallocation_body'] = 'Merhaba {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Program ataması kaldırma bildirimi';
+$string['notification_deallocation_body'] = 'Merhaba {$a->user_fullname},
 
 "{$a->program_fullname}" programından atamanız kaldırıldı.
 ';

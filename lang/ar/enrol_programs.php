@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'تاريخ تخصيص الب�
 $string['privacy:metadata:field:timestart'] = 'تاريخ البدء';
 $string['privacy:metadata:field:timedue'] = 'تاريخ الاستحقاق';
 $string['privacy:metadata:field:timeend'] = 'تاريخ الانتهاء';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'وقت الإعلام بتخصيص البرنامج';
-$string['privacy:metadata:field:timenotifiedstart'] = 'وقت الإعلام بتاريخ البدء';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'وقت الإعلام بتاريخ الإكمال';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'وقت الإعلام بتاريخ الاستحقاق';
-$string['privacy:metadata:field:timenotifieddue'] = 'وقت الإعلام بحلول تاريخ الاستحقاق';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'وقت الإعلام باقتراب تاريخ الانتهاء';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'وقت الإعلام باكتمال البرنامج';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'وقت الإعلام بفشل البرنامج';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'وقت الإعلام بإلغاء تخصيص البرنامج';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'إصدارات شهادة تخصيص البرنامج';
 $string['privacy:metadata:field:issueid'] = 'معرف الإصدار';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'الموافقة على الطلب'
 $string['source_approval_requestreject'] = 'رفض الطلب';
 $string['source_approval_requestdelete'] = 'حذف الطلب';
 $string['source_approval_rejectionreason'] = 'سبب الرفض';
-$string['source_base_notification_allocation_subject'] = 'إعلام تخصيص البرنامج';
-$string['source_base_notification_allocation_body'] = 'أهلاً يا {‎$a->user_fullname}،
+$string['notification_allocation_subject'] = 'إعلام تخصيص البرنامج';
+$string['notification_allocation_body'] = 'أهلاً يا {‎$a->user_fullname}،
 
 لقد تم تخصيصك للبرنامج "{‎$a->program_fullname}"، وتاريخ البدء هو {‎$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'إعلام إلغاء تخصيص البرنامج';
-$string['source_base_notification_deallocation_body'] = 'أهلاً يا {‎$a->user_fullname}،
+$string['notification_deallocation_subject'] = 'إعلام إلغاء تخصيص البرنامج';
+$string['notification_deallocation_body'] = 'أهلاً يا {‎$a->user_fullname}،
 
 لقد تم إلغاء تخصيصك للبرنامج "{‎$a->program_fullname}".
 ';

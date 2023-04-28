@@ -128,15 +128,6 @@ final class program {
         $data->duedatejson = util::json_encode(['type' => 'notset']);
         $data->enddatejson = util::json_encode(['type' => 'notset']);
 
-        $data->notifystart = isset($data->notifystart) ? (int)(bool)$data->notifystart : 0;
-        $data->notifycompleted = isset($data->notifycompleted) ? (int)(bool)$data->notifycompleted : 0;
-        $data->notifyduesoon = isset($data->notifyduesoon) ? (int)(bool)$data->notifyduesoon : 0;
-        $data->notifydue = isset($data->notifydue) ? (int)(bool)$data->notifydue : 0;
-        $data->notifyendsoon = isset($data->notifyendsoon) ? (int)(bool)$data->notifyendsoon : 0;
-        $data->notifyendcompleted = isset($data->notifyendcompleted) ? (int)(bool)$data->notifyendcompleted : 0;
-        $data->notifyendfailed = isset($data->notifyendfailed) ? (int)(bool)$data->notifyendfailed : 0;
-        $data->notifydeallocation = isset($data->notifydeallocation) ? (int)(bool)$data->notifydeallocation : 0;
-
         $data->timecreated = time();
         $data->id = $DB->insert_record('enrol_programs_programs', $data);
 
@@ -389,63 +380,6 @@ final class program {
     }
 
     /**
-     * Update program notification settings.
-     *
-     * @param stdClass $data
-     * @param bool $triggernotify true means trigger all missed notifications
-     * @return stdClass
-     */
-    public static function update_program_notifications(stdClass $data, bool $triggernotify = true): stdClass {
-        global $DB;
-
-        if (empty($data->id)) {
-            throw new \coding_exception('Invalid data');
-        }
-        $oldprogram = $DB->get_record('enrol_programs_programs', ['id' => $data->id], '*', MUST_EXIST);
-
-        $trans = $DB->start_delegated_transaction();
-
-        $update = [];
-        foreach ((array)$data as $k => $v) {
-            if (strpos($k, 'allocation_') === 0) {
-                $type = substr($k, strlen('allocation_'));
-                $v = (int)(bool)$v;
-                $source = $DB->get_record('enrol_programs_sources', ['programid' => $data->id, 'type' => $type], '*', MUST_EXIST);
-                if ($v != $source->notifyallocation) {
-                    $DB->set_field('enrol_programs_sources', 'notifyallocation', $v, ['id' => $source->id]);
-                }
-                continue;
-            }
-            if (strpos($k, 'notify') === 0) {
-                $update[$k] = (int)(bool)$v;;
-            }
-        }
-
-        if ($update) {
-            $update['id'] = $oldprogram->id;
-            $DB->update_record('enrol_programs_programs', (object)$update);
-        }
-
-        $program = self::make_snapshot($oldprogram->id, 'update_notification');
-
-        $trans->allow_commit();
-
-        $event = \enrol_programs\event\program_updated::create_from_program($program);
-        $event->trigger();
-
-        if ($triggernotify) {
-            // Fix enrolments before triggering notifications.
-            allocation::fix_allocation_sources($program->id, null);
-            allocation::fix_enrol_instances($program->id);
-            allocation::fix_user_enrolments($program->id, null);
-
-            notification::trigger_notifications($program->id, null);
-        }
-
-        return $program;
-    }
-
-    /**
      * Update program allocation settings.
      *
      * @param stdClass $data
@@ -674,6 +608,9 @@ final class program {
         foreach ($pgs as $pg) {
             groups_delete_group($pg->groupid);
         }
+
+        // Delete notifications configuration and data.
+        notification_manager::delete_program_notifications($program);
 
         $items = $DB->get_records('enrol_programs_items', ['programid' => $program->id]);
         foreach ($items as $item) {

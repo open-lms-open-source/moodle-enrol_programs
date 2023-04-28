@@ -30,7 +30,6 @@
 /** @var stdClass $COURSE */
 
 use enrol_programs\local\management;
-use enrol_programs\local\program;
 
 require('../../../config.php');
 require_once($CFG->dirroot . '/lib/formslib.php');
@@ -57,19 +56,6 @@ echo $OUTPUT->heading(format_string($program->fullname));
 
 echo $managementoutput->render_management_program_tabs($program, 'notifications');
 
-$buttons = [];
-if (has_capability('enrol/programs:edit', $context)) {
-    $editurl = new moodle_url('/enrol/programs/management/program_notifications_edit.php', ['id' => $program->id]);
-    $editbutton = new local_openlms\output\dialog_form\button($editurl, get_string('edit'));
-    $editbutton->set_dialog_name(get_string('notifications'));
-    $buttons[] = $dialogformoutput->render($editbutton);
-}
-
-echo $managementoutput->render_program_notifications($program);
-
-if ($buttons) {
-    $buttons = implode(' ', $buttons);
-    echo $OUTPUT->box($buttons, 'buttons');
-}
+echo \enrol_programs\local\notification_manager::render_notifications($program->id);
 
 echo $OUTPUT->footer();

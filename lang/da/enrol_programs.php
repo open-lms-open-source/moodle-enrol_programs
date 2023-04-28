@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Dato for programallokering';
 $string['privacy:metadata:field:timestart'] = 'Startdato';
 $string['privacy:metadata:field:timedue'] = 'Frist';
 $string['privacy:metadata:field:timeend'] = 'Slutdato';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Notifikationstidspunkt for programallokering';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Notifikationstidspunkt for startdato';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Notifikationstidspunkt for færdiggørelsesdato';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Notifikationstidspunkt for kort tid til fristdato';
-$string['privacy:metadata:field:timenotifieddue'] = 'Notifikationstidspunkt for fristdato ankommet';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Notifikationstidspunkt for kort tid til slutdato';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Notifikationstidspunkt for programfærdiggørelse';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Notifikationstidspunkt for program, der ikke er bestået';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Notifikationstidspunkt for programfjernelse';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Certifikatudstedelser for programallokeringer';
 $string['privacy:metadata:field:issueid'] = 'Udstedelses-id';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Godkend anmodning';
 $string['source_approval_requestreject'] = 'Afvis anmodning';
 $string['source_approval_requestdelete'] = 'Slet anmodning';
 $string['source_approval_rejectionreason'] = 'Afvisningsårsag';
-$string['source_base_notification_allocation_subject'] = 'Notifikation om programallokering';
-$string['source_base_notification_allocation_body'] = 'Hej {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Notifikation om programallokering';
+$string['notification_allocation_body'] = 'Hej {$a->user_fullname},
 
 du er allokeret til programmet "{$a->program_fullname}". Startdatoen er {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Notifikation om programfjernelse';
-$string['source_base_notification_deallocation_body'] = 'Hej {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Notifikation om programfjernelse';
+$string['notification_deallocation_body'] = 'Hej {$a->user_fullname},
 
 du er fjernet fra programmet "{$a->program_fullname}".
 ';

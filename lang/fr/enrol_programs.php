@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Date d\'attribution du progra
 $string['privacy:metadata:field:timestart'] = 'Date de début';
 $string['privacy:metadata:field:timedue'] = 'Date d\'échéance';
 $string['privacy:metadata:field:timeend'] = 'Date de fin';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Heure de notification de l\'attribution de programme';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Heure de notification de la date de début';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Heure de notification de la date de fin';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Heure de notification de l\'approche de la date d\'échéance';
-$string['privacy:metadata:field:timenotifieddue'] = 'Heure de notification de l\'arrivée de la date d\'échéance';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Heure de notification de l\'approche de la date de fin';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Heure de notification d\'achèvement du programme';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Heure de notification d\'échec du programme';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Heure de notification de suppression de l\'attribution de programme';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Problèmes de certificat d\'attribution de programme';
 $string['privacy:metadata:field:issueid'] = 'ID du problème';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Approuver la demande';
 $string['source_approval_requestreject'] = 'Rejeter la demande';
 $string['source_approval_requestdelete'] = 'Supprimer la demande';
 $string['source_approval_rejectionreason'] = 'Motif du rejet';
-$string['source_base_notification_allocation_subject'] = 'Notification d\'attribution du programme';
-$string['source_base_notification_allocation_body'] = 'Bonjour {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Notification d\'attribution du programme';
+$string['notification_allocation_body'] = 'Bonjour {$a->user_fullname},
 
 vous avez été affecté(e) au programme « {$a->program_fullname} ». La date de début est fixée au {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Notification de suppression d\'attribution du programme';
-$string['source_base_notification_deallocation_body'] = 'Bonjour {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Notification de suppression d\'attribution du programme';
+$string['notification_deallocation_body'] = 'Bonjour {$a->user_fullname},
 
 vous avez été retiré(e) du programme « {$a->program_fullname} ».
 ';

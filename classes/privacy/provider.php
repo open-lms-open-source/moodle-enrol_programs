@@ -62,15 +62,6 @@ class provider implements
                     'timedue' => 'privacy:metadata:field:timedue',
                     'timeend' => 'privacy:metadata:field:timeend',
                     'timecompleted' => 'privacy:metadata:field:timecompleted',
-                    'timenotifiedallocation' => 'privacy:metadata:field:timenotifiedallocation',
-                    'timenotifiedstart' => 'privacy:metadata:field:timenotifiedstart',
-                    'timenotifiedcompleted' => 'privacy:metadata:field:timenotifiedcompleted',
-                    'timenotifiedduesoon' => 'privacy:metadata:field:timenotifiedduesoon',
-                    'timenotifieddue' => 'privacy:metadata:field:timenotifieddue',
-                    'timenotifiedendsoon' => 'privacy:metadata:field:timenotifiedendsoon',
-                    'timenotifiedendcompleted' => 'privacy:metadata:field:timenotifiedendcompleted',
-                    'timenotifiedendfailed' => 'privacy:metadata:field:timenotifiedendfailed',
-                    'timenotifieddeallocation' => 'privacy:metadata:field:timenotifieddeallocation',
                     'timecreated' => 'privacy:metadata:field:timecreated',
                 ],
                 'privacy:metadata:table:enrol_programs_allocations'
@@ -209,9 +200,7 @@ class provider implements
 
         $sql = "SELECT p.contextid, p.fullname, pa.id, pa.programid, pa.userid,
                     pa.sourceid, pa.archived, pa.sourcedatajson, pa.timeallocated, pa.timestart, pa.timedue, pa.timeend,
-                    pa.timecompleted, pa.timenotifiedallocation, pa.timenotifiedstart, pa.timenotifiedcompleted,
-                    pa.timenotifiedduesoon, pa.timenotifieddue, pa.timenotifiedendsoon, pa.timenotifiedendcompleted,
-                    pa.timenotifiedendfailed, pa.timenotifieddeallocation, pa.timecreated,
+                    pa.timecompleted, pa.timecreated,
                     pci.timecompleted AS certificateissuetimecompleted, pci.issueid AS certificateissueid, pci.timecreated AS certificateissuetimecreated
                   FROM {enrol_programs_programs} p
                   JOIN {enrol_programs_allocations} pa ON pa.programid = p.id
@@ -234,15 +223,6 @@ class provider implements
             $allocation->timedue = \core_privacy\local\request\transform::datetime($allocation->timedue);
             $allocation->timeend = \core_privacy\local\request\transform::datetime($allocation->timeend);
             $allocation->timecompleted = \core_privacy\local\request\transform::datetime($allocation->timecompleted);
-            $allocation->timenotifiedallocation = \core_privacy\local\request\transform::datetime($allocation->timenotifiedallocation);
-            $allocation->timenotifiedstart = \core_privacy\local\request\transform::datetime($allocation->timenotifiedstart);
-            $allocation->timenotifiedcompleted = \core_privacy\local\request\transform::datetime($allocation->timenotifiedcompleted);
-            $allocation->timenotifiedduesoon = \core_privacy\local\request\transform::datetime($allocation->timenotifiedduesoon);
-            $allocation->timenotifieddue = \core_privacy\local\request\transform::datetime($allocation->timenotifieddue);
-            $allocation->timenotifiedendsoon = \core_privacy\local\request\transform::datetime($allocation->timenotifiedendsoon);
-            $allocation->timenotifiedendcompleted = \core_privacy\local\request\transform::datetime($allocation->timenotifiedendcompleted);
-            $allocation->timenotifiedendfailed = \core_privacy\local\request\transform::datetime($allocation->timenotifiedendfailed);
-            $allocation->timenotifieddeallocation = \core_privacy\local\request\transform::datetime($allocation->timenotifieddeallocation);
             $allocation->timecreated = \core_privacy\local\request\transform::datetime($allocation->timecreated);
             $allocation->certificateissuetimecompleted = \core_privacy\local\request\transform::datetime($allocation->certificateissuetimecompleted);
             $allocation->certificateissuetimecreated = \core_privacy\local\request\transform::datetime($allocation->certificateissuetimecreated);

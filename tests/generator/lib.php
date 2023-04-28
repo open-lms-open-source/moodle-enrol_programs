@@ -203,4 +203,35 @@ class enrol_programs_generator extends component_generator_base {
 
         return $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id], '*', MUST_EXIST);
     }
+
+    /**
+     * Manually allocate user to program.
+     *
+     * @param $record
+     * @return \stdClass allocation record
+     */
+    public function create_program_notification($record): stdClass {
+        global $DB;
+
+        $record = (object)(array)$record;
+
+        if (!empty($record->programid)) {
+            $program = $DB->get_record('enrol_programs_programs', ['id' => $record->programid], '*', MUST_EXIST);
+        } else {
+            $program = $DB->get_record('enrol_programs_programs', ['fullname' => $record->program], '*', MUST_EXIST);
+        }
+
+        $alltypes = \enrol_programs\local\notification_manager::get_all_types();
+        if (!$record->notificationtype || !isset($alltypes[$record->notificationtype])) {
+            throw new coding_exception('Invalid notification type');
+        }
+
+        $data = [
+            'component' => 'enrol_programs',
+            'notificationtype' => $record->notificationtype,
+            'instanceid' => $program->id,
+            'enabled' => '1',
+        ];
+        return \local_openlms\notification\util::notification_create($data);
+    }
 }

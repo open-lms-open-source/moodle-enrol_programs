@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Data d\'assignació del progr
 $string['privacy:metadata:field:timestart'] = 'Data d\'inici';
 $string['privacy:metadata:field:timedue'] = 'Data límit';
 $string['privacy:metadata:field:timeend'] = 'Data de finalització';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Hora de notificació de l\'assignació del programa';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Hora de notificació de la data d\'inici';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Hora de notificació de la data de compleció';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Hora de notificació de l\'apropament de la data límit';
-$string['privacy:metadata:field:timenotifieddue'] = 'Hora de notificació de l\'arribada a la data límit';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Hora de notificació de l\'apropament de la data de finalització';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Hora de notificació de la compleció del programa';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Hora de notificació de la no compleció del programa';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Hora de notificació de la desassignació del programa';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Emissions de certificats d\'assignació de programes';
 $string['privacy:metadata:field:issueid'] = 'ID d\'emissió';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Aprova la sol·licitud';
 $string['source_approval_requestreject'] = 'Rebutja la sol·licitud';
 $string['source_approval_requestdelete'] = 'Suprimeix la sol·licitud';
 $string['source_approval_rejectionreason'] = 'Motiu del rebuig';
-$string['source_base_notification_allocation_subject'] = 'Notificació de l\'assignació del programa';
-$string['source_base_notification_allocation_body'] = 'Hola, {$a->user_fullname}:
+$string['notification_allocation_subject'] = 'Notificació de l\'assignació del programa';
+$string['notification_allocation_body'] = 'Hola, {$a->user_fullname}:
 
 Se us ha assignat al programa "{$a->program_fullname}", que comença el {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Notificació de la desassignació del programa';
-$string['source_base_notification_deallocation_body'] = 'Hola, {$a->user_fullname}:
+$string['notification_deallocation_subject'] = 'Notificació de la desassignació del programa';
+$string['notification_deallocation_body'] = 'Hola, {$a->user_fullname}:
 
 Se us ha desassignat del programa "{$a->program_fullname}".
 ';

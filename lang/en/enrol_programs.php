@@ -103,49 +103,68 @@ $string['movebefore'] = 'Move "{$a->item}" before "{$a->target}"';
 $string['moveinto'] = 'Move "{$a->item}" into "{$a->target}"';
 $string['myprograms'] = 'My programs';
 $string['notification_allocation'] = 'User allocated';
+$string['notification_allocation_subject'] = 'Program allocation notification';
+$string['notification_allocation_body'] = 'Hello {$a->user_fullname},
+
+you have been allocated to program "{$a->program_fullname}", the start date is {$a->program_startdate}.
+';
+$string['notification_allocation_description'] = 'Notification sent to users when they are allocated to program.';
 $string['notification_completion'] = 'Program completed';
 $string['notification_completion_subject'] = 'Program completed';
 $string['notification_completion_body'] = 'Hello {$a->user_fullname},
 
 you have completed program "{$a->program_fullname}".
 ';
+$string['notification_completion_description'] = 'Notification sent to users when they are complete their program.';
 $string['notification_deallocation'] = 'User deallocated';
+$string['notification_deallocation_subject'] = 'Program deallocation notification';
+$string['notification_deallocation_body'] = 'Hello {$a->user_fullname},
+
+you have been deallocated from program "{$a->program_fullname}".
+';
+$string['notification_deallocation_description'] = 'Notification sent to users when they are deallocated from program.';
 $string['notification_duesoon'] = 'Program due date soon';
 $string['notification_duesoon_subject'] = 'Program completion is expected soon';
 $string['notification_duesoon_body'] = 'Hello {$a->user_fullname},
 
 completion of program "{$a->program_fullname}" is expected on {$a->program_duedate}.
 ';
+$string['notification_duesoon_description'] = 'Notification sent to users ahead of their program completion date unless program is already completed.';
 $string['notification_due'] = 'Program overdue';
 $string['notification_due_subject'] = 'Program completion was expected';
 $string['notification_due_body'] = 'Hello {$a->user_fullname},
 
 completion of program "{$a->program_fullname}" was expected before {$a->program_duedate}.
 ';
+$string['notification_due_description'] = 'Notification sent to users when their program completion is overdue.';
 $string['notification_endsoon'] = 'Program end date soon';
 $string['notification_endsoon_subject'] = 'Program ends soon';
 $string['notification_endsoon_body'] = 'Hello {$a->user_fullname},
 
 program "{$a->program_fullname}" is ending on {$a->program_enddate}.
 ';
+$string['notification_endsoon_description'] = 'Notification sent to users ahead of their program end date unless program is already completed.';
 $string['notification_endcompleted'] = 'Completed program ended';
 $string['notification_endcompleted_subject'] = 'Completed program ended';
 $string['notification_endcompleted_body'] = 'Hello {$a->user_fullname},
 
 program "{$a->program_fullname}" ended, you have completed it earlier.
 ';
+$string['notification_endcompleted_description'] = 'Notification sent to users when their completed program ends.';
 $string['notification_endfailed'] = 'Failed program ended';
 $string['notification_endfailed_subject'] = 'Failed program ended';
 $string['notification_endfailed_body'] = 'Hello {$a->user_fullname},
 
 program "{$a->program_fullname}" ended, you have failed to complete it.
 ';
+$string['notification_endfailed_description'] = 'Notification sent to users when program they failed to complete ends.';
 $string['notification_start'] = 'Program started';
 $string['notification_start_subject'] = 'Program started';
 $string['notification_start_body'] = 'Hello {$a->user_fullname},
 
 program "{$a->program_fullname}" has started.
 ';
+$string['notification_start_description'] = 'Notification sent to users when their program started.';
 $string['notificationdates'] = 'Notification dates';
 $string['notset'] = 'Not set';
 $string['plugindisabled'] = 'Program enrolment plugin is disabled, programs will not be functional.
@@ -168,15 +187,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Program allocation date';
 $string['privacy:metadata:field:timestart'] = 'Start date';
 $string['privacy:metadata:field:timedue'] = 'Due date';
 $string['privacy:metadata:field:timeend'] = 'End date';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Time notified of program allocation';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Time notified of start date';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Time notified of completion date';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Time notified of approaching due date';
-$string['privacy:metadata:field:timenotifieddue'] = 'Time notified of due date arrival';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Time notified of approaching end date';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Time notified of completed program';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Time notified of failed program';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Time notified of program deallocation';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Program allocation certificate issues';
 $string['privacy:metadata:field:issueid'] = 'Issue ID';
@@ -263,11 +273,6 @@ $string['source_approval_confirm'] = 'Please confirm that you want to request al
 $string['source_approval_daterequested'] = 'Date requested';
 $string['source_approval_daterejected'] = 'Date rejected';
 $string['source_approval_makerequest'] = 'Request access';
-$string['source_approval_notification_allocation_subject'] = 'Program approval notification';
-$string['source_approval_notification_allocation_body'] = 'Hello {$a->user_fullname},
-
-your sign up for program "{$a->program_fullname}" was approved, the start date is {$a->program_startdate}.
-';
 $string['source_approval_notification_approval_request_subject'] = 'Program request notification';
 $string['source_approval_notification_approval_request_body'] = '
 User {$a->user_fullname} requested access to program "{$a->program_fullname}".
@@ -288,16 +293,6 @@ $string['source_approval_requestapprove'] = 'Approve request';
 $string['source_approval_requestreject'] = 'Reject request';
 $string['source_approval_requestdelete'] = 'Delete request';
 $string['source_approval_rejectionreason'] = 'Rejection reason';
-$string['source_base_notification_allocation_subject'] = 'Program allocation notification';
-$string['source_base_notification_allocation_body'] = 'Hello {$a->user_fullname},
-
-you have been allocated to program "{$a->program_fullname}", the start date is {$a->program_startdate}.
-';
-$string['source_base_notification_deallocation_subject'] = 'Program deallocation notification';
-$string['source_base_notification_deallocation_body'] = 'Hello {$a->user_fullname},
-
-you have been deallocated from program "{$a->program_fullname}".
-';
 $string['source_cohort'] = 'Automatic cohort allocation';
 $string['source_cohort_allocatevisiblecohort'] = 'Automatically allocate to visible cohorts';
 $string['source_cohort_allownew'] = 'Allow cohort allocation';
@@ -334,11 +329,6 @@ $string['source_selfallocation_keyrequired'] = 'Sign up key is required';
 $string['source_selfallocation_maxusers'] = 'Max users';
 $string['source_selfallocation_maxusersreached'] = 'Maximum number of users self-allocated already';
 $string['source_selfallocation_maxusers_status'] = 'Users {$a->count}/{$a->max}';
-$string['source_selfallocation_notification_allocation_subject'] = 'Program allocation notification';
-$string['source_selfallocation_notification_allocation_body'] = 'Hello {$a->user_fullname},
-
-you have signed up for program "{$a->program_fullname}", the start date is {$a->program_startdate}.
-';
 $string['source_selfallocation_signupallowed'] = 'Sign ups are allowed';
 $string['source_selfallocation_signupnotallowed'] = 'Sign ups are not allowed';
 $string['source_udplans'] = 'User development plans';

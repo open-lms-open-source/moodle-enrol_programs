@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = '計畫分配日期';
 $string['privacy:metadata:field:timestart'] = '開始日期';
 $string['privacy:metadata:field:timedue'] = '截止日期';
 $string['privacy:metadata:field:timeend'] = '結束日期';
-$string['privacy:metadata:field:timenotifiedallocation'] = '計畫分配通知時間';
-$string['privacy:metadata:field:timenotifiedstart'] = '開始日期通知時間';
-$string['privacy:metadata:field:timenotifiedcompleted'] = '完成日期通知時間';
-$string['privacy:metadata:field:timenotifiedduesoon'] = '將屆截止日期通知時間';
-$string['privacy:metadata:field:timenotifieddue'] = '已屆截止日期通知時間';
-$string['privacy:metadata:field:timenotifiedendsoon'] = '將屆結束日期通知時間';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = '已完成計畫通知時間';
-$string['privacy:metadata:field:timenotifiedendfailed'] = '失敗計畫通知時間';
-$string['privacy:metadata:field:timenotifieddeallocation'] = '計畫解除分配通知時間';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = '計畫分配證書頒發作業';
 $string['privacy:metadata:field:issueid'] = '頒發作業編號';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = '核准請求';
 $string['source_approval_requestreject'] = '拒絕請求';
 $string['source_approval_requestdelete'] = '刪除請求';
 $string['source_approval_rejectionreason'] = '拒絕理由';
-$string['source_base_notification_allocation_subject'] = '計畫分配通知';
-$string['source_base_notification_allocation_body'] = '{$a->user_fullname} 您好：
+$string['notification_allocation_subject'] = '計畫分配通知';
+$string['notification_allocation_body'] = '{$a->user_fullname} 您好：
 
 您已分配至「{$a->program_fullname}」計畫，開始日期為 {$a->program_startdate}。
 ';
-$string['source_base_notification_deallocation_subject'] = '計畫解除分配通知';
-$string['source_base_notification_deallocation_body'] = '{$a->user_fullname} 您好：
+$string['notification_deallocation_subject'] = '計畫解除分配通知';
+$string['notification_deallocation_body'] = '{$a->user_fullname} 您好：
 
 您已從「{$a->program_fullname}」計畫解除分配。
 ';

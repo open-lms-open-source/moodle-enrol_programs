@@ -283,7 +283,7 @@ final class udplans extends base {
             ];
             self::allocate_user($program, $source, $plan->userid, [], $dateoverrides, $plan->id);
             \enrol_programs\local\allocation::fix_user_enrolments($program->id, $plan->userid);
-            \enrol_programs\local\notification::trigger_notifications($program->id, $plan->userid);
+            \enrol_programs\local\notification_manager::trigger_notifications($program->id, $plan->userid);
         }
         $rs->close();
 

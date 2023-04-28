@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'วันที่การ�
 $string['privacy:metadata:field:timestart'] = 'วันที่เริ่มต้น';
 $string['privacy:metadata:field:timedue'] = 'กำหนดส่งงาน';
 $string['privacy:metadata:field:timeend'] = 'วันที่สิ้นสุด';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'เวลาการแจ้งเตือนการจัดสรรโปรแกรม';
-$string['privacy:metadata:field:timenotifiedstart'] = 'เวลาการแจ้งเตือนวันที่เริ่มต้น';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'เวลาการแจ้งเตือนวันที่เสร็จสมบูรณ์';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'เวลาการแจ้งเตือนวันครบกำหนดที่ใกล้เข้ามา';
-$string['privacy:metadata:field:timenotifieddue'] = 'เวลาการแจ้งเตือนการถึงวันครบกำหนด';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'เวลาการแจ้งเตือนวันสิ้นสุดที่ใกล้เข้ามา';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'เวลาการแจ้งเตือนโปรแกรมเสร็จสมบูรณ์';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'เวลาการแจ้งเตือนโปรแกรมล้มเหลว';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'เวลาการแจ้งเตือนการเลิกจัดสรรโปรแกรม';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'ออกใบรับรองการจัดสรรโปรแกรม';
 $string['privacy:metadata:field:issueid'] = 'ID การออก';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'อนุมัติคำขอ';
 $string['source_approval_requestreject'] = 'ปฏิเสธคำขอ';
 $string['source_approval_requestdelete'] = 'ลบคำขอ';
 $string['source_approval_rejectionreason'] = 'เหตุผลของการปฏิเสธ';
-$string['source_base_notification_allocation_subject'] = 'การแจ้งเตือนการจัดสรรโปรแกรม';
-$string['source_base_notification_allocation_body'] = 'สวัสดี {$a->user_fullname},
+$string['notification_allocation_subject'] = 'การแจ้งเตือนการจัดสรรโปรแกรม';
+$string['notification_allocation_body'] = 'สวัสดี {$a->user_fullname},
 
 คุณได้รับการจัดสรรลงในโปรแกรม "{$a->program_fullname}” วันที่เริ่มต้นคือ {$a->program_startdate}
 ';
-$string['source_base_notification_deallocation_subject'] = 'การแจ้งเตือนยกเลิกการจัดสรรโปรแกรม';
-$string['source_base_notification_deallocation_body'] = 'สวัสดี {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'การแจ้งเตือนยกเลิกการจัดสรรโปรแกรม';
+$string['notification_deallocation_body'] = 'สวัสดี {$a->user_fullname},
 
 คุณถูกเลิกการจัดสรรจากโปรแกรม "{$a->program_fullname}"
 ';

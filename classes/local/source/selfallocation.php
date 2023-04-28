@@ -174,7 +174,7 @@ final class selfallocation extends base {
         $allocation = self::allocate_user($program, $source, $user->id, []);
 
         \enrol_programs\local\allocation::fix_user_enrolments($program->id, $user->id);
-        \enrol_programs\local\notification::trigger_notifications($program->id, $user->id);
+        \enrol_programs\local\notification_manager::trigger_notifications($program->id, $user->id);
 
         return $allocation;
     }

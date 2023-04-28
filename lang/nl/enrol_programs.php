@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Datum programmatoekenning';
 $string['privacy:metadata:field:timestart'] = 'Begindatum';
 $string['privacy:metadata:field:timedue'] = 'Deadline';
 $string['privacy:metadata:field:timeend'] = 'Einddatum';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Tijd melding programmatoekenning';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Tijd melding begindatum';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Tijd melding voltooiingsdatum';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Tijd melding naderende deadline';
-$string['privacy:metadata:field:timenotifieddue'] = 'Tijd melding aankomst deadline';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Tijd melding naderende einddatum';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Tijd melding voltooid programma';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Tijd melding mislukt programma';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Tijd melding programma-uitschrijving';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Problemen met certificaten voor programmatoekenningen';
 $string['privacy:metadata:field:issueid'] = 'Probleem-ID';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Aanvraag goedkeuren';
 $string['source_approval_requestreject'] = 'Aanvraag afwijzen';
 $string['source_approval_requestdelete'] = 'Aanvraag verwijderen';
 $string['source_approval_rejectionreason'] = 'Reden afwijzing';
-$string['source_base_notification_allocation_subject'] = 'Melding programmatoekenning';
-$string['source_base_notification_allocation_body'] = 'Hallo {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Melding programmatoekenning';
+$string['notification_allocation_body'] = 'Hallo {$a->user_fullname},
 
 U bent toegekend aan programma "{$a->program_fullname}", de begindatum is {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Melding uitschrijving programma';
-$string['source_base_notification_deallocation_body'] = 'Hallo {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Melding uitschrijving programma';
+$string['notification_deallocation_body'] = 'Hallo {$a->user_fullname},
 
 U bent uitgeschreven uit programma "{$a->program_fullname}".
 ';

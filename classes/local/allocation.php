@@ -730,7 +730,7 @@ final class allocation {
             allocation_calendar_event::adjust_allocation_completion_calendar_events($allocation);
             $event = \enrol_programs\event\program_completed::create_from_allocation($allocation, $program);
             $event->trigger();
-            notification::notify_completed($program, $source, $allocation, $user);
+            notification\completion::notify_now($user, $program, $source, $allocation);
         }
         $rs->close();
 
@@ -830,7 +830,7 @@ final class allocation {
         self::fix_allocation_sources($record->programid, $record->userid);
         self::fix_user_enrolments($record->programid, $record->userid);
 
-        notification::trigger_notifications($record->programid, $record->userid);
+        notification_manager::trigger_notifications($record->programid, $record->userid);
 
         return $DB->get_record('enrol_programs_allocations', ['id' => $record->id], '*', MUST_EXIST);
     }

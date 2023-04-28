@@ -165,15 +165,6 @@ $string['privacy:metadata:field:timeallocated'] = 'Datum der Programmzuordnung';
 $string['privacy:metadata:field:timestart'] = 'Startdatum';
 $string['privacy:metadata:field:timedue'] = 'Fälligkeitsdatum';
 $string['privacy:metadata:field:timeend'] = 'Enddatum';
-$string['privacy:metadata:field:timenotifiedallocation'] = 'Uhrzeit der Benachrichtigung über die Programmzuordnung';
-$string['privacy:metadata:field:timenotifiedstart'] = 'Uhrzeit der Benachrichtigung über das Startdatum';
-$string['privacy:metadata:field:timenotifiedcompleted'] = 'Uhrzeit der Benachrichtigung über das Abschlussdatum';
-$string['privacy:metadata:field:timenotifiedduesoon'] = 'Uhrzeit der Benachrichtigung über das bald bevorstehende Fälligkeitsdatum';
-$string['privacy:metadata:field:timenotifieddue'] = 'Uhrzeit der Benachrichtigung über das eingetroffene Fälligkeitsdatum';
-$string['privacy:metadata:field:timenotifiedendsoon'] = 'Uhrzeit der Benachrichtigung über das bald bevorstehende Enddatum';
-$string['privacy:metadata:field:timenotifiedendcompleted'] = 'Uhrzeit der Benachrichtigung über den Programmabschluss';
-$string['privacy:metadata:field:timenotifiedendfailed'] = 'Uhrzeit der Benachrichtigung über den fehlgeschlagenen Programmabschluss';
-$string['privacy:metadata:field:timenotifieddeallocation'] = 'Uhrzeit der Benachrichtigung über die Aufhebung der Programmzuordnung';
 
 $string['privacy:metadata:table:enrol_programs_certs_issues'] = 'Probleme mit Programmzuordnungszertifikat';
 $string['privacy:metadata:field:issueid'] = 'Problem-ID';
@@ -283,13 +274,13 @@ $string['source_approval_requestapprove'] = 'Anfrage genehmigen';
 $string['source_approval_requestreject'] = 'Anforderung ablehnen';
 $string['source_approval_requestdelete'] = 'Anforderung löschen';
 $string['source_approval_rejectionreason'] = 'Ablehnungsgrund';
-$string['source_base_notification_allocation_subject'] = 'Benachrichtigung über Programmzuordnung';
-$string['source_base_notification_allocation_body'] = 'Hallo {$a->user_fullname},
+$string['notification_allocation_subject'] = 'Benachrichtigung über Programmzuordnung';
+$string['notification_allocation_body'] = 'Hallo {$a->user_fullname},
 
 Sie wurden dem Programm "{$a->program_fullname}" zugeordnet. Das Startdatum ist der {$a->program_startdate}.
 ';
-$string['source_base_notification_deallocation_subject'] = 'Benachrichtigung über die Aufhebung der Programmzuordnung';
-$string['source_base_notification_deallocation_body'] = 'Hallo {$a->user_fullname},
+$string['notification_deallocation_subject'] = 'Benachrichtigung über die Aufhebung der Programmzuordnung';
+$string['notification_deallocation_body'] = 'Hallo {$a->user_fullname},
 
 Ihre Zuordnung zum Programm "{$a->program_fullname}" wurde aufgehoben.
 ';

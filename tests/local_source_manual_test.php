@@ -137,98 +137,37 @@ final class local_source_manual_test extends \advanced_testcase {
         $this->assertEquals($now + 1, $allocation->timeend);
     }
 
-    public function test_notify_allocation() {
+    public function test_deallocate_user() {
         global $DB;
 
         /** @var \enrol_programs_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
 
         $guest = guest_user();
-        $admin = get_admin();
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
         $user3 = $this->getDataGenerator()->create_user();
 
         $program1 = $generator->create_program(['sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-
         $program2 = $generator->create_program(['sources' => ['manual' => []]]);
         $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $notification = $generator->create_program_notification(['programid' => $program1->id, 'notificationtype' => 'allocation']);
+        $this->assertCount(0, $DB->get_records('local_openlms_user_notified', []));
 
-        $this->setUser($user3);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id], '*', MUST_EXIST);
+        $this->assertCount(2, $DB->get_records('local_openlms_user_notified', []));
+        $this->assertCount(1, $DB->get_records('local_openlms_user_notified', ['userid' => $user1->id]));
+        $this->assertCount(1, $DB->get_records('local_openlms_user_notified', ['userid' => $user2->id]));
 
-        $sink = $this->redirectMessages();
-        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
-        $messages = $sink->get_messages();
-        $sink->close();
-        $this->assertCount(0, $messages);
-        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
-        $this->assertNull($allocation->timenotifiedallocation);
-
-        $program1 = program::update_program_notifications((object)[
-            'id' => $program1->id,
-            'allocation_manual' => 1,
-        ], false);
-        $sink = $this->redirectMessages();
-        $this->setCurrentTimeStart();
-        manual::allocate_users($program1->id, $source1->id, [$user2->id]);
-        $messages = $sink->get_messages();
-        $sink->close();
-        $this->assertCount(1, $messages);
-        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id], '*', MUST_EXIST);
-        $this->assertTimeCurrent($allocation->timenotifiedallocation);
-        $message = $messages[0];
-        $this->assertSame('Program allocation notification', $message->subject);
-        $this->assertStringContainsString('you have been allocated to program', $message->fullmessage);
-        $this->assertSame($user2->id, $message->useridto);
-        $this->assertSame($user3->id, $message->useridfrom);
-    }
-
-    public function test_notify_deallocation() {
-        global $DB;
-
-        /** @var \enrol_programs_generator $generator */
-        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
-
-        $admin = get_admin();
-        $user1 = $this->getDataGenerator()->create_user();
-        $user2 = $this->getDataGenerator()->create_user();
-        $user3 = $this->getDataGenerator()->create_user();
-
-        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
-        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-
-        $program2 = $generator->create_program(['sources' => ['manual' => []]]);
-        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
-
-        $this->setUser($user3);
-
-        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
-        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
-
-        $sink = $this->redirectMessages();
-        manual::deallocate_user($program1, $source1, $allocation);
-        $messages = $sink->get_messages();
-        $sink->close();
-        $this->assertCount(0, $messages);
-
-        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
-        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
-        $program1 = program::update_program_notifications((object)[
-            'id' => $program1->id,
-            'notifydeallocation' => 1,
-        ], false);
-        $sink = $this->redirectMessages();
-        $this->setCurrentTimeStart();
-        manual::deallocate_user($program1, $source1, $allocation);
-        $messages = $sink->get_messages();
-        $sink->close();
-        $this->assertCount(1, $messages);
-        $message = $messages[0];
-        $this->assertSame('Program deallocation notification', $message->subject);
-        $this->assertStringContainsString('you have been deallocated from program', $message->fullmessage);
-        $this->assertSame($user1->id, $message->useridto);
-        $this->assertSame($user3->id, $message->useridfrom);
+        manual::deallocate_user($program1, $source1, $allocation1);
+        $this->assertFalse($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id]));
+        $this->assertTrue($DB->record_exists('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id]));
+        $this->assertCount(1, $DB->get_records('local_openlms_user_notified', []));
+        $this->assertCount(0, $DB->get_records('local_openlms_user_notified', ['userid' => $user1->id]));
+        $this->assertCount(1, $DB->get_records('local_openlms_user_notified', ['userid' => $user2->id]));
     }
 
     public function test_store_uploaded_data() {
