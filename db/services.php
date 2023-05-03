@@ -26,9 +26,9 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 $functions = [
-    'enrol_programs_search_candidate' => [
-        'classname' => 'enrol_programs\external\search_candidate',
-        'description' => 'Return list of candidates for program allocation.',
+    'enrol_programs_form_source_manual_allocate_users' => [
+        'classname' => 'enrol_programs\external\form_source_manual_allocate_users',
+        'description' => 'Return list of user candidates for program allocation.',
         'type' => 'read',
         'ajax' => true,
         'loginrequired' => true,

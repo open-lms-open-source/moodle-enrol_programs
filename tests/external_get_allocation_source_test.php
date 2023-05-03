@@ -27,7 +27,7 @@ use enrol_programs\local\source\manual;
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \enrol_programs\external\search_candidate
+ * @covers \enrol_programs\external\get_allocation_source
  */
 final class external_get_allocation_source_test extends \advanced_testcase {
     public function setUp(): void {

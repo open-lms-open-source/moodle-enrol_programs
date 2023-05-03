@@ -25,7 +25,7 @@ namespace enrol_programs;
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \enrol_programs\external\search_candidate
+ * @covers \enrol_programs\external\create_cohort_allocation
  */
 final class external_create_cohort_allocation_test extends \advanced_testcase {
     public function setUp(): void {

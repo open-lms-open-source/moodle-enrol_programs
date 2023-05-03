@@ -25,7 +25,7 @@ namespace enrol_programs;
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \enrol_programs\external\search_candidate
+ * @covers \enrol_programs\external\allocate_user
  */
 final class external_allocate_user_test extends \advanced_testcase {
     public function setUp(): void {
