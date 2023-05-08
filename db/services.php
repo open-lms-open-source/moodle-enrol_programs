@@ -33,4 +33,11 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'enrol_programs_get_programs' => [
+        'classname' => 'enrol_programs\external\get_programs',
+        'description' => 'Return list of programs that match the search parameters.',
+        'type' => 'read',
+        'ajax' => false,
+        'loginrequired' => true,
+    ],
 ];
