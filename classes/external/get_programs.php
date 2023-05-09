@@ -40,10 +40,10 @@ final class get_programs extends external_api {
             'fieldvalues' => new \external_multiple_structure(
                 new \external_single_structure(
                     [
-                        'field' => new external_value(PARAM_ALPHANUM, 'The name of the field to be searched by
-    list of acceptable fields is : id, contextid, fullname, idnumber, public, archived, tenantid'),
-                        'value' => new external_value(PARAM_RAW, 'Value of the field to be searched')
-                    ])
+                        'field' => new external_value(PARAM_ALPHANUM, 'The name of the field to be searched by list of'
+                            . ' acceptable fields is : id, contextid, fullname, idnumber, public, archived, tenantid'),
+                        'value' => new external_value(PARAM_RAW, 'Value of the field to be searched, NULL allowed only for tenantid')
+                    ]), 'Program search parameters'
             )
         ]);
     }
@@ -56,42 +56,65 @@ final class get_programs extends external_api {
      */
     public static function execute(array $fieldvalues): array {
         global $DB;
-        $params = self::validate_parameters(self::execute_parameters(),
-            ['fieldvalues' => $fieldvalues]);
-        $fieldvalues = $params['fieldvalues'];
+        $fieldvalues = self::validate_parameters(self::execute_parameters(),
+            ['fieldvalues' => $fieldvalues])['fieldvalues'];
 
         $allowedfieldlist = ['id', 'contextid', 'fullname', 'idnumber', 'public', 'archived', 'tenantid'];
         $params = [];
+        $where = [];
+        $tenantjoin = '';
         foreach ($fieldvalues as $fieldvalue) {
-            if (!in_array($fieldvalue['field'], $allowedfieldlist)) {
-                throw new \invalid_parameter_exception('Invalid field name'. $fieldvalue['field']);
+            list('field' => $field, 'value' => $value) = $fieldvalue;
+            if (!in_array($field, $allowedfieldlist, true)) {
+                throw new \invalid_parameter_exception('Invalid field name: '. $field);
             }
-            $params[$fieldvalue['field']] = $fieldvalue['value'];
-        }
-
-        if (array_key_exists('tenantid', $params)) {
-            $sql = "SELECT p.*
-                      FROM {enrol_programs_programs} p
-                      JOIN {context} c ON c.id = p.contextid
-                     WHERE c.tenantid = :tenantid ";
-            foreach ($params as $key => $value) {
-                if ($key != 'tenantid') {
-                    $sql .= "AND p.$key = :$key ";
+            if (array_key_exists($field, $params)) {
+                throw new \invalid_parameter_exception('Invalid duplicate field name: '. $field);
+            }
+            if ($field === 'tenantid') {
+                if (!\enrol_programs\local\tenant::is_available()) {
+                    throw new \invalid_parameter_exception('Invalid field name: '. $field);
                 }
+                if ($value === null) {
+                    $tenantjoin = "JOIN {context} c ON c.id = p.contextid AND c.tenantid IS NULL";
+                } else {
+                    $tenantjoin = "JOIN {context} c ON c.id = p.contextid AND c.tenantid = :tenantid";
+                }
+            } else {
+                if ($value === null) {
+                    throw new \invalid_parameter_exception('Field value cannot be NULL: '. $field);
+                }
+                $where[] = "p.$field = :$field";
             }
-            $programs = $DB->get_records_sql($sql, $params);
-        } else {
-            $programs = $DB->get_records('enrol_programs_programs', $params);
+            $params[$field] = $value;
         }
+        if ($where) {
+            $where = 'WHERE ' . implode(' AND ', $where);
+        } else {
+            $where = '';
+        }
+        $sql = "SELECT p.*
+                  FROM {enrol_programs_programs} p
+           $tenantjoin
+                $where
+              ORDER BY p.id ASC";
+        $programs = $DB->get_records_sql($sql, $params);
 
         $results = [];
         foreach ($programs as $program) {
             $context = \context::instance_by_id($program->contextid);
-            self::validate_context($context);
             if (has_capability('enrol/programs:view', $context)) {
-                list($program->description, $format) = external_format_text($program->description, FORMAT_HTML, $context);
-                $sources = $DB->get_records('enrol_programs_sources', ['programid' => $program->id], 'id', 'type');
+                self::validate_context($context);
+                $sources = $DB->get_records_menu('enrol_programs_sources',
+                    ['programid' => $program->id], 'type ASC', 'type');
                 $program->sources = array_keys($sources);
+                if ($program->public) {
+                    $program->cohortids = [];
+                } else {
+                    $cohorts = $DB->get_records_menu('enrol_programs_cohorts',
+                        ['programid' => $program->id], 'cohortid ASC', 'cohortid');
+                    $program->cohortids = array_keys($cohorts);
+                }
                 $results[] = $program;
             }
         }
@@ -102,32 +125,34 @@ final class get_programs extends external_api {
     /**
      * Describes the external function parameters.
      *
-     * @return external_description
+     * @return \external_multiple_structure
      */
     public static function execute_returns(): \external_multiple_structure {
         return new \external_multiple_structure(
             new \external_single_structure([
                 'id' => new external_value(PARAM_INT, 'Program id'),
-                'contextid' => new external_value(PARAM_INT, 'context id'),
-                'fullname' => new external_value(PARAM_RAW, 'Program fullname'),
+                'contextid' => new external_value(PARAM_INT, 'Program context id'),
+                'fullname' => new external_value(PARAM_TEXT, 'Program fullname'),
                 'idnumber' => new external_value(PARAM_RAW, 'Program idnumber'),
-                'description' => new external_value(PARAM_RAW, 'Program description'),
-                'descriptionformat' => new external_value(PARAM_INT, 'Description format'),
-                'presentationjson' => new external_value(PARAM_RAW, 'Presentation json / Not stable API data'),
-                'public' => new external_value(PARAM_INT, 'public'),
-                'archived' => new external_value(PARAM_INT, 'archived'),
-                'creategroups' => new external_value(PARAM_INT, 'create groups'),
-                'timeallocationstart' => new external_value(PARAM_INT, 'time allocation start'),
-                'timeallocationend' => new external_value(PARAM_INT, 'time allocation end'),
-                'startdatejson' => new external_value(PARAM_RAW, 'start date json'),
-                'duedatejson' => new external_value(PARAM_RAW, 'due date json'),
-                'enddatejson' => new external_value(PARAM_RAW, 'end date json'),
-                'timecreated' => new external_value(PARAM_INT, 'time created'),
+                'description' => new external_value(PARAM_RAW, 'Program description text (in original text format)'),
+                'descriptionformat' => new external_value(PARAM_INT, 'Program description text format'),
+                'presentationjson' => new external_value(PARAM_RAW, 'Presentation json (not stable internal API data)'),
+                'public' => new external_value(PARAM_BOOL, 'Public flag'),
+                'archived' => new external_value(PARAM_BOOL, 'Archived flag (archived problems do not change)'),
+                'creategroups' => new external_value(PARAM_BOOL, 'Create course groups flag'),
+                'timeallocationstart' => new external_value(PARAM_INT, 'Allocation start date'),
+                'timeallocationend' => new external_value(PARAM_INT, 'Allocation end date'),
+                'startdatejson' => new external_value(PARAM_RAW, 'Start date calculation logic in json format'),
+                'duedatejson' => new external_value(PARAM_RAW, 'Due date calculation logic in json format'),
+                'enddatejson' => new external_value(PARAM_RAW, 'End date calculation logic in json format'),
+                'timecreated' => new external_value(PARAM_INT, 'Program creation date'),
                 'sources' => new \external_multiple_structure(
-                    new external_value(PARAM_ALPHANUMEXT, 'source name')
-                )
-            ])
+                    new external_value(PARAM_ALPHANUMEXT, 'Internal source name'), 'Enabled allocation sources'
+                ),
+                'cohortids' => new \external_multiple_structure(
+                    new external_value(PARAM_INT, 'Cohort id'), 'Visible cohorts for non-public programs'
+                ),
+            ], 'List of programs')
         );
     }
-
 }
