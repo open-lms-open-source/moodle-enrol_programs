@@ -46,7 +46,7 @@ final class util {
      * @return string|null
      */
     public static function normalise_delay(?string $string): ?string {
-        if (trim($string) === '') {
+        if (trim($string ?? '') === '') {
             return null;
         }
 
