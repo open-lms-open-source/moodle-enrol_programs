@@ -27,19 +27,19 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
     'enrol_programs_form_source_manual_allocate_users' => [
-        'classname' => 'enrol_programs\external\form_source_manual_allocate_users',
+        'classname' => enrol_programs\external\form_source_manual_allocate_users::class,
         'description' => 'Return list of user candidates for program allocation.',
         'type' => 'read',
         'ajax' => true,
         'loginrequired' => true,
     ],
     'enrol_programs_get_programs' => [
-        'classname' => 'enrol_programs\external\get_programs',
+        'classname' => enrol_programs\external\get_programs::class,
         'description' => 'Return list of programs that match the search parameters.',
         'type' => 'read',
     ],
     'enrol_programs_get_program_allocations' => [
-        'classname' => 'enrol_programs\external\get_program_allocations',
+        'classname' => enrol_programs\external\get_program_allocations::class,
         'description' => 'Return list of program allocations for given programid and optional userids.',
         'type' => 'read',
     ],

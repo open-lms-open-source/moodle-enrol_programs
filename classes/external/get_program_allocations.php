@@ -22,7 +22,7 @@ use external_function_parameters;
 use external_value;
 
 /**
- * Provides list of program allocations for given program and option list of users.
+ * Provides list of program allocations for given program and optional list of users.
  *
  * @package     enrol_programs
  * @copyright   2023 Open LMS (https://www.openlms.net/)
@@ -55,7 +55,7 @@ final class get_program_allocations extends external_api {
      * @param array $userids Users for whom this info has to be returned (optional).
      * @return array
      */
-    public static function execute(int $programid, ?array $userids): array {
+    public static function execute(int $programid, array $userids = []): array {
         global $DB;
 
         $program = $DB->get_record('enrol_programs_programs', ['id' => $programid], '*', MUST_EXIST);
@@ -73,21 +73,28 @@ final class get_program_allocations extends external_api {
 
         $results = [];
         if (empty($userids)) {
+            // TODO: for now treat empty array as all allocations until MDL-78192 adds support for NULLs.
             $allocations = $DB->get_records('enrol_programs_allocations', ['programid' => $programid], 'id');
         } else {
             $allocations = [];
             foreach ($userids as $userid) {
                 $allocationrecord = $DB->get_record('enrol_programs_allocations', ['programid' => $programid, 'userid' => $userid]);
-                if ($allocationrecord !== false) {
-                    $allocations[] = $allocationrecord;
+                if ($allocationrecord) {
+                    $allocations[$allocationrecord->id] = $allocationrecord;
                 }
             }
+            ksort($allocations, SORT_NUMERIC);
         }
 
         $sourceclasses = allocation::get_source_classes();
-        $sources = $DB->get_records('enrol_programs_sources');
+        $sources = $DB->get_records('enrol_programs_sources', ['programid' => $program->id]);
         foreach ($allocations as $allocation) {
+            if (!isset($sources[$allocation->sourceid]) || !isset($sourceclasses[$sources[$allocation->sourceid]->type])) {
+                // Ignore invalid data.
+                continue;
+            }
             $source = $sources[$allocation->sourceid];
+            /** @var class-string<\enrol_programs\local\source\base> $sourceclass */
             $sourceclass = $sourceclasses[$source->type];
             $allocation->sourcename = $source->type;
             $allocation->deletesupported = $sourceclass::allocation_delete_supported($program, $source, $allocation);
@@ -101,18 +108,18 @@ final class get_program_allocations extends external_api {
     /**
      * Describes the external function parameters.
      *
-     * @return external_description
+     * @return \external_multiple_structure
      */
     public static function execute_returns(): \external_multiple_structure {
         return new \external_multiple_structure(
             new \external_single_structure([
-                'id' => new external_value(PARAM_INT, 'Allocation id'),
+                'id' => new external_value(PARAM_INT, 'Program allocation id'),
                 'programid' => new external_value(PARAM_INT, 'Program id'),
                 'userid' => new external_value(PARAM_INT, 'User id'),
-                'sourceid' => new external_value(PARAM_INT, 'Internal scd ource id'),
+                'sourceid' => new external_value(PARAM_INT, 'Allocation source id'),
                 'archived' => new external_value(PARAM_BOOL, 'Archived flag (Archived allocations do not change)'),
-                'sourcedatajson' => new external_value(PARAM_RAW, 'Source data json'),
-                'sourceinstanceid' => new external_value(PARAM_INT, 'Source instance id'),
+                'sourcedatajson' => new external_value(PARAM_RAW, 'Source data json (internal)'),
+                'sourceinstanceid' => new external_value(PARAM_INT, 'Allocation source instance id (internal)'),
                 'timeallocated' => new external_value(PARAM_INT, 'Allocation date'),
                 'timestart' => new external_value(PARAM_INT, 'Allocation start date'),
                 'timedue' => new external_value(PARAM_INT, 'Allocation due date'),
