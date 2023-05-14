@@ -178,7 +178,7 @@ final class certificate {
         }
 
         $params = ['now' => time()];
-        $sql = "SELECT a.programid, a.userid
+        $sql = "SELECT a.id, a.programid, a.userid
                   FROM {enrol_programs_programs} p
                   JOIN {enrol_programs_allocations} a ON a.programid = p.id AND a.archived = 0 AND a.timecompleted <= :now
                   JOIN {user} u ON u.id = a.userid AND u.deleted = 0 and u.confirmed = 1

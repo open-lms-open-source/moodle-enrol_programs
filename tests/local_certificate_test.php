@@ -221,9 +221,11 @@ final class local_certificate_test extends \advanced_testcase {
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
         $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
 
         $allocation1 = $programgenerator->create_program_allocation(['userid' => $user1->id, 'programid' => $program->id]);
         $allocation2 = $programgenerator->create_program_allocation(['userid' => $user2->id, 'programid' => $program->id]);
+        $allocation3 = $programgenerator->create_program_allocation(['userid' => $user3->id, 'programid' => $program->id]);
 
         $source = $DB->get_record('enrol_programs_sources', ['programid' => $program->id, 'type' => 'manual'], '*', MUST_EXIST);
 
@@ -241,5 +243,14 @@ final class local_certificate_test extends \advanced_testcase {
         certificate::cron();
         $this->assertSame(0, $DB->count_records('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation1->id]));
         $this->assertSame(0, $DB->count_records('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation2->id]));
+
+        $allocation2->timecompleted = time();
+        $allocation2 = \enrol_programs\local\allocation::update_user($allocation2);
+        $allocation3->timecompleted = time();
+        $allocation3 = \enrol_programs\local\allocation::update_user($allocation3);
+
+        certificate::cron();
+        $this->assertSame(1, $DB->count_records('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation2->id]));
+        $this->assertSame(1, $DB->count_records('enrol_programs_certs_issues', ['programid' => $program->id, 'allocationid' => $allocation3->id]));
     }
 }
