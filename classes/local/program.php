@@ -624,6 +624,7 @@ final class program {
         $sources = $DB->get_records('enrol_programs_sources', ['programid' => $program->id]);
         foreach ($sources as $source) {
             $DB->delete_records('enrol_programs_requests', ['sourceid' => $source->id]);
+            $DB->delete_records('enrol_programs_src_cohorts', ['sourceid' => $source->id]);
         }
         unset($sources);
         $DB->delete_records('enrol_programs_sources', ['programid' => $program->id]);

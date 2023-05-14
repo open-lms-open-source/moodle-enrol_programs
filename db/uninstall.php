@@ -34,6 +34,7 @@ function xmldb_enrol_programs_uninstall() {
     $DB->delete_records('enrol_programs_completions', []);
     $DB->delete_records('enrol_programs_allocations', []);
     $DB->delete_records('enrol_programs_requests', []);
+    $DB->delete_records('enrol_programs_src_cohorts', []);
     $DB->delete_records('enrol_programs_sources', []);
     $DB->delete_records('enrol_programs_cohorts', []);
     $DB->delete_records('enrol_programs_prerequisites', []);

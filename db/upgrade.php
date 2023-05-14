@@ -193,5 +193,28 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023031502, 'enrol', 'programs');
     }
 
+    if ($oldversion < 2023051400) {
+        // Always use separate cohorts table for cohort sync.
+        $sources = $DB->get_records('enrol_programs_sources', ['type' => 'cohort', 'auxint1' => 1]);
+        foreach ($sources as $source) {
+            $visible = $DB->get_records('enrol_programs_cohorts', ['programid' => $source->programid], '', 'cohortid');
+            $current = $DB->get_records('enrol_programs_src_cohorts', ['sourceid' => $source->id], '', 'cohortid');
+            foreach (array_keys($visible) as $cohortid) {
+                if (isset($current[$cohortid])) {
+                    unset($current[$cohortid]);
+                    continue;
+                }
+                $DB->insert_record('enrol_programs_src_cohorts', ['sourceid' => $source->id, 'cohortid' => $cohortid]);
+            }
+            foreach (array_keys($current) as $cohortid) {
+                $DB->delete_records('enrol_programs_src_cohorts', ['sourceid' => $source->id, 'cohortid' => $cohortid]);
+            }
+        }
+        $DB->set_field('enrol_programs_sources', 'auxint1', null, ['type' => 'cohort']);
+
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2023051400, 'enrol', 'programs');
+    }
+
     return true;
 }

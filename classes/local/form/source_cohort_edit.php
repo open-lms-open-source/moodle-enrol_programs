@@ -42,28 +42,21 @@ final class source_cohort_edit extends \local_openlms\dialog_form {
             $mform->hardFreeze('enable');
         }
 
-        $mform->addElement('select', 'auxint1', get_string('source_cohort_allocatevisiblecohort', 'enrol_programs'),
-            ['1' => get_string('yes'), '0' => get_string('no')]);
-        if (isset($source->auxint1)) {
-            $mform->setDefault('auxint1', $source->auxint1);
-        }
-        $mform->hideIf('auxint1', 'enable', 'neq', 1);
-
         $options = ['contextid' => $context->id, 'multiple' => true];
         /** @var \MoodleQuickForm_cohort $cohortsel */
         $cohortsel = $mform->addElement('cohort', 'cohorts', get_string('source_cohort_cohortstoallocate',
             'enrol_programs'), $options);
-        $mform->addHelpButton('cohorts', 'source_cohort_cohortsallocate', 'enrol_programs');
         // WARNING: The cohort element is not great at all, work around the current value problems here in a very hacky way.
-
-        $sourceid = $DB->get_field('enrol_programs_sources', 'id', ['type' => 'cohort', 'programid' => $program->id]);
-        $cohorts = cohort::fetch_allocation_cohorts_menu($sourceid);
-        $cohorts = array_map('format_string', $cohorts);
-        foreach ($cohorts as $cid => $cname) {
-            $cohortsel->addOption($cname, $cid);
+        if (!empty($source->id)) {
+            $cohorts = cohort::fetch_allocation_cohorts_menu($source->id);
+            $cohorts = array_map('format_string', $cohorts);
+            foreach ($cohorts as $cid => $cname) {
+                $cohortsel->addOption($cname, $cid);
+            }
+            $cohortsel->setSelected(array_keys($cohorts));
         }
-        $cohortsel->setSelected(array_keys($cohorts));
-        $mform->hideIf('cohorts', 'auxint1', 'eq', 1);
+        $mform->hideIf('cohorts', 'enable', 'eq', 0);
+
         $mform->addElement('hidden', 'programid');
         $mform->setType('programid', PARAM_INT);
         $mform->setDefault('programid', $program->id);

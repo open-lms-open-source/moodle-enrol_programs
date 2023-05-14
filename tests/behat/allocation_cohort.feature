@@ -14,6 +14,8 @@ Feature: Visible cohorts program allocation tests
       | Cohort 1 | CH1      |
       | Cohort 2 | CH2      |
       | Cohort 3 | CH3      |
+      | Cohort 4 | CH3      |
+      | Cohort 5 | CH3      |
     And the following "courses" exist:
       | fullname | shortname | format | category |
       | Course 1 | C1        | topics | CAT1     |
@@ -66,24 +68,19 @@ Feature: Visible cohorts program allocation tests
       | Program 003 | PR3      | Cat 3    |
 
   @javascript
-  Scenario: Manager may enable visible cohort allocation
+  Scenario: Manager may enable automatic cohort allocation in programs
     Given I log in as "manager1"
     And I am on all programs management page
     And I follow "Program 000"
-    And I follow "Visibility settings"
-    And I press "Edit"
-    And I set the following fields to these values:
-      | Visible to cohorts | Cohort 1, Cohort 2 |
-    And I press dialog form button "Update program"
-    And I follow "Allocation settings"
+    And I click on "Allocation settings" "link" in the "#region-main" "css_element"
     And I click on "Update Automatic cohort allocation" "link"
     And I set the following fields to these values:
-      | Active | Yes |
-
-    When I press dialog form button "Update"
-    And I should see "Active" in the "Automatic cohort allocation:" definition list item
-    And I follow "Users"
-    Then "Student 1" row "Source" column of "program_allocations" table should contain "Automatic cohort allocation"
+      | Active           | Yes                |
+      | Allocate cohorts | Cohort 1, Cohort 2 |
+    And I press dialog form button "Update"
+    Then I should see "Active (Cohort 1, Cohort 2)" in the "Automatic cohort allocation:" definition list item
+    And I click on "Users" "link" in the "#region-main" "css_element"
+    And "Student 1" row "Source" column of "program_allocations" table should contain "Automatic cohort allocation"
     And "Student 1" row "Program status" column of "program_allocations" table should contain "Open"
     And "Student 2" row "Source" column of "program_allocations" table should contain "Automatic cohort allocation"
     And "Student 2" row "Program status" column of "program_allocations" table should contain "Open"
@@ -93,13 +90,14 @@ Feature: Visible cohorts program allocation tests
     And "Student 4" row "Program status" column of "program_allocations" table should contain "Open"
     And I should not see "Student 5"
 
-    When I follow "Visibility settings"
-    And I press "Edit"
+    When I click on "Allocation settings" "link" in the "#region-main" "css_element"
+    And I click on "Update Automatic cohort allocation" "link"
     And I set the following fields to these values:
-      | Visible to cohorts | Cohort 1 |
-    And I press dialog form button "Update program"
-    And I follow "Users"
-    Then "Student 1" row "Source" column of "program_allocations" table should contain "Automatic cohort allocation"
+      | Allocate cohorts | Cohort 1 |
+    And I press dialog form button "Update"
+    Then I should see "Active (Cohort 1)" in the "Automatic cohort allocation:" definition list item
+    And I click on "Users" "link" in the "#region-main" "css_element"
+    And "Student 1" row "Source" column of "program_allocations" table should contain "Automatic cohort allocation"
     And "Student 1" row "Program status" column of "program_allocations" table should contain "Open"
     And "Student 2" row "Source" column of "program_allocations" table should contain "Automatic cohort allocation"
     And "Student 2" row "Program status" column of "program_allocations" table should contain "Open"
@@ -109,43 +107,25 @@ Feature: Visible cohorts program allocation tests
     And "Student 4" row "Program status" column of "program_allocations" table should contain "Archived"
     And I should not see "Student 5"
 
-    When I click on "Delete program allocation" "link" in the "Student 4" "table_row"
-    And I press dialog form button "Delete program allocation"
-    Then I should not see "Student 4"
-
-  @javascript
-  Scenario: Manager may enable automatic cohort allocation separate from visible cohorts
-    Given I log in as "manager1"
-    And I am on all programs management page
-    And I follow "Program 000"
-    And I follow "Visibility settings"
-    And I press "Edit"
-    And I set the following fields to these values:
-      | Visible to cohorts | Cohort 1, Cohort 2 |
-    And I press dialog form button "Update program"
-    And I follow "Allocation settings"
+    When I click on "Allocation settings" "link" in the "#region-main" "css_element"
     And I click on "Update Automatic cohort allocation" "link"
     And I set the following fields to these values:
-      | Active | Yes |
-    And I set the following fields to these values:
-      | Automatically allocate to visible cohorts | No |
-    And I set the following fields to these values:
-      | Allocate to cohorts | Cohort 1 |
+      | Allocate cohorts | Cohort 4 |
     And I press dialog form button "Update"
-    And I follow "Users"
-    And I should not see "Student 4"
-    And I should see "Student 1"
-    And I should see "Student 2"
-    And I should see "Student 3"
-    And I am on all programs management page
-    And I follow "Program 000"
-    And I follow "Visibility settings"
-    And I press "Edit"
+    And I should see "Active (Cohort 4)" in the "Automatic cohort allocation:" definition list item
+    And I click on "Users" "link" in the "#region-main" "css_element"
+    And I click on "Delete program allocation" "link" in the "Student 1" "table_row"
+    And I press dialog form button "Delete program allocation"
+    And I click on "Delete program allocation" "link" in the "Student 2" "table_row"
+    And I press dialog form button "Delete program allocation"
+    And I click on "Delete program allocation" "link" in the "Student 3" "table_row"
+    And I press dialog form button "Delete program allocation"
+    And I click on "Delete program allocation" "link" in the "Student 4" "table_row"
+    And I press dialog form button "Delete program allocation"
+    And I should see "No user allocations found"
+    And I click on "Allocation settings" "link" in the "#region-main" "css_element"
+    And I click on "Update Automatic cohort allocation" "link"
     And I set the following fields to these values:
-      | Visible to cohorts |  Cohort 2 |
-    And I press dialog form button "Update program"
-    And I follow "Users"
-    And I should not see "Student 4"
-    And I should see "Student 1"
-    And I should see "Student 2"
-    And I should see "Student 3"
+      | Active              | No                |
+    And I press dialog form button "Update"
+    Then I should see "Inactive" in the "Automatic cohort allocation:" definition list item

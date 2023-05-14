@@ -380,6 +380,7 @@ abstract class base {
                     throw new \coding_exception('Cannot delete source with allocations');
                 }
                 $DB->delete_records('enrol_programs_requests', ['sourceid' => $source->id]);
+                $DB->delete_records('enrol_programs_src_cohorts', ['sourceid' => $source->id]);
                 $DB->delete_records('enrol_programs_sources', ['id' => $source->id]);
                 $source = null;
             }

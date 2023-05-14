@@ -82,7 +82,7 @@
         <INDEX NAME="itemid-prerequisiteitemid" UNIQUE="true" FIELDS="itemid, prerequisiteitemid" COMMENT="Prevent duplicates"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="enrol_programs_cohorts" COMMENT="Members of these cohorts may browse non-public programs before allocation, optionally they can be allocated automatically">
+    <TABLE NAME="enrol_programs_cohorts" COMMENT="Members of these cohorts may browse non-public programs before allocation">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="programid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
