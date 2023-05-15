@@ -100,6 +100,7 @@ final class local_source_manual_test extends \advanced_testcase {
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
         $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
 
         $program1 = $generator->create_program(['sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
@@ -135,6 +136,21 @@ final class local_source_manual_test extends \advanced_testcase {
         $this->assertEquals($now, $allocation->timestart);
         $this->assertEquals($now + 1, $allocation->timedue);
         $this->assertEquals($now + 1, $allocation->timeend);
+
+        // Use date overrides.
+        $now = time();
+        $dateoverrides = [
+            'timeallocated' => $now - 60*60*3,
+            'timestart' => $now - 60*60*2,
+            'timedue' => $now + 60*60*1,
+            'timeend' => $now + 60*60*2,
+        ];
+        manual::allocate_users($program1->id, $source1->id, [$user4->id], $dateoverrides);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user4->id]);
+        $this->assertSame((string)$dateoverrides['timeallocated'], $allocation->timeallocated);
+        $this->assertSame((string)$dateoverrides['timestart'], $allocation->timestart);
+        $this->assertSame((string)$dateoverrides['timedue'], $allocation->timedue);
+        $this->assertSame((string)$dateoverrides['timeend'], $allocation->timeend);
     }
 
     public function test_deallocate_user() {

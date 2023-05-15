@@ -96,7 +96,7 @@ final class get_program_allocations extends external_api {
             $source = $sources[$allocation->sourceid];
             /** @var class-string<\enrol_programs\local\source\base> $sourceclass */
             $sourceclass = $sourceclasses[$source->type];
-            $allocation->sourcename = $source->type;
+            $allocation->sourcetype = $source->type;
             $allocation->deletesupported = $sourceclass::allocation_delete_supported($program, $source, $allocation);
             $allocation->editsupported = $sourceclass::allocation_edit_supported($program, $source, $allocation);
             $results[] = $allocation;
@@ -126,7 +126,7 @@ final class get_program_allocations extends external_api {
                 'timeend' => new external_value(PARAM_INT, 'Allocation end date'),
                 'timecompleted' => new external_value(PARAM_INT, 'Allocation completed date'),
                 'timecreated' => new external_value(PARAM_INT, 'Allocation created date'),
-                'sourcename' => new external_value(PARAM_ALPHANUMEXT, 'Internal source name'),
+                'sourcetype' => new external_value(PARAM_ALPHANUMEXT, 'Internal source name'),
                 'deletesupported' => new external_value(PARAM_BOOL, 'Flag to indicate if delete is supported'),
                 'editsupported' => new external_value(PARAM_BOOL, 'Flag to indicate if edit is supported'),
             ], 'List of program allocations')

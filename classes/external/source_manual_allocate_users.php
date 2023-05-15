@@ -16,7 +16,6 @@
 
 namespace enrol_programs\external;
 
-use enrol_programs\local\source\base;
 use external_api;
 use external_function_parameters;
 use external_value;
@@ -84,42 +83,53 @@ final class source_manual_allocate_users extends external_api {
             throw new \moodle_exception('programsarchived', 'enrol_programs');
         }
 
-        $programtenantid = $DB->get_field('context', 'tenantid', ['id' => $program->contextid]);
+        if (!manual::is_valid_dateoverrides($program, $dateoverrides)) {
+            throw new \moodle_exception('errorinvalidoverridedates', 'enrol_programs');
+        }
 
         $useridstoallocate = [];
         foreach ($userids as $userid) {
-            if (!$DB->record_exists('enrol_programs_allocations', ['userid' => $userid, 'programid' => $programid])) {
-                $usertenant = $DB->get_field('tool_olms_tenant_user', 'tenantid', ['userid' => $userid]);
-                if ((empty($usertenant) && empty($programtenantid)) || ($programtenantid == $usertenant)) {
-                    $useridstoallocate[] = $userid;
-                }
-
+            if ($DB->record_exists('enrol_programs_allocations', ['userid' => $userid, 'programid' => $program->id])) {
+                continue;
             }
+            $useridstoallocate[$userid] = $userid;
         }
-
         foreach ($cohortids as $cohortid) {
             $cohort = $DB->get_record('cohort', ['id' => $cohortid], '*', MUST_EXIST);
             $cohortcontext = \context::instance_by_id($cohort->contextid);
             require_capability('moodle/cohort:view', $cohortcontext);
-            $cohorttenantid = $DB->get_field('context', 'tenantid', ['id' => $cohortcontext->id]);
-            if ((empty($cohorttenantid) && empty($programtenantid)) || ($cohorttenantid == $programtenantid)) {
-                $usersofcohort = array_keys($DB->get_records ('cohort_members', ['cohortid' => $cohortid], 'id', 'userid'));
-                $useridstoallocate = array_merge($useridstoallocate, $usersofcohort);
+            $cohrotuserids = $DB->get_fieldset_select('cohort_members', 'userid',  "cohortid = ?", [$cohort->id]);
+            foreach ($cohrotuserids as $userid) {
+                if ($DB->record_exists('enrol_programs_allocations', ['userid' => $userid, 'programid' => $program->id])) {
+                    continue;
+                }
+                $useridstoallocate[$userid] = $userid;
             }
         }
 
-        if (!base::is_valid_dateoverrides($program, $dateoverrides)) {
-            throw new \moodle_exception('errorinvalidoverridedates', 'enrol_programs');
+        if (\enrol_programs\local\tenant::is_active()) {
+            $programtenantid = $DB->get_field('context', 'tenantid', ['id' => $program->contextid]);
+            if ($programtenantid) {
+                foreach ($useridstoallocate as $userid) {
+                    $usertenantid = \tool_olms_tenant\tenant_users::get_user_tenant_id($userid);
+                    if ($usertenantid && $usertenantid != $programtenantid) {
+                        throw new \moodle_exception('invalidtenantid', 'tool_olms_tenant');
+                    }
+                }
+            }
         }
 
-        manual::allocate_users($program->id, $source->id, $useridstoallocate, $dateoverrides);
+        if ($useridstoallocate) {
+            $useridstoallocate = array_values($useridstoallocate);
+            manual::allocate_users($program->id, $source->id, $useridstoallocate, $dateoverrides);
+        }
 
         return $useridstoallocate;
     }
     /**
      * Describes the external function parameters.
      *
-     * @return external_description
+     * @return \external_multiple_structure
      */
     public static function execute_returns(): \external_multiple_structure {
         return new \external_multiple_structure(

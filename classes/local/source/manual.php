@@ -149,6 +149,7 @@ final class manual extends base {
      * @param int $programid
      * @param int $sourceid
      * @param array $userids
+     * @param array $dateoverrides
      * @return void
      */
     public static function allocate_users(int $programid, int $sourceid, array $userids, array $dateoverrides = []): void {

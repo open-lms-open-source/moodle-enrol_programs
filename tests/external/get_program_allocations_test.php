@@ -95,7 +95,7 @@ final class get_program_allocations_test extends \advanced_testcase {
         $this->assertSame(null, $result->timeend);
         $this->assertSame(null, $result->timecompleted);
         $this->assertSame((int)$allocation1->timecreated, $result->timecreated);
-        $this->assertSame('manual', $result->sourcename);
+        $this->assertSame('manual', $result->sourcetype);
         $this->assertSame(true, $result->deletesupported);
         $this->assertSame(true, $result->editsupported);
         $result = (object)$results[1];
@@ -104,7 +104,7 @@ final class get_program_allocations_test extends \advanced_testcase {
         $this->assertSame((int)$allocation2->sourceid, $result->sourceid);
         $this->assertSame((int)$allocation2->userid, $result->userid);
         $this->assertSame((int)$allocation2->timecompleted, $result->timecompleted);
-        $this->assertSame('manual', $result->sourcename);
+        $this->assertSame('manual', $result->sourcetype);
         $this->assertSame(true, $result->deletesupported);
         $this->assertSame(true, $result->editsupported);
         $result = (object)$results[2];
@@ -113,7 +113,7 @@ final class get_program_allocations_test extends \advanced_testcase {
         $this->assertSame((int)$allocation3->sourceid, $result->sourceid);
         $this->assertSame((int)$allocation3->userid, $result->userid);
         $this->assertSame(null, $result->timecompleted);
-        $this->assertSame('selfallocation', $result->sourcename);
+        $this->assertSame('selfallocation', $result->sourcetype);
         $this->assertSame(true, $result->deletesupported);
         $this->assertSame(true, $result->editsupported);
 
