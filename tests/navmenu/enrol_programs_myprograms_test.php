@@ -35,6 +35,11 @@ final class enrol_programs_myprograms_test extends \advanced_testcase {
     protected function setUp(): void {
         global $DB;
         parent::setUp();
+
+        if (!get_config('local_navmenu', 'version')) {
+            $this->markTestSkipped('local_navmenu not available');
+        }
+
         $this->resetAfterTest();
         $DB->delete_records('local_navmenu_items', []);
     }

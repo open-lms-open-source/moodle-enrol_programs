@@ -130,3 +130,9 @@ $capabilities = [
         ],
     ],
 ];
+
+// Compatibility hacks for vanilla Moodle.
+if (!file_exists(__DIR__ . '/../../../admin/tool/olms_tenant/version.php')) {
+    unset($capabilities['enrol/programs:addtoplan']['archetypes']['tenantmanager']);
+    unset($capabilities['enrol/programs:configframeworks']['archetypes']['tenantmanager']);
+}

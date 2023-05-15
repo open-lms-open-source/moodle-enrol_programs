@@ -3,10 +3,6 @@ Feature: Programs navigation behat steps test
 
   Background:
     Given unnecessary Admin bookmarks block gets deleted
-    And the following "local_navmenu > items" exist:
-      | itemtype                  |
-      | enrol_programs_catalogue  |
-      | enrol_programs_myprograms |
     And the following "categories" exist:
       | name  | category | idnumber |
       | Cat 1 | 0        | CAT1     |
@@ -173,7 +169,12 @@ Feature: Programs navigation behat steps test
 
   @javascript
   Scenario: Category manager navigates to programs the normal way
-    Given I log in as "manager2"
+    Given I skip tests if "local_navmenu" is not installed
+    And the following "local_navmenu > items" exist:
+      | itemtype                  |
+      | enrol_programs_catalogue  |
+      | enrol_programs_myprograms |
+    And I log in as "manager2"
 
     When I select "Program catalogue" from primary navigation
     And I follow "Program management"
@@ -209,7 +210,12 @@ Feature: Programs navigation behat steps test
 
   @javascript
   Scenario: Full viewer navigates to programs the normal way
-    Given I log in as "viewer1"
+    Given I skip tests if "local_navmenu" is not installed
+    And the following "local_navmenu > items" exist:
+      | itemtype                  |
+      | enrol_programs_catalogue  |
+      | enrol_programs_myprograms |
+    And I log in as "viewer1"
 
     When I select "Program catalogue" from primary navigation
     And I follow "Program management"
@@ -253,7 +259,12 @@ Feature: Programs navigation behat steps test
 
   @javascript
   Scenario: Category viewer navigates to programs the normal way
-    Given I log in as "manager2"
+    Given I skip tests if "local_navmenu" is not installed
+    And the following "local_navmenu > items" exist:
+      | itemtype                  |
+      | enrol_programs_catalogue  |
+      | enrol_programs_myprograms |
+    And I log in as "manager2"
 
     When I select "Program catalogue" from primary navigation
     And I follow "Program management"
@@ -275,7 +286,12 @@ Feature: Programs navigation behat steps test
 
   @javascript
   Scenario: Student navigates to Program catalogue the normal way
-    Given I log in as "student1"
+    Given I skip tests if "local_navmenu" is not installed
+    And the following "local_navmenu > items" exist:
+      | itemtype                  |
+      | enrol_programs_catalogue  |
+      | enrol_programs_myprograms |
+    And I log in as "student1"
 
     When I select "Program catalogue" from primary navigation
     Then I should see "Program catalogue"
@@ -293,7 +309,12 @@ Feature: Programs navigation behat steps test
 
   @javascript
   Scenario: Student navigates to My programs the normal way
-    Given I log in as "student1"
+    Given I skip tests if "local_navmenu" is not installed
+    And the following "local_navmenu > items" exist:
+      | itemtype                  |
+      | enrol_programs_catalogue  |
+      | enrol_programs_myprograms |
+    And I log in as "student1"
 
     When I select "My programs" from primary navigation
     Then I should see "My programs"

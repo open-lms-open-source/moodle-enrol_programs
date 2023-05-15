@@ -109,8 +109,7 @@ Feature: Manual program allocation tests
 
   @javascript @tool_olms_tenant
   Scenario: Tenant manager may allocate users manually
-    Given I skip tests if "tool_olms_tenant" is not installed
-    And tenant support was activated
+    Given tenant support was activated
     And the following "tool_olms_tenant > tenants" exist:
       | name     | idnumber | category |
       | Tenant 1 | TEN1     | CAT1     |

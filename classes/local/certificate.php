@@ -37,7 +37,7 @@ final class certificate {
             return false;
         }
         $version = get_config('tool_certificate', 'version');
-        if (!$version || $version < 2022031620) {
+        if (!$version || $version < 2023042500) {
             return false;
         }
         return true;

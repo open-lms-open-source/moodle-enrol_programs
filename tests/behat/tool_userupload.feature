@@ -2,7 +2,8 @@
 Feature: Program allocation via tool_userupload
 
   Background:
-    Given unnecessary Admin bookmarks block gets deleted
+    Given I skip tests if "local_olms_work" is not installed
+    And unnecessary Admin bookmarks block gets deleted
     And the following "categories" exist:
       | name  | category | idnumber |
       | Cat 1 | 0        | CAT1     |
