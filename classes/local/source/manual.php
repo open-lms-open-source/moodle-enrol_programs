@@ -151,7 +151,7 @@ final class manual extends base {
      * @param array $userids
      * @return void
      */
-    public static function allocate_users(int $programid, int $sourceid, array $userids): void {
+    public static function allocate_users(int $programid, int $sourceid, array $userids, array $dateoverrides = []): void {
         global $DB;
 
         $program = $DB->get_record('enrol_programs_programs', ['id' => $programid], '*', MUST_EXIST);
@@ -168,7 +168,7 @@ final class manual extends base {
                 // One allocation per program only.
                 continue;
             }
-            self::allocate_user($program, $source, $user->id, []);
+            self::allocate_user($program, $source, $user->id, [], $dateoverrides);
         }
 
         if (count($userids) === 1) {
