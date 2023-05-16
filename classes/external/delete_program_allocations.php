@@ -40,7 +40,7 @@ final class delete_program_allocations extends external_api {
             'programid' => new external_value(PARAM_INT, 'Program id'),
             'userids' => new \external_multiple_structure(
                 new external_value(PARAM_INT, 'User id')
-                , 'User ids to be allocated the program')
+                , 'User ids to be deallocated from program')
         ]);
     }
 
@@ -55,8 +55,8 @@ final class delete_program_allocations extends external_api {
         global $DB;
         $params = self::validate_parameters(self::execute_parameters(),
             ['programid' => $programid, 'userids' => $userids]);
-        $userids = $params['userids'];
         $programid = $params['programid'];
+        $userids = $params['userids'];
 
         $program = $DB->get_record('enrol_programs_programs', ['id' => $programid], '*', MUST_EXIST);
 
@@ -65,34 +65,48 @@ final class delete_program_allocations extends external_api {
         self::validate_context($context);
         require_capability('enrol/programs:allocate', $context);
 
-        $useridsdeallocated = [];
         $sourceclasses = allocation::get_source_classes();
         $sources = $DB->get_records('enrol_programs_sources', ['programid' => $program->id]);
 
+        // Check all data is valid first.
+        $deallocate = [];
         foreach ($userids as $userid) {
-            $allocationrecord = $DB->get_record('enrol_programs_allocations', ['programid' => $programid, 'userid' => $userid]);
-
-            if (!$allocationrecord || !isset($sources[$allocationrecord->sourceid]) || !isset($sourceclasses[$sources[$allocationrecord->sourceid]->type])) {
-                // Ignore invalid data.
+            $allocationrecord = $DB->get_record('enrol_programs_allocations',
+                ['programid' => $programid, 'userid' => $userid]);
+            if (!$allocationrecord) {
+                // Not allocated - ignore.
                 continue;
+            }
+            if (!isset($sources[$allocationrecord->sourceid])
+                || !isset($sourceclasses[$sources[$allocationrecord->sourceid]->type])) {
+                // This was not included in get_program_allocations results.
+                throw new \invalid_parameter_exception('Invalid user allocation');
             }
             $source = $sources[$allocationrecord->sourceid];
             /** @var class-string<\enrol_programs\local\source\base> $sourceclass */
             $sourceclass = $sourceclasses[$source->type];
 
-            if ($sourceclass::allocation_delete_supported($program, $source, $allocationrecord)) {
-                $sourceclass::deallocate_user($program, $source, $allocationrecord);
-                $useridsdeallocated[] = $userid;
+            if (!$sourceclass::allocation_delete_supported($program, $source, $allocationrecord)) {
+                // They should have checked data returned from get_program_allocations.
+                throw new \invalid_parameter_exception('Cannot deallocate');
             }
 
+            $deallocate[$userid] = [$sourceclass, $source, $allocationrecord];
         }
 
-        return $useridsdeallocated;
+        // Deallocate after validation of all data.
+        foreach ($deallocate as $v) {
+            /** @var class-string<\enrol_programs\local\source\base> $sourceclass */
+            list($sourceclass, $source, $allocationrecord) = $v;
+            $sourceclass::deallocate_user($program, $source, $allocationrecord);
+        }
+
+        return array_keys($deallocate);
     }
     /**
      * Describes the external function parameters.
      *
-     * @return external_description
+     * @return \external_multiple_structure
      */
     public static function execute_returns(): \external_multiple_structure {
         return new \external_multiple_structure(

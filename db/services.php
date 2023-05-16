@@ -45,12 +45,12 @@ $functions = [
     ],
     'enrol_programs_source_manual_allocate_users' => [
         'classname' => enrol_programs\external\source_manual_allocate_users::class,
-        'description' => 'Allocates the user or cohorts to the program.',
+        'description' => 'Allocates users or cohorts to the program.',
         'type' => 'write',
     ],
     'enrol_programs_delete_program_allocations' => [
         'classname' => enrol_programs\external\delete_program_allocations::class,
-        'description' => 'Deallocates the user from the program.',
+        'description' => 'Deallocates users from the program.',
         'type' => 'write',
     ],
 ];

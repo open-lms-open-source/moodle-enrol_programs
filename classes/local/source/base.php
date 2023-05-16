@@ -423,7 +423,7 @@ abstract class base {
         global $DB;
 
         if (static::get_type() !== $source->type || $program->id != $allocation->programid || $program->id != $source->programid) {
-            throw new \coding_exception('invalid paramters');
+            throw new \coding_exception('invalid parameters');
         }
         $user = $DB->get_record('user', ['id' => $allocation->userid]);
 
