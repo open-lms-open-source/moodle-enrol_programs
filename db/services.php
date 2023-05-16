@@ -53,4 +53,9 @@ $functions = [
         'description' => 'Deallocates users from the program.',
         'type' => 'write',
     ],
+    'enrol_programs_update_program_allocation' => [
+        'classname' => enrol_programs\external\update_program_allocation::class,
+        'description' => 'Updates the allocation for the user and the program.',
+        'type' => 'write',
+    ],
 ];
