@@ -48,4 +48,9 @@ $functions = [
         'description' => 'Allocates the user or cohorts to the program.',
         'type' => 'write',
     ],
+    'enrol_programs_delete_program_allocations' => [
+        'classname' => enrol_programs\external\delete_program_allocations::class,
+        'description' => 'Deallocates the user from the program.',
+        'type' => 'write',
+    ],
 ];
