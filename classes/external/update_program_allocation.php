@@ -44,9 +44,8 @@ final class update_program_allocation extends external_api {
                 'timestart' => new external_value(PARAM_INT, 'time start', VALUE_OPTIONAL),
                 'timedue' => new external_value(PARAM_INT, 'time due', VALUE_OPTIONAL),
                 'timeend' => new external_value(PARAM_INT, 'time start', VALUE_OPTIONAL),
-                'timecompleted' => new external_value(PARAM_INT, 'time start', VALUE_OPTIONAL)
-            ], 'Array of allocation dates timestart timedue timeend timecompleted can be passed as unix timestamps', VALUE_DEFAULT, []),
-            'archived' => new external_value(PARAM_BOOL, 'Archived flag', VALUE_DEFAULT, false)
+            ], 'Array of updates for timestart, timedue, timeend can be passed as unix timestamps', VALUE_DEFAULT, []),
+            'archived' => new external_value(PARAM_BOOL, 'Archived flag', VALUE_DEFAULT, null)
         ]);
     }
 
@@ -55,11 +54,11 @@ final class update_program_allocation extends external_api {
      *
      * @param int $programid Program id.
      * @param int $userid User id.
-     * @param array $allocationdates Allocation dates.
-     * @param bool $archived Archived false.
-     * @return array
+     * @param array $allocationdates optional allocation dates.
+     * @param ?bool $archived Optional archived flag.
+     * @return \stdClass
      */
-    public static function execute(int $programid, int $userid, array $allocationdates = [], bool $archived = false): array {
+    public static function execute(int $programid, int $userid, array $allocationdates = [], ?bool $archived = null): \stdClass {
         global $DB;
         $params = self::validate_parameters(self::execute_parameters(),
             ['programid' => $programid, 'userid' => $userid, 'allocationdates' => $allocationdates, 'archived' => $archived]);
@@ -75,43 +74,43 @@ final class update_program_allocation extends external_api {
         self::validate_context($context);
         require_capability('enrol/programs:admin', $context);
 
-        $sourceclasses = allocation::get_source_classes();
-        $allocationrecord = $DB->get_record('enrol_programs_allocations', ['programid' => $programid, 'userid' => $userid]);
+        $allocation = $DB->get_record('enrol_programs_allocations',
+            ['programid' => $programid, 'userid' => $userid], '*', MUST_EXIST);
 
-        if (!$allocationrecord) {
-            throw new \moodle_exception('errornoallocation', 'enrol_programs');
+        $sourceclasses = allocation::get_source_classes();
+        $source = $DB->get_record('enrol_programs_sources', ['id' => $allocation->sourceid]);
+        if (!$source || !isset($sourceclasses[$source->type])) {
+            throw new \invalid_parameter_exception('Invalid allocation data');
         }
 
-        $source = $DB->get_record('enrol_programs_sources', ['id' => $allocationrecord->sourceid]);
-
+        /** @var class-string<\enrol_programs\local\source\base> $sourceclass */
         $sourceclass = $sourceclasses[$source->type];
 
-        if ($sourceclass::is_update_allowed($program, $source, $allocationrecord)) {
-
-            $timestart = $allocationdates['timestart'] ?? $allocationrecord->timestart;
-            $timedue = $allocationdates['timedue'] ?? $allocationrecord->timedue;
-            $timeend = $allocationdates['timeend'] ?? $allocationrecord->timeend;
-            $timecompleted = $allocationdates['timecompleted'] ?? $allocationrecord->timeend;
-            $errors = allocation::validate_allocation_dates($timestart, $timedue, $timeend);
-            if (empty($errors)) {
-                $allocationrecord->timestart = $timestart;
-                $allocationrecord->timedue = $timedue;
-                $allocationrecord->timeend = $timeend;
-                $allocationrecord->archived = $archived;
-                // TODO , do we need validation for time completed as well?
-                $allocationrecord->timecompleted = $timecompleted;
-                $DB->update_record('enrol_programs_allocations', $allocationrecord);
-            } else {
-                throw new \moodle_exception('errorinvalidoverridedates', 'enrol_programs');
-            }
-            $allocationrecord->sourcetype = $source->type;
-            $allocationrecord->deletesupported = $sourceclass::allocation_delete_supported($program, $source, $allocationrecord);
-            $allocationrecord->editsupported = $sourceclass::allocation_edit_supported($program, $source, $allocationrecord);
-        } else {
-            throw new \invalid_parameter_exception('Cannot update');
+        if (!$sourceclass::allocation_edit_supported($program, $source, $allocation)) {
+            throw new \invalid_parameter_exception('Allocation data cannot be update');
         }
 
-        return (array) $allocationrecord;
+        if ($archived !== null) {
+            $allocation->archived = (int)$archived;
+        }
+        foreach ($allocationdates as $name => $value) {
+            if ($name !== 'timestart' && $name !== 'timedue' && $name !== 'timeend') {
+                throw new \invalid_parameter_exception('Invalid date type');
+            }
+            $allocation->$name = $value;
+        }
+        $errors = allocation::validate_allocation_dates(
+            $allocation->timestart, $allocation->timedue, $allocation->timeend);
+        if ($errors) {
+            throw new \invalid_parameter_exception('Allocation dates are invalid');
+        }
+
+        $allocation = allocation::update_user($allocation);
+        $allocation->sourcetype = $source->type;
+        $allocation->deletesupported = $sourceclass::allocation_delete_supported($program, $source, $allocation);
+        $allocation->editsupported = $sourceclass::allocation_edit_supported($program, $source, $allocation);
+
+        return $allocation;
     }
 
     /**
@@ -120,6 +119,7 @@ final class update_program_allocation extends external_api {
      * @return \external_single_structure
      */
     public static function execute_returns(): \external_single_structure {
+        // NOTE: This matches \enrol_programs\external\get_program_allocations::execute_returns().
         return new \external_single_structure([
             'id' => new external_value(PARAM_INT, 'Program allocation id'),
             'programid' => new external_value(PARAM_INT, 'Program id'),

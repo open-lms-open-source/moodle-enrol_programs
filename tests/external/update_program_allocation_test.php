@@ -16,10 +16,8 @@
 
 namespace enrol_programs\external;
 
-use enrol_programs\local\source\selfallocation;
-
 /**
- * External API for get program allocations
+ * External API for updating of program allocations
  *
  * @group      openlms
  * @package    enrol_programs
@@ -28,7 +26,7 @@ use enrol_programs\local\source\selfallocation;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @runTestsInSeparateProcesses
- * @covers \enrol_programs\external\get_program_allocations
+ * @covers \enrol_programs\external\update_program_allocation
  */
 final class update_program_allocation_test extends \advanced_testcase {
     public function setUp(): void {
@@ -46,116 +44,99 @@ final class update_program_allocation_test extends \advanced_testcase {
         $category1 = $this->getDataGenerator()->create_category([]);
         $catcontext1 = \context_coursecat::instance($category1->id);
 
-        $cohort1 = $this->getDataGenerator()->create_cohort();
-
-        $program1 = $generator->create_program(
-            ['sources' => ['manual' => [], 'selfallocation' => []], 'public' => 1, 'contextid' => $catcontext1->id]);
-        $source1m = $DB->get_record('enrol_programs_sources',
-            ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-        $source1s = $DB->get_record('enrol_programs_sources',
-            ['programid' => $program1->id, 'type' => 'selfallocation'], '*', MUST_EXIST);
-        $program2 = $generator->create_program(
-            ['sources' => ['manual' => [], 'cohort' => ['cohorts' => [$cohort1->id]]]]);
-        $source2 = $DB->get_record('enrol_programs_sources',
-            ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $program1 = $generator->create_program(['fullname' => 'pokus', 'contextid' => $catcontext1->id,
+            'sources' => ['manual' => []]]);
+        $program2 = $generator->create_program(['fullname' => 'hokus',
+            'sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
 
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
         $user3 = $this->getDataGenerator()->create_user();
-        $user4 = $this->getDataGenerator()->create_user();
 
-        cohort_add_member($cohort1->id, $user4->id);
+        $now = time();
 
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1m->id, [$user2->id, $user3->id]);
+        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id,
+            [$user1->id], ['timestart' => $now - 120, 'timedue' => $now + 60, 'timeend' => $now + 120]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['sourceid' => $source1->id, 'userid' => $user1->id]);
 
-        $viewerroleid = $this->getDataGenerator()->create_role();
-        assign_capability('enrol/programs:admin', CAP_ALLOW, $viewerroleid, $syscontext);
-        role_assign($viewerroleid, $user1->id, $catcontext1->id);
+        \enrol_programs\local\source\manual::allocate_users($program2->id, $source2->id,
+            [$user2->id], ['timestart' => $now - 1200, 'timedue' => $now + 600, 'timeend' => $now + 1200]);
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['sourceid' => $source2->id, 'userid' => $user1->id]);
 
-        $this->setUser($user1->id);
+        $adminroleid = $this->getDataGenerator()->create_role();
+        assign_capability('enrol/programs:admin', CAP_ALLOW, $adminroleid, $syscontext);
+        role_assign($adminroleid, $user2->id, $catcontext1->id);
 
-        $timestart = time() + YEARSECS;
+        $this->setUser($user2);
 
-        $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-            update_program_allocation::execute($program1->id, $user2->id, ['timestart' => $timestart], true));
-
-        $result = (object) $result;
-
-        $this->assertSame((int) $program1->id, $result->programid);
-        $this->assertSame((int) $user2->id, $result->userid);
-        $this->assertSame((int) $result->timestart, $timestart);
-        $this->assertTrue($result->archived);
-
-        $timedue = time() + YEARSECS + (7 * DAYSECS);
-        $timeend = time() + YEARSECS + (30 * DAYSECS);
-        $timecompleted = time() + YEARSECS + (6 * DAYSECS);
-        $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-            update_program_allocation::execute($program1->id, $user2->id,
-                ['timedue' => $timedue, 'timeend' => $timeend, 'timecompleted' => $timecompleted], false));
-
-        $result = (object) $result;
-
-        $this->assertSame((int) $program1->id, $result->programid);
-        $this->assertSame((int) $user2->id, $result->userid);
-        $this->assertSame((int) $source1m->id, $result->sourceid);
-        $this->assertSame((int) $result->timedue, $timedue);
-        $this->assertSame((int) $result->timeend, $timeend);
-        $this->assertSame((int) $result->timestart, $timestart);
-        $this->assertSame((int) $result->timecompleted, $timecompleted);
+        $result = update_program_allocation::clean_returnvalue(
+            update_program_allocation::execute_returns(),
+            update_program_allocation::execute($program1->id, $user1->id,
+                ['timestart' => $now - 10], true));
+        $result = (object)$result;
+        $this->assertSame((int)$allocation1->id, $result->id);
+        $this->assertSame((int)$source1->id, $result->sourceid);
+        $this->assertSame((int)$user1->id, $result->userid);
+        $this->assertSame($now - 10, $result->timestart);
+        $this->assertSame($now + 60, $result->timedue);
+        $this->assertSame($now + 120, $result->timeend);
+        $this->assertSame(true, $result->archived);
         $this->assertSame('manual', $result->sourcetype);
-        $this->assertFalse($result->archived);
+        $this->assertSame(true, $result->deletesupported);
+        $this->assertSame(true, $result->editsupported);
 
-        $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-            update_program_allocation::execute($program1->id, $user2->id, [], true));
+        $result = update_program_allocation::clean_returnvalue(
+            update_program_allocation::execute_returns(),
+            update_program_allocation::execute($program1->id, $user1->id,
+                ['timestart' => $now - 10, 'timedue' => null, 'timeend' => $now + 60]));
+        $result = (object)$result;
+        $this->assertSame((int)$allocation1->id, $result->id);
+        $this->assertSame($now - 10, $result->timestart);
+        $this->assertSame(null, $result->timedue);
+        $this->assertSame($now + 60, $result->timeend);
+        $this->assertSame(true, $result->archived);
 
-        $result = (object) $result;
-        $this->assertTrue($result->archived);
-
-        $this->setUser($user3);
-
-        try {
-            $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-                update_program_allocation::execute($program1->id, $user2->id, ['timedue' => $timedue, 'timeend' => $timeend], false));
-            $this->fail('Exception expected');
-        } catch (\moodle_exception $exception) {
-            $this->assertInstanceOf(\required_capability_exception::class, $exception);
-            $this->assertSame('Sorry, but you do not currently have permissions to do that (Advanced program administration).', $exception->getMessage());
-        }
-
-        \enrol_programs\local\source\manual::allocate_users($program2->id, $source2->id, [$user3->id]);
-        $this->setUser($user1);
-
-        try {
-            $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-                update_program_allocation::execute($program2->id, $user3->id, [], true));
-            $this->fail('Exception expected');
-        } catch (\moodle_exception $exception) {
-            $this->assertInstanceOf(\required_capability_exception::class, $exception);
-            $this->assertSame('Sorry, but you do not currently have permissions to do that (Advanced program administration).', $exception->getMessage());
-        }
-
-        $this->setUser($user4);
-        selfallocation::signup($program1->id, $source1s->id);
-
-        $this->setAdminUser();
-        $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-            update_program_allocation::execute($program2->id, $user4->id, [], true));
-        $result = (object) $result;
-        $this->assertTrue($result->archived);
-
-        $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-            update_program_allocation::execute($program2->id, $user4->id, [], false));
-        $result = (object) $result;
-        $this->assertFalse($result->archived);
+        $result = update_program_allocation::clean_returnvalue(
+            update_program_allocation::execute_returns(),
+            update_program_allocation::execute($program1->id, $user1->id,
+                [], false));
+        $result = (object)$result;
+        $this->assertSame((int)$allocation1->id, $result->id);
+        $this->assertSame($now - 10, $result->timestart);
+        $this->assertSame(null, $result->timedue);
+        $this->assertSame($now + 60, $result->timeend);
+        $this->assertSame(false, $result->archived);
 
         try {
-            $result = update_program_allocation::clean_returnvalue(update_program_allocation::execute_returns(),
-                update_program_allocation::execute($program2->id, $user1->id, [], false));
+            update_program_allocation::execute($program1->id, $user1->id,
+                ['timestart' => $now - 10, 'timecompleted' => $now], true);
             $this->fail('Exception expected');
-        } catch (\moodle_exception $exception) {
-            $this->assertInstanceOf(\moodle_exception::class, $exception);
-            $this->assertSame('Program is not allocated', $exception->getMessage());
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\invalid_parameter_exception::class, $ex);
         }
 
+        try {
+            update_program_allocation::execute($program1->id, $user1->id,
+                ['timestart' => 0]);
+            $this->fail('Exception expected');
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\invalid_parameter_exception::class, $ex);
+        }
+
+        try {
+            update_program_allocation::execute($program1->id, $user3->id, [], true);
+            $this->fail('Exception expected');
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\dml_missing_record_exception::class, $ex);
+        }
+
+        try {
+            update_program_allocation::execute($program2->id, $user2->id, [], true);
+            $this->fail('Exception expected');
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\required_capability_exception::class, $ex);
+        }
     }
 }
