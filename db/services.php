@@ -58,4 +58,19 @@ $functions = [
         'description' => 'Updates the allocation for the user and the program.',
         'type' => 'write',
     ],
+    'enrol_programs_source_cohort_get_cohorts' => [
+        'classname' => enrol_programs\external\source_cohort_get_cohorts::class,
+        'description' => 'Gets list of cohort that are synced with the program cohort allocation.',
+        'type' => 'read',
+    ],
+    'enrol_programs_source_cohort_add_cohort' => [
+        'classname' => enrol_programs\external\source_cohort_add_cohort::class,
+        'description' => 'Add cohort to the list of synchronised cohorts of one program.',
+        'type' => 'write',
+    ],
+    'enrol_programs_source_cohort_delete_cohort' => [
+        'classname' => enrol_programs\external\source_cohort_delete_cohort::class,
+        'description' => 'Removes a cohort from the list of synchronised cohorts of one program.',
+        'type' => 'write',
+    ],
 ];
