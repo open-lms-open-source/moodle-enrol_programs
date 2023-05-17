@@ -106,6 +106,8 @@ final class form_source_manual_allocate_users_test extends \advanced_testcase {
             $this->fail('Exception expected');
         } catch (\moodle_exception $ex) {
             $this->assertInstanceOf('required_capability_exception', $ex);
+            $this->assertSame('Sorry, but you do not currently have permissions to do that (Allocate students to programs).',
+                $ex->getMessage());
         }
 
         $this->setUser($user5);

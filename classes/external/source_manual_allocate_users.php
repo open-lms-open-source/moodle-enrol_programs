@@ -80,11 +80,11 @@ final class source_manual_allocate_users extends external_api {
         require_capability('enrol/programs:allocate', $context);
 
         if ($program->archived) {
-            throw new \moodle_exception('programsarchived', 'enrol_programs');
+            throw new \invalid_parameter_exception('Program is archived');
         }
 
         if (!manual::is_valid_dateoverrides($program, $dateoverrides)) {
-            throw new \moodle_exception('errorinvalidoverridedates', 'enrol_programs');
+            throw new \invalid_parameter_exception('Invalid program allocation dates');
         }
 
         $useridstoallocate = [];
@@ -113,7 +113,7 @@ final class source_manual_allocate_users extends external_api {
                 foreach ($useridstoallocate as $userid) {
                     $usertenantid = \tool_olms_tenant\tenant_users::get_user_tenant_id($userid);
                     if ($usertenantid && $usertenantid != $programtenantid) {
-                        throw new \moodle_exception('invalidtenantid', 'tool_olms_tenant');
+                        throw new \invalid_parameter_exception('Tenant mismatch');
                     }
                 }
             }

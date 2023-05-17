@@ -102,8 +102,8 @@ final class source_manual_allocate_users_test extends \advanced_testcase {
             source_manual_allocate_users::execute($program1->id, [$user9->id], [], ['timedue' => $timedue, 'timestart' => $timestart]);
             $this->fail('Exception expected');
         } catch (\moodle_exception $ex) {
-            $this->assertInstanceOf(\moodle_exception::class, $ex);
-            $this->assertSame('Invalid date overrides', $ex->getMessage());
+            $this->assertInstanceOf(\invalid_parameter_exception::class, $ex);
+            $this->assertSame('Invalid program allocation dates', $ex->debuginfo);
         }
         $record = $DB->get_record('enrol_programs_allocations', ['userid' => $user8->id, 'programid' => $program1->id]);
         $this->assertSame($timeend, (int)$record->timeend);
@@ -114,11 +114,23 @@ final class source_manual_allocate_users_test extends \advanced_testcase {
             $this->fail('Exception expected');
         } catch (\moodle_exception $ex) {
             $this->assertInstanceOf(\required_capability_exception::class, $ex);
+            $this->assertSame('Sorry, but you do not currently have permissions to do that (Allocate students to programs).',
+                $ex->getMessage());
         }
 
         $this->setUser($user2);
         $results = source_manual_allocate_users::execute($program2->id, [], [$cohort2->id]);
         $this->assertCount(1, $results);
+
+        $this->setAdminUser();
+        \enrol_programs\local\program::update_program_general((object)['id' => $program1->id, 'archived' => 1]);
+        try {
+            source_manual_allocate_users::execute($program1->id, [], [$cohort1->id]);
+            $this->fail('Exception expected');
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\invalid_parameter_exception::class, $ex);
+            $this->assertSame('Program is archived', $ex->debuginfo);
+        }
     }
 
     public function test_execute_tenants() {
@@ -176,7 +188,8 @@ final class source_manual_allocate_users_test extends \advanced_testcase {
             source_manual_allocate_users::execute($program1->id, [$user2->id]);
             $this->fail('Exception expected');
         } catch (\moodle_exception $ex) {
-            $this->assertInstanceOf(\moodle_exception::class, $ex);
+            $this->assertInstanceOf(\invalid_parameter_exception::class, $ex);
+            $this->assertSame('Tenant mismatch', $ex->debuginfo);
         }
     }
 }
