@@ -16,8 +16,6 @@
 
 namespace enrol_programs\external;
 
-use enrol_programs\local\program;
-
 /**
  * External API for removing cohort from the list or cohorts that are synced with the program.
  *
@@ -31,8 +29,7 @@ use enrol_programs\local\program;
  * @covers \enrol_programs\external\source_cohort_delete_cohort_test
  */
 final class source_cohort_delete_cohort_test extends \advanced_testcase {
-    public function setUp(): void
-    {
+    public function setUp(): void {
         global $CFG;
         require_once("$CFG->dirroot/lib/externallib.php");
         $this->resetAfterTest();
@@ -55,39 +52,63 @@ final class source_cohort_delete_cohort_test extends \advanced_testcase {
             'contextid' => $catcontext1->id,
             'sources' => ['cohort' => ['cohorts' => [$cohort1->id, $cohort2->id, $cohort3->id]]]
         ]);
-        $source1c = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'cohort'], '*', MUST_EXIST);
+        $program2 = $generator->create_program([
+            'contextid' => $syscontext->id,
+            'sources' => ['cohort' => ['cohorts' => [$cohort2->id, $cohort3->id]]]
+        ]);
 
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
 
-        $viewerroleid = $this->getDataGenerator()->create_role();
-        assign_capability('enrol/programs:view', CAP_ALLOW, $viewerroleid, $syscontext);
-        role_assign($viewerroleid, $user1->id, $catcontext1->id);
+        $editorroleid = $this->getDataGenerator()->create_role();
+        assign_capability('enrol/programs:edit', CAP_ALLOW, $editorroleid, $syscontext);
+        role_assign($editorroleid, $user1->id, $catcontext1->id);
 
         $this->setUser($user1);
 
-        $cohorts = $DB->get_records('enrol_programs_src_cohorts', ['sourceid' => $source1c->id]);
-        $this->assertCount(3, $cohorts);
-
-        $result = source_cohort_delete_cohort::clean_returnvalue(source_cohort_delete_cohort::execute_returns(),
+        $result = source_cohort_delete_cohort::clean_returnvalue(
+            source_cohort_delete_cohort::execute_returns(),
             source_cohort_delete_cohort::execute($program1->id, $cohort2->id));
-
         $this->assertCount(2, $result);
-        $result = (object) $result[1];
-        $this->assertSame((int) $cohort3->id, $result->id);
+        $this->assertEquals($cohort1->id, $result[0]['id']);
+        $this->assertEquals($cohort3->id, $result[1]['id']);
 
-        $cohorts = $DB->get_records('enrol_programs_src_cohorts', ['sourceid' => $source1c->id]);
-        $this->assertCount(2, $cohorts);
+        $result = source_cohort_delete_cohort::clean_returnvalue(
+            source_cohort_delete_cohort::execute_returns(),
+            source_cohort_delete_cohort::execute($program1->id, $cohort2->id));
+        $this->assertCount(2, $result);
 
-        $this->setUser($user2);
+        $result = source_cohort_delete_cohort::clean_returnvalue(
+            source_cohort_delete_cohort::execute_returns(),
+            source_cohort_delete_cohort::execute($program1->id, -10));
+        $this->assertCount(2, $result);
+
         try {
-            $result = source_cohort_delete_cohort::clean_returnvalue(source_cohort_delete_cohort::execute_returns(),
-                source_cohort_delete_cohort::execute($program1->id, $cohort3->id));
+            source_cohort_delete_cohort::execute($program2->id, $cohort1->id);
             $this->fail('Exception excepted');
-        } catch (\moodle_exception $exception) {
-            $this->assertInstanceOf(\required_capability_exception::class, $exception);
-            $this->assertSame('Sorry, but you do not currently have permissions to do that (View program management).', $exception->getMessage());
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\required_capability_exception::class, $ex);
+            $this->assertSame('Sorry, but you do not currently have permissions to do that (Add and update programs).',
+                $ex->getMessage());
         }
 
+        $this->setUser($user2);
+
+        try {
+            source_cohort_delete_cohort::execute($program1->id, $cohort1->id);
+            $this->fail('Exception excepted');
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\required_capability_exception::class, $ex);
+            $this->assertSame('Sorry, but you do not currently have permissions to do that (Add and update programs).',
+                $ex->getMessage());
+        }
+
+        $this->setAdminUser();
+
+        $result = source_cohort_delete_cohort::clean_returnvalue(
+            source_cohort_delete_cohort::execute_returns(),
+            source_cohort_delete_cohort::execute($program2->id, $cohort2->id));
+        $this->assertCount(1, $result);
+        $this->assertEquals($cohort3->id, $result[0]['id']);
     }
 }

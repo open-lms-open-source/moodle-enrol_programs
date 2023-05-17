@@ -59,16 +59,7 @@ final class source_cohort_get_cohorts extends external_api {
         self::validate_context($context);
         require_capability('enrol/programs:view', $context);
 
-        $sql = "SELECT c.id, c.contextid, c.name, c.idnumber
-                  FROM {enrol_programs_src_cohorts} sc
-                  JOIN {cohort} c ON c.id = sc.cohortid
-                  JOIN {enrol_programs_sources} ps ON ps.id = sc.sourceid
-                 WHERE ps.programid = :programid and ps.type = 'cohort'
-              ORDER BY id ASC";
-
-        $records = $DB->get_records_sql($sql, ['programid' => $programid]);
-
-        return $records;
+        return self::get_cohorts($program->id);
     }
 
     /**
@@ -77,6 +68,15 @@ final class source_cohort_get_cohorts extends external_api {
      * @return \external_multiple_structure
      */
     public static function execute_returns(): \external_multiple_structure {
+        return self::get_cohorts_returns();
+    }
+
+    /**
+     * Description of get_cohorts() result.
+     *
+     * @return \external_multiple_structure
+     */
+    public static function get_cohorts_returns(): \external_multiple_structure {
         return new \external_multiple_structure(
             new \external_single_structure([
                 'id' => new external_value(PARAM_INT, 'Cohort id'),
@@ -85,5 +85,25 @@ final class source_cohort_get_cohorts extends external_api {
                 'idnumber' => new external_value(PARAM_RAW, 'Cohort idnumber'),
             ], 'List of cohorts that are synced with the program')
         );
+    }
+
+    /**
+     * Returns cohorts synced with program.
+     *
+     * @param int $programid
+     * @return array
+     */
+    public static function get_cohorts(int $programid): array {
+        global $DB;
+
+        $sql = "SELECT c.id, c.contextid, c.name, c.idnumber
+                  FROM {enrol_programs_src_cohorts} sc
+                  JOIN {cohort} c ON c.id = sc.cohortid
+                  JOIN {enrol_programs_sources} ps ON ps.id = sc.sourceid
+                 WHERE ps.programid = :programid and ps.type = 'cohort'
+              ORDER BY id ASC";
+
+        $cohorts = $DB->get_records_sql($sql, ['programid' => $programid]);
+        return array_values($cohorts);
     }
 }

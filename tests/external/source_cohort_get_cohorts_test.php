@@ -16,8 +16,6 @@
 
 namespace enrol_programs\external;
 
-use enrol_programs\local\program;
-
 /**
  * External API for getting cohorts that are synced with the program.
  *
@@ -31,15 +29,13 @@ use enrol_programs\local\program;
  * @covers \enrol_programs\external\source_cohort_get_cohorts
  */
 final class source_cohort_get_cohorts_test extends \advanced_testcase {
-    public function setUp(): void
-    {
+    public function setUp(): void {
         global $CFG;
         require_once("$CFG->dirroot/lib/externallib.php");
         $this->resetAfterTest();
     }
 
     public function test_execute() {
-        global $DB;
         /** @var \enrol_programs_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
 
@@ -50,9 +46,12 @@ final class source_cohort_get_cohorts_test extends \advanced_testcase {
         $cohort2 = $this->getDataGenerator()->create_cohort();
         $program1 = $generator->create_program([
             'contextid' => $catcontext1->id,
-            'sources' => ['cohort' => ['cohorts' => [$cohort1->id, $cohort2->id]]]
+            'sources' => ['cohort' => ['cohorts' => [$cohort2->id, $cohort1->id]]]
         ]);
-        $source1c = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'cohort'], '*', MUST_EXIST);
+        $program2 = $generator->create_program([
+            'contextid' => $syscontext->id,
+            'sources' => ['cohort' => ['cohorts' => [$cohort2->id]]]
+        ]);
 
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
@@ -62,40 +61,55 @@ final class source_cohort_get_cohorts_test extends \advanced_testcase {
         role_assign($viewerroleid, $user1->id, $catcontext1->id);
 
         $this->setUser($user1);
-        $result = source_cohort_get_cohorts::clean_returnvalue(source_cohort_get_cohorts::execute_returns(),
-            source_cohort_get_cohorts::execute($program1->id));
 
+        $result = source_cohort_get_cohorts::clean_returnvalue(
+            source_cohort_get_cohorts::execute_returns(),
+            source_cohort_get_cohorts::execute($program1->id));
         $this->assertCount(2, $result);
-        $firstcohort = (object) $result[0];
-        $this->assertSame((int) $cohort1->id, $firstcohort->id);
-        $this->assertSame((int) $cohort1->contextid, $firstcohort->contextid);
+        $firstcohort = (object)$result[0];
+        $this->assertSame((int)$cohort1->id, $firstcohort->id);
+        $this->assertSame((int)$cohort1->contextid, $firstcohort->contextid);
         $this->assertSame($cohort1->name, $firstcohort->name);
         $this->assertSame($cohort1->idnumber, $firstcohort->idnumber);
-
-        $secondcohort = (object) $result[1];
-        $this->assertSame((int) $cohort2->id, $secondcohort->id);
-        $this->assertSame((int) $cohort2->contextid, $secondcohort->contextid);
+        $secondcohort = (object)$result[1];
+        $this->assertSame((int)$cohort2->id, $secondcohort->id);
+        $this->assertSame((int)$cohort2->contextid, $secondcohort->contextid);
         $this->assertSame($cohort2->name, $secondcohort->name);
         $this->assertSame($cohort2->idnumber, $secondcohort->idnumber);
 
-        $DB->delete_records('enrol_programs_src_cohorts', ['sourceid' => $source1c->id, 'cohortid' => $cohort1->id]);
-
-        $result = source_cohort_get_cohorts::clean_returnvalue(source_cohort_get_cohorts::execute_returns(),
-            source_cohort_get_cohorts::execute($program1->id));
-
-        $this->assertCount(1, $result);
-        $result = (object) $result[0];
-        $this->assertSame((int) $cohort2->id, $result->id);
-
-        $this->setUser($user2);
         try {
-            $result = source_cohort_get_cohorts::clean_returnvalue(source_cohort_get_cohorts::execute_returns(),
-                source_cohort_get_cohorts::execute($program1->id));
+            source_cohort_get_cohorts::execute($program2->id);
             $this->fail('Exception expected');
-        } catch (\moodle_exception $exception) {
-            $this->assertInstanceOf(\required_capability_exception::class, $exception);
-            $this->assertSame('Sorry, but you do not currently have permissions to do that (View program management).', $exception->getMessage());
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\required_capability_exception::class, $ex);
+            $this->assertSame('Sorry, but you do not currently have permissions to do that (View program management).',
+                $ex->getMessage());
         }
 
+        try {
+            source_cohort_get_cohorts::execute(-10);
+            $this->fail('Exception expected');
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\dml_missing_record_exception::class, $ex);
+        }
+
+        $this->setUser($user2);
+
+        try {
+            source_cohort_get_cohorts::execute($program2->id);
+            $this->fail('Exception expected');
+        } catch (\moodle_exception $ex) {
+            $this->assertInstanceOf(\required_capability_exception::class, $ex);
+            $this->assertSame('Sorry, but you do not currently have permissions to do that (View program management).',
+                $ex->getMessage());
+        }
+
+        $this->setAdminUser();
+        $result = source_cohort_get_cohorts::clean_returnvalue(
+            source_cohort_get_cohorts::execute_returns(),
+            source_cohort_get_cohorts::execute($program2->id));
+        $this->assertCount(1, $result);
+        $firstcohort = (object)$result[0];
+        $this->assertEquals($cohort2->id, $firstcohort->id);
     }
 }

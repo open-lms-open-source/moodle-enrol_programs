@@ -19,9 +19,10 @@ namespace enrol_programs\external;
 use external_function_parameters;
 use external_value;
 use external_api;
+use enrol_programs\local\source\cohort;
 
 /**
- * Adds a cohort to the list of synchronised cohorts in a program.
+ * Remove cohort from the list of synchronised cohorts in a program.
  *
  * @package     enrol_programs
  * @copyright   2023 Open LMS (https://www.openlms.net/)
@@ -56,26 +57,27 @@ final class source_cohort_delete_cohort extends external_api {
         $cohortid = $params['cohortid'];
 
         $program = $DB->get_record('enrol_programs_programs', ['id' => $programid], '*', MUST_EXIST);
-
         $source = $DB->get_record('enrol_programs_sources', ['programid' => $program->id, 'type' => 'cohort'], '*', MUST_EXIST);
 
         // Validate context.
         $context = \context::instance_by_id($program->contextid);
         self::validate_context($context);
-        require_capability('enrol/programs:view', $context);
+        require_capability('enrol/programs:edit', $context);
 
-        $DB->delete_records('enrol_programs_src_cohorts', ['sourceid' => $source->id, 'cohortid' => $cohortid]);
+        $oldcohorts = cohort::fetch_allocation_cohorts_menu($source->id);
+        if (isset($oldcohorts[$cohortid])) {
+            unset($oldcohorts[$cohortid]);
+            $data = (object)[
+                'id' => $source->id,
+                'type' => $source->type,
+                'programid' => $source->programid,
+                'enable' => 1,
+                'cohorts' => array_keys($oldcohorts)
+            ];
+            cohort::update_source($data);
+        }
 
-        $sql = "SELECT c.id, c.contextid, c.name, c.idnumber
-                  FROM {enrol_programs_src_cohorts} sc
-                  JOIN {cohort} c ON c.id = sc.cohortid
-                  JOIN {enrol_programs_sources} ps ON ps.id = sc.sourceid
-                 WHERE ps.programid = :programid and ps.type = 'cohort'
-              ORDER BY id ASC";
-
-        $records = $DB->get_records_sql($sql, ['programid' => $programid]);
-
-        return $records;
+        return source_cohort_get_cohorts::get_cohorts($program->id);
     }
 
     /**
@@ -84,13 +86,6 @@ final class source_cohort_delete_cohort extends external_api {
      * @return \external_multiple_structure
      */
     public static function execute_returns(): \external_multiple_structure {
-        return new \external_multiple_structure(
-            new \external_single_structure([
-                'id' => new external_value(PARAM_INT, 'Cohort id'),
-                'contextid' => new external_value(PARAM_INT, 'Cohort context id'),
-                'name' => new external_value(PARAM_TEXT, 'Cohort name'),
-                'idnumber' => new external_value(PARAM_RAW, 'Cohort idnumber'),
-            ], 'List of cohorts that are synced with the program')
-        );
+        return source_cohort_get_cohorts::get_cohorts_returns();
     }
 }
