@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\event;
 
 /**
  * Program completed event test.
@@ -27,7 +27,7 @@ namespace enrol_programs;
  *
  * @covers \enrol_programs\event\program_completed
  */
-final class event_program_completed_test extends \advanced_testcase {
+final class program_completed_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

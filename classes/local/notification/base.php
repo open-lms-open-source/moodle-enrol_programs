@@ -107,11 +107,16 @@ abstract class base extends \local_openlms\notification\notificationtype {
      * @param bool $alowmultiple
      * @return void
      */
-    protected static function notify_allocated_user(stdClass $program, stdClass $source, stdClass $allocation, stdClass $user, $alowmultiple = false): void {
+    protected static function notify_allocated_user(stdClass $program, stdClass $source, stdClass $allocation, stdClass $user, bool $alowmultiple = false): void {
         global $DB;
 
-        if ($program->archived || $allocation->archived) {
-            // Never send notifications for archived stuff.
+        if ($program->archived) {
+            // Never send notifications for archived program.
+            return;
+        }
+
+        if ($allocation->archived && static::get_notificationtype() !== 'deallocation') {
+            // Notification for deallocation is different because we require archiving before deallocation.
             return;
         }
 

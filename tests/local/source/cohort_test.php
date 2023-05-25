@@ -14,12 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\local\source;
 
-use enrol_programs\local\source\cohort;
-use enrol_programs\local\source\manual;
 use enrol_programs\local\program;
-use enrol_programs\local\allocation;
 
 /**
  * Visible cohort allocation source test.
@@ -32,7 +29,7 @@ use enrol_programs\local\allocation;
  *
  * @covers \enrol_programs\local\source\cohort
  */
-final class local_source_cohort_test extends \advanced_testcase {
+final class cohort_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

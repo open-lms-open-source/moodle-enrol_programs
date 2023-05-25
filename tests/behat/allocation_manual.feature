@@ -67,7 +67,7 @@ Feature: Manual program allocation tests
       | Program 003 | PR3      | Cat 3    |
 
   @javascript
-  Scenario: Manager may allocate users manually
+  Scenario: Manager may allocate users manually to program
     Given I log in as "manager1"
     And I am on all programs management page
     And I follow "Program 000"
@@ -108,7 +108,7 @@ Feature: Manual program allocation tests
     Then I should not see "Student 2"
 
   @javascript @tool_olms_tenant
-  Scenario: Tenant manager may allocate users manually
+  Scenario: Tenant manager may allocate users manually to program
     Given tenant support was activated
     And the following "tool_olms_tenant > tenants" exist:
       | name     | idnumber | category |

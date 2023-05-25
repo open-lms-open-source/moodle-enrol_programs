@@ -66,7 +66,7 @@ if (has_capability('enrol/programs:edit', $context)) {
 } else {
     $editbutton = '';
 }
-echo $OUTPUT->heading(get_string('allocations', 'enrol_programs') . $editbutton, 3);
+echo $OUTPUT->heading(get_string('allocations', 'enrol_programs') . $editbutton, 2, ['h3']);
 echo $managementoutput->render_program_allocation($program);
 
 if (has_capability('enrol/programs:edit', $context)) {
@@ -77,10 +77,10 @@ if (has_capability('enrol/programs:edit', $context)) {
 } else {
     $editbutton = '';
 }
-echo $OUTPUT->heading(get_string('scheduling', 'enrol_programs') . $editbutton, 3);
+echo $OUTPUT->heading(get_string('scheduling', 'enrol_programs') . $editbutton, 2, ['h3']);
 echo $managementoutput->render_program_scheduling($program);
 
-echo $OUTPUT->heading(get_string('allocationsources', 'enrol_programs'), 3);
+echo $OUTPUT->heading(get_string('allocationsources', 'enrol_programs'), 2, ['h3']);
 echo $managementoutput->render_program_sources($program);
 
 if (has_capability('enrol/programs:edit', $context) && !$program->archived) {

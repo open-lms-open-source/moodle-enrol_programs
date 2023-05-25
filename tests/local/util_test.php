@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
-
-use enrol_programs\local\util;
+namespace enrol_programs\local;
 
 /**
  * Program helper test.
@@ -29,7 +27,7 @@ use enrol_programs\local\util;
  *
  * @covers \enrol_programs\local\util
  */
-final class local_util_test extends \advanced_testcase {
+final class util_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

@@ -68,6 +68,9 @@ class renderer extends \plugin_renderer_base {
         }
         $description = file_rewrite_pluginfile_urls($program->description, 'pluginfile.php', $context->id, 'enrol_programs', 'description', $program->id);
         $description = format_text($description, $program->descriptionformat, ['context' => $context]);
+        if (trim($description) === '') {
+            $description = '&nbsp;';
+        }
         $result .= '<dt class="col-3">' . get_string('description') . ':</dt><dd class="col-9">' . $description . '</dd>';
         $result .= '<dt class="col-3">' . get_string('archived', 'enrol_programs') . ':</dt><dd class="col-9">'
             . ($program->archived ? get_string('yes') : get_string('no')) . '<br />';
@@ -459,7 +462,7 @@ class renderer extends \plugin_renderer_base {
         return $result;
     }
 
-    public function render_user_allocation(stdClass $program, stdClass $allocation): string {
+    public function render_user_allocation(stdClass $program, stdClass $source, stdClass $allocation): string {
         global $DB;
 
         /** @var \local_openlms\output\dialog_form\renderer $dialogformoutput */
@@ -497,6 +500,8 @@ class renderer extends \plugin_renderer_base {
         $result .= '<dl class="row">';
         $result .= '<dt class="col-3">' . get_string('programstatus', 'enrol_programs') . ':</dt><dd class="col-9">'
             . allocation::get_completion_status_html($program, $allocation) . '</dd>';
+        $result .= '<dt class="col-3">' . get_string('source', 'enrol_programs') . ':</dt><dd class="col-9">'
+            . $sourceclass::render_allocation_source($program, $source, $allocation) . '</dd>';
         $result .= '<dt class="col-3">' . get_string('allocationdate', 'enrol_programs') . ':</dt><dd class="col-9">'
             . userdate($allocation->timeallocated) . '</dd>';
         $result .= '<dt class="col-3">' . get_string('programstart', 'enrol_programs') . ':</dt><dd class="col-9">'
@@ -507,8 +512,6 @@ class renderer extends \plugin_renderer_base {
             . (isset($allocation->timeend) ? userdate($allocation->timeend) : $strnotset) . '</dd>';
         $result .= '<dt class="col-3">' . get_string('completiondate', 'enrol_programs') . ':</dt><dd class="col-9">'
             . (isset($allocation->timecompleted) ? userdate($allocation->timecompleted) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('source', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . $sourcenames[$source->type] . '</dd>';
         $result .= '</dl>';
 
         if ($buttons) {
@@ -523,7 +526,7 @@ class renderer extends \plugin_renderer_base {
     public function render_user_notifications(stdClass $program, stdClass $allocation): string {
         $strnotset = get_string('notset', 'enrol_programs');
 
-        $result = $this->output->heading(get_string('notificationdates', 'enrol_programs'), 4);
+        $result = $this->output->heading(get_string('notificationdates', 'enrol_programs'), 3, ['h4']);
 
         $result .= '<dl class="row">';
 
@@ -633,7 +636,7 @@ class renderer extends \plugin_renderer_base {
         $table->attributes['class'] = 'admintable generaltable';
         $table->data = $rows;
 
-        $result = $this->output->heading(get_string('completion', 'completion'), 4);
+        $result = $this->output->heading(get_string('completion', 'completion'),  3, ['h4']);
         $result .= \html_writer::table($table);
 
         return $result;

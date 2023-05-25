@@ -37,9 +37,11 @@ require('../../../config.php');
 
 $id = required_param('id', PARAM_INT);
 
-$PAGE->set_url(new moodle_url('/enrol/programs/my/program.php', ['id' => $id]));
-
 require_login();
+
+$usercontext = context_user::instance($USER->id);
+$PAGE->set_context($usercontext);
+$PAGE->set_url(new moodle_url('/enrol/programs/my/program.php', ['id' => $id]));
 
 if (!enrol_is_enabled('programs')) {
     redirect(new moodle_url('/'));
@@ -86,11 +88,14 @@ if (!$allocation || $allocation->archived) {
         }
     }
 }
+$source = $DB->get_record('enrol_programs_sources', ['id' => $allocation->sourceid], '*', MUST_EXIST);
 
-$PAGE->set_context(context_system::instance());
-$PAGE->set_heading(get_string('myprograms', 'enrol_programs'));
-$PAGE->navigation->override_active_url(new moodle_url('/enrol/programs/my/index.php'));
-$PAGE->set_title(get_string('myprograms', 'enrol_programs'));
+$title = get_string('myprograms', 'enrol_programs');
+$PAGE->navigation->extend_for_user($USER);
+$PAGE->set_title($title);
+$PAGE->set_pagelayout('report');
+$PAGE->navbar->add(get_string('profile'), new moodle_url('/user/profile.php', ['id' => $USER->id]));
+$PAGE->navbar->add($title, new moodle_url('/enrol/programs/my/index.php'));
 $PAGE->navbar->add(format_string($program->fullname));
 
 if (has_capability('enrol/programs:view', $programcontext)) {
@@ -109,7 +114,7 @@ $event->trigger();
 
 echo $myouput->render_program($program);
 
-echo $myouput->render_user_allocation($program, $allocation);
+echo $myouput->render_user_allocation($program, $source, $allocation);
 
 echo $myouput->render_user_progress($program, $allocation);
 

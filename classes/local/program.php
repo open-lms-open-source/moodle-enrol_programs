@@ -716,6 +716,9 @@ final class program {
         $DB->delete_records('enrol_programs_cohorts', ['programid' => $program->id]);
         $DB->delete_records('enrol_programs_items', ['programid' => $program->id]);
 
+        $DB->delete_records('enrol_programs_certs_issues', ['programid' => $program->id]);
+        $DB->delete_records('enrol_programs_certs', ['programid' => $program->id]);
+
         // Delete enrolment instances.
         allocation::fix_enrol_instances($program->id);
 
@@ -757,13 +760,15 @@ final class program {
         }
         $data->explanation = $explanation;
 
-        $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
-        if (!$program) {
-            // Most have been just deleted.
+        if ($reason === 'delete') {
+            if ($DB->record_exists('enrol_programs_programs', ['id' => $programid])) {
+                throw new \coding_exception('deleted program must not exist');
+            }
             $DB->insert_record('enrol_programs_prg_snapshots', $data);
             return null;
         }
 
+        $program = $DB->get_record('enrol_programs_programs', ['id' => $programid], '*', MUST_EXIST);
         $data->programjson = util::json_encode($program);
         $data->itemsjson = util::json_encode($DB->get_records('enrol_programs_items', ['programid' => $program->id], 'id ASC'));
         $data->cohortsjson = util::json_encode($DB->get_records('enrol_programs_cohorts', ['programid' => $program->id], 'id ASC'));

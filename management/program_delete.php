@@ -51,10 +51,14 @@ $currenturl = new moodle_url('/enrol/programs/management/program_delete.php', ['
 management::setup_program_page($currenturl, $context, $program);
 
 $form = new \enrol_programs\local\form\program_delete(null, ['program' => $program]);
+$returnurl = new moodle_url('/enrol/programs/management/program.php', ['id' => $program->id]);
 
+if (!$program->archived) {
+    redirect($returnurl);
+}
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url('/enrol/programs/management/program.php', ['id' => $program->id]));
+    redirect($returnurl);
 }
 
 if ($data = $form->get_data()) {

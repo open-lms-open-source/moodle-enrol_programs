@@ -22,7 +22,7 @@ use local_navmenu\local\itemtype\pluginbase;
 /**
  * My programs menu item.
  *
- * @package    tool_udplans
+ * @package    enrol_programs
  * @author     Petr Skoda
  * @copyright  2023 Open LMS (https://www.openlms.net/)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

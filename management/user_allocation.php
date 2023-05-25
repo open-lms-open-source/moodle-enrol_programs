@@ -64,9 +64,9 @@ echo $managementoutput->render_management_program_tabs($program, 'users');
 allocation::fix_user_enrolments($program->id, $allocation->userid);
 $allocation = $DB->get_record('enrol_programs_allocations', ['id' => $allocation->id], '*', MUST_EXIST);
 
-echo $OUTPUT->heading($OUTPUT->user_picture($user) . fullname($user), 3);
+echo $OUTPUT->heading($OUTPUT->user_picture($user) . fullname($user), 2, ['h3']);
 
-echo $managementoutput->render_user_allocation($program, $allocation);
+echo $managementoutput->render_user_allocation($program, $source, $allocation);
 echo $managementoutput->render_user_progress($program, $allocation);
 echo $managementoutput->render_user_notifications($program, $allocation);
 

@@ -76,14 +76,20 @@ EOT;
         return $result;
     }
 
-    public function render_user_allocation(stdClass $program, stdClass $allocation): string {
+    public function render_user_allocation(stdClass $program, stdClass $source, stdClass $allocation): string {
         $strnotset = get_string('notset', 'enrol_programs');
+
+        $sourceclasses = allocation::get_source_classes();
+        /** @var \enrol_programs\local\source\base $sourceclass */
+        $sourceclass = $sourceclasses[$source->type];
 
         $result = '';
 
         $result .= '<dl class="row">';
         $result .= '<dt class="col-3">' . get_string('programstatus', 'enrol_programs') . ':</dt><dd class="col-9">'
             . allocation::get_completion_status_html($program, $allocation) . '</dd>';
+        $result .= '<dt class="col-3">' . get_string('source', 'enrol_programs') . ':</dt><dd class="col-9">'
+            . $sourceclass::render_allocation_source($program, $source, $allocation) . '</dd>';
         $result .= '<dt class="col-3">' . get_string('allocationdate', 'enrol_programs') . ':</dt><dd class="col-9">'
             . userdate($allocation->timeallocated) . '</dd>';
         $result .= '<dt class="col-3">' . get_string('programstart', 'enrol_programs') . ':</dt><dd class="col-9">'

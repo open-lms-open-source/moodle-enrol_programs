@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
-
-use enrol_programs\local\management;
-use enrol_programs\local\program;
+namespace enrol_programs\local;
 
 /**
  * Program management helper test.
@@ -30,7 +27,7 @@ use enrol_programs\local\program;
  *
  * @covers \enrol_programs\local\management
  */
-final class local_management_test extends \advanced_testcase {
+final class management_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

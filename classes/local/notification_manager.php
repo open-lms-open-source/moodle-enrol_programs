@@ -179,7 +179,6 @@ final class notification_manager extends \local_openlms\notification\manager {
         $PAGE->set_url('/local/openlms/notification/view.php', ['id' => $notification->id]);
 
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(format_string($program->fullname));
 
         /** @var \enrol_programs\output\management\renderer $managementoutput */
         $managementoutput = $PAGE->get_renderer('enrol_programs', 'management');
@@ -217,7 +216,7 @@ final class notification_manager extends \local_openlms\notification\manager {
             }
         }
 
-        $types = static::get_all_types();
+        $types = self::get_all_types();
 
         /** @var class-string<notification\base> $classname */
         foreach ($types as $classname) {
@@ -238,7 +237,7 @@ final class notification_manager extends \local_openlms\notification\manager {
             ['component' => 'enrol_programs', 'instanceid' => $allocation->programid]);
         foreach ($notifications as $notification) {
             /** @var class-string<notification\base> $classname */
-            $classname = static::get_classname($notification->notificationtype);
+            $classname = self::get_classname($notification->notificationtype);
             if (!$classname) {
                 continue;
             }

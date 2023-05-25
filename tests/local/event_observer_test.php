@@ -14,10 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\local;
 
-use enrol_programs\local\program;
-use enrol_programs\local\allocation;
 use enrol_programs\local\source\manual;
 
 /**
@@ -30,7 +28,7 @@ use enrol_programs\local\source\manual;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
-final class local_event_observer_test extends \advanced_testcase {
+final class event_observer_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

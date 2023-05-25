@@ -368,6 +368,24 @@ abstract class base {
     }
 
     /**
+     * Render allocation source information.
+     *
+     * @param stdClass $program
+     * @param stdClass $source
+     * @param stdClass $allocation
+     * @return string HTML fragment
+     */
+    public static function render_allocation_source(stdClass $program, stdClass $source, stdClass $allocation): string {
+        $type = static::get_type();
+
+        if ($source && $source->type !== $type) {
+            throw new \coding_exception('Invalid source type');
+        }
+
+        return static::get_name();
+    }
+
+    /**
      * Update source details.
      *
      * @param stdClass $data
@@ -457,9 +475,10 @@ abstract class base {
      * @param stdClass $program
      * @param stdClass $source
      * @param stdClass $allocation
+     * @param bool $skipnotify
      * @return void
      */
-    public static function deallocate_user(stdClass $program, stdClass $source, stdClass $allocation): void {
+    public static function deallocate_user(stdClass $program, stdClass $source, stdClass $allocation, bool $skipnotify = false): void {
         global $DB;
 
         if (static::get_type() !== $source->type || $program->id != $allocation->programid || $program->id != $source->programid) {
@@ -471,16 +490,28 @@ abstract class base {
 
         \enrol_programs\local\allocation::make_snapshot($allocation->id, 'deallocation');
 
-        if ($user) {
+        if ($user && !$skipnotify) {
             \enrol_programs\local\notification\deallocation::notify_now($user, $program, $source, $allocation);
         }
         \enrol_programs\local\notification_manager::delete_allocation_notifications($allocation);
+
+        $issues = $DB->get_records('enrol_programs_certs_issues', ['allocationid' => $allocation->id]);
+        foreach ($issues as $issue) {
+            $DB->set_field('enrol_programs_certs_issues', 'allocationid', null, ['id' => $issue->id]);
+        }
+        if (\enrol_programs\local\certificate::is_available()) {
+            foreach ($issues as $issue) {
+                $DB->set_field('tool_certificate_issues', 'archived', 1, ['id' => $issue->issueid]);
+            }
+        }
+        unset($issues);
 
         $items = $DB->get_records('enrol_programs_items', ['programid' => $allocation->programid]);
         foreach ($items as $item) {
             $DB->delete_records('enrol_programs_evidences', ['itemid' => $item->id, 'userid' => $allocation->userid]);
             $DB->delete_records('enrol_programs_completions', ['itemid' => $item->id, 'allocationid' => $allocation->id]);
         }
+        unset($items);
         $DB->delete_records('enrol_programs_allocations', ['id' => $allocation->id]);
 
         $trans->allow_commit();

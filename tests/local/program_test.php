@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
-
-use enrol_programs\local\program;
-use enrol_programs\local\util;
+namespace enrol_programs\local;
 
 /**
  * Program helper test.
@@ -30,7 +27,7 @@ use enrol_programs\local\util;
  *
  * @covers \enrol_programs\local\program
  */
-final class local_program_test extends \advanced_testcase {
+final class program_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }
@@ -518,14 +515,14 @@ final class local_program_test extends \advanced_testcase {
         program::delete_program($program->id);
         $this->setCurrentTimeStart();
         $DB->delete_records('enrol_programs_prg_snapshots', []);
-        program::make_snapshot($program->id, 'test', 'some explanation');
+        program::make_snapshot($program->id, 'delete', 'some explanation');
 
         $records = $DB->get_records('enrol_programs_prg_snapshots', []);
         $this->assertCount(1, $records);
 
         $record = reset($records);
         $this->assertSame($program->id, $record->programid);
-        $this->assertSame('test', $record->reason);
+        $this->assertSame('delete', $record->reason);
         $this->assertTimeCurrent($record->timesnapshot);
         $this->assertSame($admin->id, $record->snapshotby);
         $this->assertSame('some explanation', $record->explanation);

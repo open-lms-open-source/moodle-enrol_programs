@@ -44,6 +44,7 @@ final class deallocation_test extends \advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
 
         $admin = get_admin();
+        $user0 = $this->getDataGenerator()->create_user();
         $user1 = $this->getDataGenerator()->create_user();
         $user2 = $this->getDataGenerator()->create_user();
         $user3 = $this->getDataGenerator()->create_user();
@@ -54,29 +55,55 @@ final class deallocation_test extends \advanced_testcase {
         $program2 = $generator->create_program(['sources' => ['manual' => []]]);
         $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
 
-        $this->setUser($user3);
+        $this->setUser($user0);
 
-        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
-        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id, $user3->id]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id], '*', MUST_EXIST);
+        $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id], '*', MUST_EXIST);
+        $allocation3->archived = '1';
+        $DB->update_record('enrol_programs_allocations', $allocation3);
 
         $sink = $this->redirectMessages();
-        manual::deallocate_user($program1, $source1, $allocation);
+        manual::deallocate_user($program1, $source1, $allocation1);
         $messages = $sink->get_messages();
         $sink->close();
         $this->assertCount(0, $messages);
 
-        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
         $notification = $generator->create_program_notification(['programid' => $program1->id, 'notificationtype' => 'deallocation']);
+
         $sink = $this->redirectMessages();
         $this->setCurrentTimeStart();
-        manual::deallocate_user($program1, $source1, $allocation);
+        manual::deallocate_user($program1, $source1, $allocation2);
         $messages = $sink->get_messages();
         $sink->close();
         $this->assertCount(1, $messages);
         $message = $messages[0];
         $this->assertSame('Program deallocation notification', $message->subject);
         $this->assertStringContainsString('you have been deallocated from program', $message->fullmessage);
-        $this->assertSame($user1->id, $message->useridto);
+        $this->assertSame($user2->id, $message->useridto);
         $this->assertSame('-10', $message->useridfrom);
+
+        $sink = $this->redirectMessages();
+        $this->setCurrentTimeStart();
+        manual::deallocate_user($program1, $source1, $allocation3);
+        $messages = $sink->get_messages();
+        $sink->close();
+        $this->assertCount(1, $messages);
+        $message = $messages[0];
+        $this->assertSame('Program deallocation notification', $message->subject);
+        $this->assertStringContainsString('you have been deallocated from program', $message->fullmessage);
+        $this->assertSame($user3->id, $message->useridto);
+        $this->assertSame('-10', $message->useridfrom);
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $program1->archived = '1';
+        $DB->update_record('enrol_programs_programs', $program1);
+        $sink = $this->redirectMessages();
+        manual::deallocate_user($program1, $source1, $allocation1);
+        $messages = $sink->get_messages();
+        $sink->close();
+        $this->assertCount(0, $messages);
     }
 }

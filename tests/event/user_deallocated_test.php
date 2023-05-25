@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\event;
+
+use enrol_programs\local\program;
 
 /**
- * User allocated event test.
+ * User deallocated event test.
  *
  * @group      openlms
  * @package    enrol_programs
@@ -25,9 +27,9 @@ namespace enrol_programs;
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \enrol_programs\event\user_allocated
+ * @covers \enrol_programs\event\user_deallocated
  */
-final class event_user_allocated_test extends \advanced_testcase {
+final class user_deallocated_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }
@@ -52,17 +54,18 @@ final class event_user_allocated_test extends \advanced_testcase {
         $source = $DB->get_record('enrol_programs_sources', ['programid' => $program->id, 'type' => 'manual']);
 
         $this->setAdminUser();
-        $sink = $this->redirectEvents();
         \enrol_programs\local\source\manual::allocate_users($program->id, $source->id, [$user->id]);
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id]);
+
+        $sink = $this->redirectEvents();
+        \enrol_programs\local\source\manual::deallocate_user($program, $source, $allocation);
         $events = $sink->get_events();
         $sink->close();
 
-        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id]);
-
         $this->assertCount(2, $events);
         $event = $events[1];
-        $this->assertInstanceOf('enrol_programs\event\user_allocated', $event);
-        $this->assertInstanceOf('core\event\calendar_event_created', $events[0]);
+        $this->assertInstanceOf('enrol_programs\event\user_deallocated', $event);
+        $this->assertInstanceOf('core\event\calendar_event_deleted', $events[0]);
         $this->assertEquals($syscontext->id, $event->contextid);
         $this->assertSame($allocation->id, $event->objectid);
         $this->assertSame($admin->id, $event->userid);
@@ -70,24 +73,12 @@ final class event_user_allocated_test extends \advanced_testcase {
         $this->assertSame('c', $event->crud);
         $this->assertSame($event::LEVEL_OTHER, $event->edulevel);
         $this->assertSame('enrol_programs_allocations', $event->objecttable);
-        $this->assertSame('User allocated to program', $event::get_name());
+        $this->assertSame('User deallocated from program', $event::get_name());
         $description = $event->get_description();
-        $programurl = new \moodle_url('/enrol/programs/management/user_allocation.php', ['id' => $allocation->id]);
+        $programurl = new \moodle_url('/enrol/programs/management/program.php', ['id' => $program->id]);
         $this->assertSame($programurl->out(false), $event->get_url()->out(false));
 
         $allocationcalendarevents = $DB->get_records('event', ['instance' => $allocation->id, 'component' => 'enrol_programs', 'userid' => $user->id]);
-        $allocationeventtypes = ['programstart', 'programend', 'programdue'];
-        foreach ($allocationcalendarevents as $calendarevent) {
-            $this->assertContains($calendarevent->eventtype, $allocationeventtypes);
-            if ($calendarevent->eventtype === 'programstart') {
-                $this->assertEquals($calendarevent->timestart, $allocation->timestart);
-            }
-            if ($calendarevent->eventtype === 'programend') {
-                $this->assertEquals($calendarevent->timestart, $allocation->timeend);
-            }
-            if ($calendarevent->eventtype === 'programdue') {
-                $this->assertEquals($calendarevent->timestart, $allocation->timedue);
-            }
-        }
+        $this->assertCount(0, $allocationcalendarevents);
     }
 }

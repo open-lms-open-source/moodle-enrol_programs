@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\local;
 
-use enrol_programs\local\allocation;
-use enrol_programs\local\program;
+use enrol_programs\local\content\set;
+use enrol_programs\local\source\manual;
 
 /**
  * Program allocation helper test.
@@ -30,7 +30,7 @@ use enrol_programs\local\program;
  *
  * @covers \enrol_programs\local\allocation
  */
-final class local_allocation_test extends \advanced_testcase {
+final class allocation_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }
@@ -343,7 +343,7 @@ final class local_allocation_test extends \advanced_testcase {
         $instance2x1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'programs', 'customint1' => $program2->id], '*', MUST_EXIST);
 
         // Method fix_user_enrolments is called during allocation, confirm the everything was added.
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         $this->assertTrue(is_enrolled($context1, $user1, '', true));
         $this->assertTrue(is_enrolled($context2, $user1, '', true));
@@ -435,7 +435,7 @@ final class local_allocation_test extends \advanced_testcase {
         $instance2x1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'programs', 'customint1' => $program2->id], '*', MUST_EXIST);
 
         // Method fix_user_enrolments is called during allocation, confirm the everything was added.
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         // Just make sure there are no errors.
         allocation::fix_enrol_instances(null);
@@ -483,7 +483,7 @@ final class local_allocation_test extends \advanced_testcase {
         $instance2x1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'programs', 'customint1' => $program2->id], '*', MUST_EXIST);
 
         // Method fix_user_enrolments is called during allocation, confirm the everything was added.
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         // Just make sure there are no errors.
         allocation::fix_allocation_sources(null, null);
@@ -503,7 +503,7 @@ final class local_allocation_test extends \advanced_testcase {
         $context1 = \context_course::instance($course1->id);
         $program1 = $generator->create_program(['fullname' => 'hokus', 'sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
         $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
 
         $now = time();
@@ -540,7 +540,7 @@ final class local_allocation_test extends \advanced_testcase {
         $context1 = \context_course::instance($course1->id);
         $program1 = $generator->create_program(['fullname' => 'hokus', 'sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
         $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $top1 = program::load_content($program1->id);
         $item1 = $top1->append_course($top1, $course1->id);
@@ -616,7 +616,7 @@ final class local_allocation_test extends \advanced_testcase {
         $context1 = \context_course::instance($course1->id);
         $program1 = $generator->create_program(['fullname' => 'hokus', 'sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
         $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
 
         $now = time();
@@ -764,7 +764,7 @@ final class local_allocation_test extends \advanced_testcase {
         $context1 = \context_course::instance($course1->id);
         $program1 = $generator->create_program(['fullname' => 'hokus', 'sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
         $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
 
         $now = time();
@@ -915,7 +915,7 @@ final class local_allocation_test extends \advanced_testcase {
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
         $top1 = program::load_content($program1->id);
         $item1 = $top1->append_course($top1, $course1->id);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id], '*', MUST_EXIST);
@@ -963,7 +963,7 @@ final class local_allocation_test extends \advanced_testcase {
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
         $top1 = program::load_content($program1->id);
         $item1 = $top1->append_course($top1, $course1->id);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id], '*', MUST_EXIST);
@@ -1008,19 +1008,19 @@ final class local_allocation_test extends \advanced_testcase {
         $program5 = $generator->create_program(['sources' => ['manual' => []]]);
 
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user2->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user2->id]);
         $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program2->id, $source2->id, [$user1->id]);
+        manual::allocate_users($program2->id, $source2->id, [$user1->id]);
         $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program2->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $allocation2->archived = 1;
         allocation::update_user($allocation2);
         $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program3->id, $source3->id, [$user1->id]);
+        manual::allocate_users($program3->id, $source3->id, [$user1->id]);
         $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program3->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $source4 = $DB->get_record('enrol_programs_sources', ['programid' => $program4->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program4->id, $source4->id, [$user1->id]);
+        manual::allocate_users($program4->id, $source4->id, [$user1->id]);
         $allocation4 = $DB->get_record('enrol_programs_allocations', ['programid' => $program4->id, 'userid' => $user1->id], '*', MUST_EXIST);
 
         $this->setUser($user1);
@@ -1058,16 +1058,16 @@ final class local_allocation_test extends \advanced_testcase {
         $program5 = $generator->create_program(['sources' => ['manual' => []]]);
 
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
         $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program2->id, $source2->id, [$user1->id]);
+        manual::allocate_users($program2->id, $source2->id, [$user1->id]);
         $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program2->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program3->id, $source3->id, [$user1->id]);
+        manual::allocate_users($program3->id, $source3->id, [$user1->id]);
         $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program3->id, 'userid' => $user1->id], '*', MUST_EXIST);
         $source4 = $DB->get_record('enrol_programs_sources', ['programid' => $program4->id, 'type' => 'manual'], '*', MUST_EXIST);
-        \enrol_programs\local\source\manual::allocate_users($program4->id, $source4->id, [$user1->id]);
+        manual::allocate_users($program4->id, $source4->id, [$user1->id]);
         $allocation4 = $DB->get_record('enrol_programs_allocations', ['programid' => $program4->id, 'userid' => $user1->id], '*', MUST_EXIST);
 
         $this->setUser($user1);
@@ -1104,7 +1104,7 @@ final class local_allocation_test extends \advanced_testcase {
         $topitem3 = $DB->get_record('enrol_programs_items', ['programid' => $program3->id, 'topitem' => 1], '*', MUST_EXIST);
 
         $user1 = $this->getDataGenerator()->create_user(['username' => 'user1', 'email' => 'user1@example.com', 'idnumber' => 'u1']);
-        \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
         $user2 = $this->getDataGenerator()->create_user(['username' => 'user2', 'email' => 'user2@example.com', 'idnumber' => 'u2']);
         $manager = $this->getDataGenerator()->create_user();
 
@@ -1243,5 +1243,538 @@ final class local_allocation_test extends \advanced_testcase {
         $this->assertSame($allocation->timecompleted, $completion->timecompleted);
         $evidence = $DB->get_record('enrol_programs_evidences', ['itemid' => $topitem1->id, 'userid' => $user1->id]);
         $this->assertSame('{"details":"yes yes"}', $evidence->evidencejson);
+    }
+
+    /**
+     * Test that sequencing works for all set types work.
+     *
+     * @return void
+     */
+    public function test_enrol_sequencing() {
+        global $DB, $CFG;
+        require_once("$CFG->libdir/completionlib.php");
+        $CFG->enablecompletion = true;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
+
+        $course1 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context1 = \context_course::instance($course1->id);
+        $course2 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context2 = \context_course::instance($course2->id);
+        $course3 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context3 = \context_course::instance($course3->id);
+        $course4 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context4 = \context_course::instance($course4->id);
+        $course5 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context5 = \context_course::instance($course5->id);
+        $course6 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context6 = \context_course::instance($course6->id);
+        $course7 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context7 = \context_course::instance($course7->id);
+        $course8 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context8 = \context_course::instance($course8->id);
+        $course9 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context9 = \context_course::instance($course9->id);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $top = program::load_content($program1->id);
+        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
+        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $item1x1 = $top->append_course($set1, $course1->id);
+        $item1x2 = $top->append_course($set1, $course2->id);
+        $item1x3 = $top->append_course($set1, $course3->id);
+        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $item2x1 = $top->append_course($set2, $course4->id);
+        $item2x2 = $top->append_course($set2, $course5->id);
+        $item3 = $top->append_course($top, $course6->id);
+        $item4 = $top->append_course($top, $course7->id);
+
+        $this->getDataGenerator()->enrol_user($user2->id, $course6->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course6->id, 'userid' => $user2->id]);
+        $ccompletion->mark_complete();
+
+        $this->getDataGenerator()->enrol_user($user3->id, $course1->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course7->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course7->id, 'userid' => $user3->id]);
+        $ccompletion->mark_complete();
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id, $user3->id]);
+        $this->assertCount(24, $DB->get_records('user_enrolments', []));
+        $this->assertCount(11, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertFalse(is_enrolled($context4, $user1, '', true));
+        $this->assertTrue(is_enrolled($context1, $user2, '', true));
+        $this->assertTrue(is_enrolled($context2, $user2, '', true));
+        $this->assertTrue(is_enrolled($context3, $user2, '', true));
+        $this->assertTrue(is_enrolled($context3, $user2, '', true));
+        $this->assertFalse(is_enrolled($context4, $user2, '', true));
+        $this->assertFalse(is_enrolled($context6, $user2, '', true));
+        $this->assertTrue(is_enrolled($context7, $user2, '', true));
+        $this->assertTrue(is_enrolled($context1, $user3, '', true));
+        $this->assertTrue(is_enrolled($context2, $user3, '', true));
+        $this->assertTrue(is_enrolled($context3, $user3, '', true));
+        $this->assertFalse(is_enrolled($context6, $user3, '', true));
+        $this->assertFalse(is_enrolled($context7, $user3, '', true));
+
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id], '*', MUST_EXIST);
+        $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id], '*', MUST_EXIST);
+
+        $ccompletion = new \completion_completion(['course' => $course3->id, 'userid' => $user1->id]);
+        $ccompletion->mark_complete();
+        $this->assertCount(3, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $item1x1->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $this->assertCount(5, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+        $this->assertTrue(is_enrolled($context5, $user1, '', true));
+
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $item2x1->get_id(),
+            'timecompleted' => null,
+            'evidencetimecompleted' => time(),
+            'evidencedetails' => '',
+        ]);
+        $this->assertCount(5, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+        $this->assertTrue(is_enrolled($context5, $user1, '', true));
+
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $item2x2->get_id(),
+            'timecompleted' => null,
+            'evidencetimecompleted' => time(),
+            'evidencedetails' => '',
+        ]);
+        $this->assertCount(6, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+        $this->assertTrue(is_enrolled($context5, $user1, '', true));
+        $this->assertTrue(is_enrolled($context6, $user1, '', true));
+
+        $ccompletion = new \completion_completion(['course' => $course6->id, 'userid' => $user1->id]);
+        $ccompletion->mark_complete();
+        $this->assertCount(7, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+        $this->assertTrue(is_enrolled($context5, $user1, '', true));
+        $this->assertTrue(is_enrolled($context6, $user1, '', true));
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+
+        $ccompletion = new \completion_completion(['course' => $course7->id, 'userid' => $user1->id]);
+        $this->setCurrentTimeStart();
+        $ccompletion->mark_complete();
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertTimeCurrent($allocation1->timecompleted);
+    }
+
+    public function test_enrol_before_start() {
+        global $DB, $CFG;
+        require_once("$CFG->libdir/completionlib.php");
+        $CFG->enablecompletion = true;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
+
+        $course1 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context1 = \context_course::instance($course1->id);
+        $course2 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context2 = \context_course::instance($course2->id);
+        $course3 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context3 = \context_course::instance($course3->id);
+        $course4 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context4 = \context_course::instance($course4->id);
+        $course5 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context5 = \context_course::instance($course5->id);
+        $course6 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context6 = \context_course::instance($course6->id);
+        $course7 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context7 = \context_course::instance($course7->id);
+        $course8 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context8 = \context_course::instance($course8->id);
+        $course9 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context9 = \context_course::instance($course9->id);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program1 = program::update_program_scheduling((object)[
+            'id' => $program1->id,
+            'programstart_type' => 'date',
+            'programstart_date' => time() + 100,
+            'programdue_type' => 'notset',
+            'programend_type' => 'notset',
+        ]);
+
+        $top = program::load_content($program1->id);
+        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
+        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $item1x1 = $top->append_course($set1, $course1->id);
+        $item1x2 = $top->append_course($set1, $course2->id);
+        $item1x3 = $top->append_course($set1, $course3->id);
+        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $item2x1 = $top->append_course($set2, $course4->id);
+        $item2x2 = $top->append_course($set2, $course5->id);
+        $item3 = $top->append_course($top, $course6->id);
+        $item4 = $top->append_course($top, $course7->id);
+
+        $this->getDataGenerator()->enrol_user($user2->id, $course6->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course6->id, 'userid' => $user2->id]);
+        $ccompletion->mark_complete();
+
+        $this->getDataGenerator()->enrol_user($user3->id, $course1->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course7->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course7->id, 'userid' => $user3->id]);
+        $ccompletion->mark_complete();
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id, $user3->id]);
+        $this->assertCount(24, $DB->get_records('user_enrolments', []));
+        $this->assertCount(1, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE]));
+        $this->assertCount(0, $DB->get_records('enrol_programs_completions'));
+    }
+
+    public function test_enrol_open() {
+        global $DB, $CFG;
+        require_once("$CFG->libdir/completionlib.php");
+        $CFG->enablecompletion = true;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
+
+        $course1 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context1 = \context_course::instance($course1->id);
+        $course2 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context2 = \context_course::instance($course2->id);
+        $course3 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context3 = \context_course::instance($course3->id);
+        $course4 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context4 = \context_course::instance($course4->id);
+        $course5 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context5 = \context_course::instance($course5->id);
+        $course6 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context6 = \context_course::instance($course6->id);
+        $course7 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context7 = \context_course::instance($course7->id);
+        $course8 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context8 = \context_course::instance($course8->id);
+        $course9 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context9 = \context_course::instance($course9->id);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program1 = program::update_program_scheduling((object)[
+            'id' => $program1->id,
+            'programstart_type' => 'date',
+            'programstart_date' => time() - 100,
+            'programdue_type' => 'notset',
+            'programend_type' => 'date',
+            'programend_date' => time() + 100,
+        ]);
+
+        $top = program::load_content($program1->id);
+        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
+        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $item1x1 = $top->append_course($set1, $course1->id);
+        $item1x2 = $top->append_course($set1, $course2->id);
+        $item1x3 = $top->append_course($set1, $course3->id);
+        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $item2x1 = $top->append_course($set2, $course4->id);
+        $item2x2 = $top->append_course($set2, $course5->id);
+        $item3 = $top->append_course($top, $course6->id);
+        $item4 = $top->append_course($top, $course7->id);
+
+        $this->getDataGenerator()->enrol_user($user2->id, $course6->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course6->id, 'userid' => $user2->id]);
+        $ccompletion->mark_complete();
+
+        $this->getDataGenerator()->enrol_user($user3->id, $course1->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course7->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course7->id, 'userid' => $user3->id]);
+        $ccompletion->mark_complete();
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id, $user3->id]);
+        $this->assertCount(24, $DB->get_records('user_enrolments', []));
+        $this->assertCount(11, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE]));
+        $this->assertCount(2, $DB->get_records('enrol_programs_completions'));
+    }
+
+    public function test_enrol_after_end() {
+        global $DB, $CFG;
+        require_once("$CFG->libdir/completionlib.php");
+        $CFG->enablecompletion = true;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
+
+        $course1 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context1 = \context_course::instance($course1->id);
+        $course2 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context2 = \context_course::instance($course2->id);
+        $course3 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context3 = \context_course::instance($course3->id);
+        $course4 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context4 = \context_course::instance($course4->id);
+        $course5 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context5 = \context_course::instance($course5->id);
+        $course6 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context6 = \context_course::instance($course6->id);
+        $course7 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context7 = \context_course::instance($course7->id);
+        $course8 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context8 = \context_course::instance($course8->id);
+        $course9 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context9 = \context_course::instance($course9->id);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program1 = program::update_program_scheduling((object)[
+            'id' => $program1->id,
+            'programstart_type' => 'date',
+            'programstart_date' => time() - 200,
+            'programdue_type' => 'notset',
+            'programend_type' => 'date',
+            'programend_date' => time() - 100,
+        ]);
+
+        $top = program::load_content($program1->id);
+        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
+        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $item1x1 = $top->append_course($set1, $course1->id);
+        $item1x2 = $top->append_course($set1, $course2->id);
+        $item1x3 = $top->append_course($set1, $course3->id);
+        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $item2x1 = $top->append_course($set2, $course4->id);
+        $item2x2 = $top->append_course($set2, $course5->id);
+        $item3 = $top->append_course($top, $course6->id);
+        $item4 = $top->append_course($top, $course7->id);
+
+        $this->getDataGenerator()->enrol_user($user2->id, $course6->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course6->id, 'userid' => $user2->id]);
+        $ccompletion->mark_complete();
+
+        $this->getDataGenerator()->enrol_user($user3->id, $course1->id);
+        $this->getDataGenerator()->enrol_user($user3->id, $course7->id, null, 'manual', 0, 0, ENROL_USER_SUSPENDED);
+        $ccompletion = new \completion_completion(['course' => $course7->id, 'userid' => $user3->id]);
+        $ccompletion->mark_complete();
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id, $user3->id]);
+        $this->assertCount(24, $DB->get_records('user_enrolments', []));
+        $this->assertCount(1, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE]));
+        $this->assertCount(0, $DB->get_records('enrol_programs_completions'));
+    }
+
+    public function test_groups() {
+        global $DB;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+
+        $course1 = $this->getDataGenerator()->create_course([]);
+        $course2 = $this->getDataGenerator()->create_course([]);
+        $course3 = $this->getDataGenerator()->create_course([]);
+        $course4 = $this->getDataGenerator()->create_course([]);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program2 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $program3 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source3 = $DB->get_record('enrol_programs_sources', ['programid' => $program3->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $top1 = program::load_content($program1->id);
+        $item1x1 = $top1->append_course($top1, $course1->id);
+        $item1x2 = $top1->append_course($top1, $course2->id);
+
+        $top2 = program::load_content($program2->id);
+        $item2x1 = $top2->append_course($top2, $course2->id);
+        $item2x2 = $top2->append_course($top2, $course3->id);
+
+        $top3 = program::load_content($program3->id);
+        $item3x1 = $top3->append_course($top3, $course1->id);
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
+        manual::allocate_users($program2->id, $source2->id, [$user1->id]);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(0, $groups);
+
+        $program1 = program::update_program_general((object)[
+            'id' => $program1->id,
+            'creategroups' => 1,
+        ]);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(2, $groups);
+        $groups = array_values($groups);
+        $this->assertSame($program1->fullname, $groups[0]->name);
+        $this->assertSame($course1->id, $groups[0]->courseid);
+        $this->assertSame($program1->fullname, $groups[1]->name);
+        $this->assertSame($course2->id, $groups[1]->courseid);
+        $members = $DB->get_records('groups_members', [], 'userid ASC, groupid ASC');
+        $this->assertCount(4, $members);
+        $members = array_values($members);
+        $this->assertSame($user1->id, $members[0]->userid);
+        $this->assertSame($groups[0]->id, $members[0]->groupid);
+        $this->assertSame($user1->id, $members[1]->userid);
+        $this->assertSame($groups[1]->id, $members[1]->groupid);
+        $this->assertSame($user2->id, $members[2]->userid);
+        $this->assertSame($groups[0]->id, $members[2]->groupid);
+        $this->assertSame($user2->id, $members[3]->userid);
+        $this->assertSame($groups[1]->id, $members[3]->groupid);
+
+        $program2 = program::update_program_general((object)[
+            'id' => $program2->id,
+            'creategroups' => 1,
+        ]);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(4, $groups);
+        $groups = array_values($groups);
+        $this->assertSame($program1->fullname, $groups[0]->name);
+        $this->assertSame($course1->id, $groups[0]->courseid);
+        $this->assertSame($program1->fullname, $groups[1]->name);
+        $this->assertSame($course2->id, $groups[1]->courseid);
+        $this->assertSame($program2->fullname, $groups[2]->name);
+        $this->assertSame($course2->id, $groups[2]->courseid);
+        $this->assertSame($program2->fullname, $groups[3]->name);
+        $this->assertSame($course3->id, $groups[3]->courseid);
+        $members = $DB->get_records('groups_members', [], 'userid ASC, groupid ASC');
+        $this->assertCount(6, $members);
+
+        $program2 = program::update_program_general((object)[
+            'id' => $program2->id,
+            'creategroups' => 0,
+        ]);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(2, $groups);
+        $groups = array_values($groups);
+        $this->assertSame($program1->fullname, $groups[0]->name);
+        $this->assertSame($course1->id, $groups[0]->courseid);
+        $this->assertSame($program1->fullname, $groups[1]->name);
+        $this->assertSame($course2->id, $groups[1]->courseid);
+        $members = $DB->get_records('groups_members', [], 'userid ASC, groupid ASC');
+        $this->assertCount(4, $members);
+
+        $program2 = program::update_program_general((object)[
+            'id' => $program2->id,
+            'creategroups' => 1,
+        ]);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(4, $groups);
+        program::delete_program($program2->id);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(2, $groups);
+        $groups = array_values($groups);
+        $this->assertSame($program1->fullname, $groups[0]->name);
+        $this->assertSame($course1->id, $groups[0]->courseid);
+        $this->assertSame($program1->fullname, $groups[1]->name);
+        $this->assertSame($course2->id, $groups[1]->courseid);
+        $members = $DB->get_records('groups_members', [], 'userid ASC, groupid ASC');
+        $this->assertCount(4, $members);
+
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        manual::deallocate_user($program1, $source1, $allocation1);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(2, $groups);
+        $groups = array_values($groups);
+        $this->assertSame($program1->fullname, $groups[0]->name);
+        $this->assertSame($course1->id, $groups[0]->courseid);
+        $this->assertSame($program1->fullname, $groups[1]->name);
+        $this->assertSame($course2->id, $groups[1]->courseid);
+        $members = $DB->get_records('groups_members', [], 'userid ASC, groupid ASC');
+        $this->assertCount(2, $members);
+        $members = array_values($members);
+        $this->assertSame($user2->id, $members[0]->userid);
+        $this->assertSame($groups[0]->id, $members[0]->groupid);
+        $this->assertSame($user2->id, $members[1]->userid);
+        $this->assertSame($groups[1]->id, $members[1]->groupid);
+
+        $top1->delete_item($item1x1->get_id());
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(1, $groups);
+        $groups = array_values($groups);
+        $this->assertSame($program1->fullname, $groups[0]->name);
+        $this->assertSame($course2->id, $groups[0]->courseid);
+        $members = $DB->get_records('groups_members', [], 'userid ASC, groupid ASC');
+        $this->assertCount(1, $members);
+        $members = array_values($members);
+        $this->assertSame($user2->id, $members[0]->userid);
+        $this->assertSame($groups[0]->id, $members[0]->groupid);
+
+        $group = $groups[0];
+        $group->name = 'xxx';
+        groups_update_group($group);
+        \enrol_programs\local\allocation::fix_enrol_instances(null);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(1, $groups);
+        $groups = array_values($groups);
+        $this->assertSame('xxx', $groups[0]->name);
+        $this->assertSame($course2->id, $groups[0]->courseid);
+
+        $program1 = program::update_program_general((object)[
+            'id' => $program1->id,
+            'fullname' => 'yy',
+        ]);
+        $groups = $DB->get_records('groups', [], 'id ASC');
+        $this->assertCount(1, $groups);
+        $groups = array_values($groups);
+        $this->assertSame($program1->fullname, $groups[0]->name);
+        $this->assertSame($course2->id, $groups[0]->courseid);
+
+        $program3 = program::update_program_general((object)['id' => $program3->id, 'creategroups' => 0]);
+        $this->assertCount(0, $DB->get_records('groups', ['name' => $program3->fullname, 'courseid' => $course1->id]));
+        delete_course($course1, false);
+        $program3 = program::update_program_general((object)['id' => $program3->id, 'creategroups' => 1]);
+        program::delete_program($program3->id);
     }
 }

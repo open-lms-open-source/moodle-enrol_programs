@@ -14,9 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\local\source;
 
-use enrol_programs\local\source\base;
 use enrol_programs\local\program;
 
 /**
@@ -28,9 +27,9 @@ use enrol_programs\local\program;
  * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \enrol_programs\local\source\manual
+ * @covers \enrol_programs\local\source\base
  */
-final class local_source_base_test extends \advanced_testcase {
+final class base_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

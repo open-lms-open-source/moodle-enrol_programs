@@ -221,7 +221,6 @@ final class management {
             require_once($CFG->libdir . '/adminlib.php');
             admin_externalpage_setup('programsmanagement', '', null, $pageurl, ['pagelayout' => 'admin', 'nosearch' => true]);
             $PAGE->set_heading(get_string('management', 'enrol_programs'));
-            $PAGE->set_secondary_navigation(false);
         } else {
             $PAGE->set_pagelayout('admin');
             $PAGE->set_context($context);
@@ -239,6 +238,7 @@ final class management {
                 $PAGE->navbar->add(get_string('management', 'enrol_programs'));
             }
         }
+        $PAGE->set_secondary_navigation(false);
 
         $PAGE->set_docs_path("$CFG->wwwroot/enrol/programs/documentation.php/management.md");
     }

@@ -77,7 +77,18 @@ class enrol_programs_generator extends component_generator_base {
 
         $sources = [];
         if (!empty($record->sources)) {
-            $sources = $record->sources;
+            if (is_array($record->sources)) {
+                $sources = $record->sources;
+            }
+            if (is_string($record->sources)) {
+                foreach (explode(',', $record->sources) as $type) {
+                    $type = trim($type);
+                    if ($type === '') {
+                        continue;
+                    }
+                    $sources[$type] = [];
+                }
+            }
         }
         unset($record->sources);
 
@@ -205,10 +216,10 @@ class enrol_programs_generator extends component_generator_base {
     }
 
     /**
-     * Manually allocate user to program.
+     * Create program notification.
      *
      * @param $record
-     * @return \stdClass allocation record
+     * @return \stdClass notification record
      */
     public function create_program_notification($record): stdClass {
         global $DB;

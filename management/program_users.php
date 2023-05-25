@@ -200,7 +200,6 @@ $allocations = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
 
 $sql = "SELECT COUNT(a.id)
           FROM {enrol_programs_allocations} a
-     LEFT JOIN {enrol_programs_sources} s ON s.id = a.sourceid
           JOIN {user} u ON u.id = a.userid
          WHERE a.programid = :programid $usersearch";
 $totalcount = $DB->count_records_sql($sql, $params);
@@ -241,7 +240,7 @@ foreach ($allocations as $allocation) {
 
     $row[] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
 
-    $cell = $sourcenames[$allocation->sourcetype];
+    $cell = $sourceclass::render_allocation_source($program, $source, $allocation);
     $actions = [];
     if (has_capability('enrol/programs:admin', $context)) {
         if ($sourceclass::allocation_edit_supported($program, $source, $allocation)) {

@@ -64,12 +64,16 @@ if ($form->is_cancelled()) {
 }
 
 if ($data = $form->get_data()) {
+    $userids = [];
     if ($data->cohortid) {
         $userids = $DB->get_fieldset_select('cohort_members', 'userid', "cohortid = ?", [$data->cohortid]);
-        manual::allocate_users($program->id, $source->id, $userids);
     }
     if ($data->users) {
-        manual::allocate_users($program->id, $source->id, $data->users);
+        $userids = array_merge($userids, $data->users);
+        $userids = array_unique($userids);
+    }
+    if ($userids) {
+        manual::allocate_users($program->id, $source->id, $userids);
     }
     $form->redirect_submitted($returnurl);
 }

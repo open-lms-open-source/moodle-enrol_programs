@@ -14,14 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace enrol_programs\navmenu;
+namespace enrol_programs\local\navmenu;
 
-use enrol_programs\local\navmenu\enrol_programs_catalogue;
 use local_navmenu\local\itemtype\set;
 use local_navmenu\local\itemtype\root;
 
 /**
- * Advanced primary menu Program catalogue tests.
+ * Advanced primary menu My programs tests.
  *
  * @group      openlms
  * @package    enrol_programs
@@ -29,9 +28,9 @@ use local_navmenu\local\itemtype\root;
  * @copyright  2023 Open LMS (https://www.openlms.net/)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @coversDefaultClass \enrol_programs\local\navmenu\enrol_programs_catalogue
+ * @coversDefaultClass \enrol_programs\local\navmenu\enrol_programs_myprograms
  */
-final class enrol_programs_catalogue_test extends \advanced_testcase {
+final class enrol_programs_myprograms_test extends \advanced_testcase {
     protected function setUp(): void {
         global $DB;
         parent::setUp();
@@ -45,15 +44,15 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
     }
 
     public function test_is_parentable() {
-        $this->assertFalse(enrol_programs_catalogue::is_parentable());
+        $this->assertFalse(enrol_programs_myprograms::is_parentable());
     }
 
     public function test_is_editable() {
-        $this->assertTrue(enrol_programs_catalogue::is_editable());
+        $this->assertTrue(enrol_programs_myprograms::is_editable());
     }
 
     public function test_get_type_name() {
-        $this->assertSame('Program catalogue', enrol_programs_catalogue::get_type_name());
+        $this->assertSame('My programs', enrol_programs_myprograms::get_type_name());
     }
 
     public function test_create() {
@@ -62,9 +61,9 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $cohort1 = $this->getDataGenerator()->create_cohort();
         $cohort2 = $this->getDataGenerator()->create_cohort();
 
-        $home1 = enrol_programs_catalogue::create([]);
+        $home1 = enrol_programs_myprograms::create([]);
         $this->assertInstanceOf('stdClass', $home1);
-        $this->assertSame('enrol_programs_catalogue', $home1->itemtype);
+        $this->assertSame('enrol_programs_myprograms', $home1->itemtype);
         $this->assertSame('', $home1->name);
         $this->assertSame('', $home1->tooltip);
         $this->assertSame(null, $home1->datajson);
@@ -78,7 +77,7 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $this->assertEquals([], $DB->get_fieldset_select('local_navmenu_cohorts', 'cohortid', 'itemid = ?', [$home1->id]));
 
         $data = [
-            'name' => 'Katalog',
+            'name' => 'Programy',
             'tooltip' => 'Nice page',
             'parent' => '0',
             'sortorder' => '1',
@@ -89,10 +88,10 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
             'contextid' => (string)SYSCONTEXTID,
             'cohorts' => [$cohort1->id, $cohort2->id],
         ];
-        $home2 = enrol_programs_catalogue::create($data);
+        $home2 = enrol_programs_myprograms::create($data);
         $home1 = $DB->get_record('local_navmenu_items', ['id' => $home1->id], '*', MUST_EXIST);
         $this->assertInstanceOf('stdClass', $home2);
-        $this->assertSame('enrol_programs_catalogue', $home2->itemtype);
+        $this->assertSame('enrol_programs_myprograms', $home2->itemtype);
         $this->assertSame($data['name'], $home2->name);
         $this->assertSame($data['tooltip'], $home2->tooltip);
         $this->assertSame(null, $home2->datajson);
@@ -112,11 +111,11 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
             'parent' => $set->id,
             'sortorder' => '5',
         ];
-        $home3 = enrol_programs_catalogue::create($data);
+        $home3 = enrol_programs_myprograms::create($data);
         $home1 = $DB->get_record('local_navmenu_items', ['id' => $home1->id], '*', MUST_EXIST);
         $home2 = $DB->get_record('local_navmenu_items', ['id' => $home2->id], '*', MUST_EXIST);
         $this->assertInstanceOf('stdClass', $home3);
-        $this->assertSame('enrol_programs_catalogue', $home3->itemtype);
+        $this->assertSame('enrol_programs_myprograms', $home3->itemtype);
         $this->assertSame($data['parent'], $home3->parent);
         $this->assertSame('1', $home3->sortorder);
         $this->assertSame('1', $home2->sortorder);
@@ -125,7 +124,7 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $DB->set_field('local_navmenu_items', 'sortorder', -1, []);
 
         // Automatic reordering.
-        $home4 = enrol_programs_catalogue::create([]);
+        $home4 = enrol_programs_myprograms::create([]);
         $home1 = $DB->get_record('local_navmenu_items', ['id' => $home1->id], '*', MUST_EXIST);
         $home2 = $DB->get_record('local_navmenu_items', ['id' => $home2->id], '*', MUST_EXIST);
         $home3 = $DB->get_record('local_navmenu_items', ['id' => $home3->id], '*', MUST_EXIST);
@@ -151,7 +150,7 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $set2 = set::create(['itemtype' => 'set', 'name' => 'Menu 1']);
 
         $data = [
-            'name' => 'Katalog 1',
+            'name' => 'Programy 1',
             'parent' => $set1->id,
             'sortorder' => '1',
             'visibility' => (string)set::VISIBILITY_COHORTS,
@@ -161,11 +160,11 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
             'contextid' => (string)$coursecontext->id,
             'cohorts' => [$cohort3->id],
         ];
-        $home1 = enrol_programs_catalogue::create($data);
+        $home1 = enrol_programs_myprograms::create($data);
 
         $data = [
             'id' => $home1->id,
-            'name' => 'Katalog 0',
+            'name' => 'Programy 0',
             'tooltip' => 'Nice page',
             'parent' => '0',
             'sortorder' => '1',
@@ -176,9 +175,9 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
             'contextid' => (string)SYSCONTEXTID,
             'cohorts' => [$cohort1->id, $cohort2->id],
         ];
-        $home1 = enrol_programs_catalogue::update($data);
+        $home1 = enrol_programs_myprograms::update($data);
         $this->assertInstanceOf('stdClass', $home1);
-        $this->assertSame('enrol_programs_catalogue', $home1->itemtype);
+        $this->assertSame('enrol_programs_myprograms', $home1->itemtype);
         $this->assertSame($data['name'], $home1->name);
         $this->assertSame($data['tooltip'], $home1->tooltip);
         $this->assertSame(null, $home1->datajson);
@@ -192,18 +191,18 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $this->assertEquals($data['cohorts'], $DB->get_fieldset_select('local_navmenu_cohorts', 'cohortid', 'itemid = ?', [$home1->id]));
 
         $data = [
-            'name' => 'Katalog 2',
+            'name' => 'Programy 2',
             'visibility' => (string)set::VISIBILITY_HIDDEN,
             'parent' => $set1->id,
         ];
-        $home2 = enrol_programs_catalogue::create($data);
+        $home2 = enrol_programs_myprograms::create($data);
         $data = [
             'id' => $home2->id,
             'visibility' => (string)set::VISIBILITY_ALL,
             'parent' => '0',
             'sortorder' => '1',
         ];
-        $home2 = enrol_programs_catalogue::update($data);
+        $home2 = enrol_programs_myprograms::update($data);
         $home1 = $DB->get_record('local_navmenu_items', ['id' => $home1->id], '*', MUST_EXIST);
         $this->assertSame($data['parent'], $home2->parent);
         $this->assertSame(null,
@@ -222,13 +221,13 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
             'visibility' => set::VISIBILITY_COHORTS,
             'cohorts' => [$cohort1->id],
         ];
-        $home1 = enrol_programs_catalogue::create($data);
+        $home1 = enrol_programs_myprograms::create($data);
 
         $data = [
             'visibility' => set::VISIBILITY_COHORTS,
             'cohorts' => [$cohort1->id],
         ];
-        $home2 = enrol_programs_catalogue::create($data);
+        $home2 = enrol_programs_myprograms::create($data);
 
         set::delete($home1->id);
         $this->assertFalse($DB->record_exists('local_navmenu_items', ['id' => $home1->id]));
@@ -240,7 +239,7 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
     }
 
     public function test_is_visible() {
-        $record = enrol_programs_catalogue::create([]);
+        $record = enrol_programs_myprograms::create([]);
         $user = $this->getDataGenerator()->create_user();
         $admin = get_admin();
 
@@ -265,7 +264,7 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $this->assertTrue($item->is_visible($root));
 
         $data = ['id' => $record->id, 'visibility' => $item::VISIBILITY_HIDDEN];
-        $record = enrol_programs_catalogue::update($data);
+        $record = enrol_programs_myprograms::update($data);
 
         $this->setUser(null);
         $root = root::init(false);
@@ -290,9 +289,9 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
 
     public function test_get_name() {
         $data = [
-            'name' => 'Katalog 1<span>xx</span>',
+            'name' => 'Programy 1<span>xx</span>',
         ];
-        enrol_programs_catalogue::create($data);
+        enrol_programs_myprograms::create($data);
         $root = root::init();
         $item = $root->get_children()[0];
 
@@ -304,7 +303,7 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $data = [
             'tooltip' => 'Some page<span>xx</span>',
         ];
-        enrol_programs_catalogue::create($data);
+        enrol_programs_myprograms::create($data);
         $root = root::init();
         $item = $root->get_children()[0];
 
@@ -315,11 +314,11 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
     public function test_get_url() {
         global $CFG;
 
-        enrol_programs_catalogue::create([]);
+        enrol_programs_myprograms::create([]);
         $root = root::init();
         $item = $root->get_children()[0];
 
-        $this->assertSame("$CFG->wwwroot/enrol/programs/catalogue/index.php", $item->get_url());
+        $this->assertSame("$CFG->wwwroot/enrol/programs/my/index.php", $item->get_url());
     }
 
     public function test_export_for_template() {
@@ -328,17 +327,17 @@ final class enrol_programs_catalogue_test extends \advanced_testcase {
         $output = new \renderer_base($PAGE, RENDERER_TARGET_CLI);
 
         $data = [
-            'name' => 'Katalog',
+            'name' => 'Programy',
             'tooltip' => 'Some page<span>xx</span>',
         ];
-        enrol_programs_catalogue::create($data);
+        enrol_programs_myprograms::create($data);
         $root = root::init(false);
         $item = $root->get_children()[0];
 
         $result = $item->export_for_template($output);
         $this->assertSame([
             'text' => format_string($data['name']),
-            'url' => "$CFG->wwwroot/enrol/programs/catalogue/index.php",
+            'url' => "$CFG->wwwroot/enrol/programs/my/index.php",
             'is_action_link' => true,
             'actionattributes' => [['name' => 'title', 'value' => format_string($data['tooltip'])]],
         ], $result);

@@ -58,7 +58,7 @@ echo $OUTPUT->header();
 echo $managementoutput->render_management_program_tabs($program, 'general');
 
 $buttons = [];
-if (has_capability('enrol/programs:delete', $context)) {
+if ($program->archived && has_capability('enrol/programs:delete', $context)) {
     $url = new moodle_url('/enrol/programs/management/program_delete.php', ['id' => $program->id]);
     $deletebutton = new local_openlms\output\dialog_form\button($url, get_string('deleteprogram', 'enrol_programs'));
     $deletebutton->set_after_submit($deletebutton::AFTER_SUBMIT_REDIRECT);

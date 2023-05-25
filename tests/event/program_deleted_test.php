@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\event;
 
 use enrol_programs\local\program;
 
@@ -29,7 +29,7 @@ use enrol_programs\local\program;
  *
  * @covers \enrol_programs\event\program_deleted
  */
-final class event_program_deleted_test extends \advanced_testcase {
+final class program_deleted_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

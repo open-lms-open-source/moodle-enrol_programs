@@ -14,10 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\local\source;
 
-use enrol_programs\local\source\approval;
-use enrol_programs\local\source\manual;
 use enrol_programs\local\program;
 
 /**
@@ -31,7 +29,7 @@ use enrol_programs\local\program;
  *
  * @covers \enrol_programs\local\source\approval
  */
-final class local_source_approval_test extends \advanced_testcase {
+final class approval_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

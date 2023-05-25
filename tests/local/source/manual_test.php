@@ -14,9 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\local\source;
 
-use enrol_programs\local\source\manual;
 use enrol_programs\local\program;
 
 /**
@@ -30,7 +29,7 @@ use enrol_programs\local\program;
  *
  * @covers \enrol_programs\local\source\manual
  */
-final class local_source_manual_test extends \advanced_testcase {
+final class manual_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }
@@ -39,7 +38,7 @@ final class local_source_manual_test extends \advanced_testcase {
         $this->assertSame('manual', manual::get_type());
     }
 
-    public function test_ai_new_alloved() {
+    public function test_is_new_alloved() {
         /** @var \enrol_programs_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
         $program = $generator->create_program();
@@ -744,7 +743,7 @@ final class local_source_manual_test extends \advanced_testcase {
 
         /** @var \enrol_programs_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
-        
+
         $program1 = $generator->create_program(['sources' => ['manual' => []]]);
         $program2 = $generator->create_program(['sources' => []]);
         $program3 = $generator->create_program(['sources' => []]);

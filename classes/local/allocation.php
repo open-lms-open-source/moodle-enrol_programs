@@ -22,6 +22,7 @@ use enrol_programs\local\source\cohort;
 use enrol_programs\local\source\manual;
 use enrol_programs\local\source\selfallocation;
 use enrol_programs\local\source\udplans;
+use enrol_programs\local\source\certify;
 use enrol_programs\local\content\course;
 use enrol_programs\local\content\top;
 use enrol_programs\local\content\set;
@@ -53,6 +54,10 @@ final class allocation {
 
         if (file_exists(__DIR__ . '/../../../../admin/tool/udplans/version.php')) {
             $types[udplans::get_type()] = udplans::class;
+        }
+
+        if (file_exists(__DIR__ . '/../../../../admin/tool/certify/version.php')) {
+            $types[certify::get_type()] = certify::class;
         }
 
         return $types;
@@ -505,7 +510,7 @@ final class allocation {
              LEFT JOIN {enrol_programs_completions} pc ON pc.allocationid = pa.id AND pc.itemid = pi.id
                  WHERE pc.id IS NULL
                        AND p.archived = 0 AND pa.archived = 0
-                       AND (pa.timestart IS NULL OR pa.timestart <= :now1)
+                       AND (pa.timestart <= :now1)
                        AND (pa.timeend IS NULL OR pa.timeend > :now2)
                        $programselect $userselect";
         $DB->execute($sql, $params);
@@ -568,7 +573,7 @@ final class allocation {
                       JOIN {enrol_programs_completions} pric ON pric.itemid = pr.prerequisiteitemid AND pric.allocationid = pa.id
                      WHERE psic.id IS NULL AND psi.courseid IS NULL
                            AND p.archived = 0 AND pa.archived = 0
-                           AND (pa.timestart IS NULL OR pa.timestart <= :now1)
+                           AND (pa.timestart <= :now1)
                            AND (pa.timeend IS NULL OR pa.timeend > :now2)
                            $programselect $userselect
                   GROUP BY psi.id, pa.id, psi.minprerequisites
@@ -620,7 +625,7 @@ final class allocation {
                  WHERE ue.status = :suspended
                        AND (pi.previtemid IS NULL OR previc.timecompleted IS NOT NULL)
                        AND p.archived = 0 AND pa.archived = 0
-                       AND (pa.timestart IS NULL OR pa.timestart <= :now1)
+                       AND (pa.timestart <= :now1)
                        AND (pa.timeend IS NULL OR pa.timeend > :now2)
                        $programselect $userselect
               ORDER BY e.id ASC, pa.id ASC";
@@ -994,7 +999,7 @@ final class allocation {
      * Make a full user allocation snapshot.
      *
      * @param int $allocationid
-     * @param string $reaons snapshot reason type
+     * @param string $reason snapshot reason type
      * @param string|null $explanation
      * @return \stdClass|null allocation record or null if not exists any more
      */
@@ -1018,9 +1023,6 @@ final class allocation {
 
         foreach ((array)$allocation as $k => $v) {
             if ($k === 'id' || $k === 'timecreated') {
-                continue;
-            }
-            if (strpos($k, 'timenotified') === 0) {
                 continue;
             }
             $data->{$k} = $v;

@@ -133,6 +133,16 @@ final class generator_test extends \advanced_testcase {
         $cs = array_values($cs);
         $this->assertSame($cohort1->id, $cs[0]->cohortid);
         $this->assertSame($cohort2->id, $cs[1]->cohortid);
+
+        $data = (object)[
+            'sources' => 'manual, cohort',
+        ];
+        $program = $generator->create_program($data);
+        $sources = $DB->get_records('enrol_programs_sources', ['programid' => $program->id], 'type ASC');
+        $this->assertCount(2, $sources);
+        $sources = array_values($sources);
+        $this->assertSame('cohort', $sources[0]->type);
+        $this->assertSame('manual', $sources[1]->type);
     }
 
     public function test_create_program_item() {

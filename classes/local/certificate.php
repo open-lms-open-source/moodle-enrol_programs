@@ -19,8 +19,6 @@ namespace enrol_programs\local;
 /**
  * Program certificate awarded via tool_certificate.
  *
- * NOTE: This should be refactored into an independent subplugin in tool_certificate.
- *
  * @package    enrol_programs
  * @copyright  2022 Open LMS (https://www.openlms.net/)
  * @author     Petr Skoda
@@ -103,37 +101,48 @@ final class certificate {
         global $DB;
 
         if (!PHPUNIT_TEST && !CLI_SCRIPT) {
-            throw new \coding_exception('Certificates cannot be awarded from normal web apges');
+            throw new \coding_exception('Certificates cannot be awarded from normal web pages');
         }
 
-        $program = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
-        if (!$program || $program->archived) {
-            return false;
-        }
-        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $userid]);
-        if (!$allocation || $allocation->archived || !$allocation->timecompleted) {
-            return false;
-        }
-        $cert = $DB->get_record('enrol_programs_certs', ['programid' => $programid]);
-        if (!$cert) {
-            return false;
-        }
-        $template = $DB->get_record('tool_certificate_templates', ['id' => $cert->templateid]);
-        if (!$template) {
-            return false;
-        }
-        $user = $DB->get_record('user', ['id' => $allocation->userid, 'deleted' => 0, 'confirmed' => 1]);
-        if (!$user) {
+        $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $programid, 'userid' => $userid]);
+        if (!$allocation) {
             return false;
         }
 
         $lockfactory = \core\lock\lock_config::get_lock_factory('enrol_programs_certificate_lock');
         $lock = $lockfactory->get_lock("allocation_{$allocation->id}", MINSECS);
         if (!$lock) {
-            throw new \moodle_exception('locktimeout');
+            debugging('locktimeout when issuing certificate for allocation ' . $allocation->id, DEBUG_DEVELOPER);
+            return false;
         }
         if ($DB->record_exists('enrol_programs_certs_issues', ['allocationid' => $allocation->id])) {
             // Prevent multiple certificates for program completion at the same time of one user.
+            $lock->release();
+            return false;
+        }
+
+        $allocation = $DB->get_record('enrol_programs_allocations', ['id' => $allocation->id]);
+        if (!$allocation || $allocation->archived || !$allocation->timecompleted) {
+            $lock->release();
+            return false;
+        }
+        $program = $DB->get_record('enrol_programs_programs', ['id' => $allocation->programid]);
+        if (!$program || $program->archived) {
+            $lock->release();
+            return false;
+        }
+        $cert = $DB->get_record('enrol_programs_certs', ['programid' => $programid]);
+        if (!$cert) {
+            $lock->release();
+            return false;
+        }
+        $template = $DB->get_record('tool_certificate_templates', ['id' => $cert->templateid]);
+        if (!$template) {
+            $lock->release();
+            return false;
+        }
+        $user = $DB->get_record('user', ['id' => $allocation->userid, 'deleted' => 0, 'confirmed' => 1]);
+        if (!$user) {
             $lock->release();
             return false;
         }
@@ -151,8 +160,7 @@ final class certificate {
             $cert->expirydateoffset,
             $cert->expirydateoffset
         );
-        $issueid = $template->issue_certificate($user->id, $expirydate, $issuedata, 'enrol_programs', null);
-        $lock->release(); // TODO: move this into issue_certificate() after 3.11.9 upstream tool_certificate release.
+        $issueid = $template->issue_certificate($user->id, $expirydate, $issuedata, 'enrol_programs');
 
         $issue = new \stdClass();
         $issue->programid = $program->id;
@@ -162,7 +170,20 @@ final class certificate {
         $issue->timecreated = time();
         $DB->insert_record('enrol_programs_certs_issues', $issue);
 
+        $lock->release();
+
         return true;
+    }
+
+    /**
+     * Called after certificate template is deleted.
+     *
+     * @param \tool_certificate\event\template_deleted $event
+     * @return void
+     */
+    public static function template_deleted(\tool_certificate\event\template_deleted $event): void {
+        global $DB;
+        $DB->delete_records('enrol_programs_certs', ['templateid' => $event->objectid]);
     }
 
     /**

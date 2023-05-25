@@ -27,50 +27,39 @@ defined('MOODLE_INTERNAL') || die();
 
 $observers = [
     [
-        'eventname'   => '\core\event\course_updated',
-        'callback'    => 'enrol_programs\local\event_observer::course_updated',
+        'eventname'   => \core\event\course_updated::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::course_updated',
     ],
     [
-        'eventname'   => '\core\event\course_deleted',
-        'callback'    => 'enrol_programs\local\event_observer::course_deleted',
+        'eventname'   => \core\event\course_deleted::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::course_deleted',
     ],
     [
-        'eventname'   => '\core\event\course_category_deleted',
-        'callback'    => 'enrol_programs\local\event_observer::course_category_deleted',
+        'eventname'   => \core\event\course_category_deleted::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::course_category_deleted',
     ],
     [
-        'eventname'   => '\core\event\user_deleted',
-        'callback'    => 'enrol_programs\local\event_observer::user_deleted',
+        'eventname'   => \core\event\user_deleted::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::user_deleted',
     ],
     [
-        'eventname'   => '\core\event\cohort_member_added',
-        'callback'    => 'enrol_programs\local\event_observer::cohort_member_added',
+        'eventname'   => \core\event\cohort_member_added::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::cohort_member_added',
     ],
     [
-        'eventname'   => '\core\event\cohort_member_removed',
-        'callback'    => 'enrol_programs\local\event_observer::cohort_member_removed',
+        'eventname'   => \core\event\cohort_member_removed::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::cohort_member_removed',
     ],
     [
-        'eventname'   => '\core\event\course_completed',
-        'callback'    => 'enrol_programs\local\event_observer::course_completed',
+        'eventname'   => \core\event\course_completed::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::course_completed',
     ],
     [
-        'eventname'   => '\core\event\group_deleted',
-        'callback'    => 'enrol_programs\local\event_observer::group_deleted',
-    ],
-
-    // Certificate related observers, in the future they should be moved
-    // to a new tool_certificate subplugin type.
-    [
-        'eventname' => '\tool_certificate\event\template_deleted',
-        'callback' => 'enrol_programs\local\certificate_observer::template_deleted'
+        'eventname'   => \core\event\group_deleted::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::group_deleted',
     ],
     [
-        'eventname' => '\enrol_programs\event\program_deleted',
-        'callback' => 'enrol_programs\local\certificate_observer::program_deleted',
-    ],
-    [
-        'eventname' => '\enrol_programs\event\user_deallocated',
-        'callback' => 'enrol_programs\local\certificate_observer::user_deallocated',
+        'eventname' => \tool_certificate\event\template_deleted::class,
+        'callback' => \enrol_programs\local\certificate::class . '::template_deleted'
     ],
 ];

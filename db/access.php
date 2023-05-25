@@ -44,6 +44,7 @@ $capabilities = [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
         ],
     ],
 
@@ -54,6 +55,7 @@ $capabilities = [
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
         ],
     ],
 
@@ -65,11 +67,23 @@ $capabilities = [
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
         ],
     ],
 
     /* Add program to plans. */
     'enrol/programs:addtoplan' => [
+        'captype' => 'read', // This does not allow to change any data by itself.
+        'contextlevel' => CONTEXT_COURSECAT,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
+        ],
+    ],
+
+    /* Add program to certifications. */
+    'enrol/programs:addtocertifications' => [
         'captype' => 'read', // This does not allow to change any data by itself.
         'contextlevel' => CONTEXT_COURSECAT,
         'archetypes' => [
@@ -96,6 +110,7 @@ $capabilities = [
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
         ],
     ],
 
@@ -108,6 +123,7 @@ $capabilities = [
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
         ],
     ],
 
@@ -118,6 +134,7 @@ $capabilities = [
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+            'tenantmanager' => CAP_ALLOW,
         ],
     ],
 
@@ -143,6 +160,7 @@ $capabilities = [
 
 // Compatibility hacks for vanilla Moodle.
 if (!file_exists(__DIR__ . '/../../../admin/tool/olms_tenant/version.php')) {
-    unset($capabilities['enrol/programs:addtoplan']['archetypes']['tenantmanager']);
-    unset($capabilities['enrol/programs:configframeworks']['archetypes']['tenantmanager']);
+    foreach ($capabilities as $k => $unused) {
+        unset($capabilities[$k]['archetypes']['tenantmanager']);
+    }
 }

@@ -81,6 +81,8 @@ final class program_certificate_edit extends \local_openlms\dialog_form {
             $record = $DB->get_record('tool_certificate_templates', ['id' => $templateid]);
             if ($record) {
                 $templates[$record->id] = format_string($record->name);
+            } else {
+                $templates[$templateid] = get_string('error');
             }
         }
 

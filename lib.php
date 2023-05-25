@@ -189,6 +189,29 @@ function enrol_programs_core_calendar_provide_event_action(calendar_event $event
 }
 
 /**
+ * Add nodes to myprofile page.
+ *
+ * @param \core_user\output\myprofile\tree $tree Tree object
+ * @param stdClass $user user object
+ * @param bool $iscurrentuser
+ * @param stdClass $course Course object
+ */
+function enrol_programs_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
+    global $USER;
+
+    if (!enrol_is_enabled('programs')) {
+        return;
+    }
+
+    if ($USER->id == $user->id) {
+        $link = get_string('myprograms', 'enrol_programs');
+        $url = new moodle_url('/enrol/programs/my/index.php');
+        $node = new core_user\output\myprofile\node('miscellaneous', 'enrolprograms_programs', $link, null, $url);
+        $tree->add_node($node);
+    }
+}
+
+/**
  * Map icons for font-awesome themes.
  */
 function enrol_programs_get_fontawesome_icon_map() {

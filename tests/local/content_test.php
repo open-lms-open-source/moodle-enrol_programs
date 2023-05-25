@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace enrol_programs;
+namespace enrol_programs\local;
 
 use enrol_programs\local\content\top;
 use enrol_programs\local\content\course;
@@ -34,7 +34,7 @@ use enrol_programs\local\content\item;
  * @covers \enrol_programs\local\content\set
  * @covers \enrol_programs\local\content\item
  */
-final class local_content_test extends \advanced_testcase {
+final class content_test extends \advanced_testcase {
     public function setUp(): void {
         $this->resetAfterTest();
     }

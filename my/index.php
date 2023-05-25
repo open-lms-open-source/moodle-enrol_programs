@@ -30,14 +30,14 @@
 /** @var stdClass $USER */
 
 require('../../../config.php');
-$syscontext = context_system::instance();
 
 $sort = optional_param('sort', 'fullname', PARAM_ALPHANUMEXT);
 $dir = optional_param('dir', 'ASC', PARAM_ALPHA);
 
-$PAGE->set_context($syscontext);
-
 require_login();
+
+$usercontext = context_user::instance($USER->id);
+$PAGE->set_context($usercontext);
 
 if (!enrol_is_enabled('programs')) {
     redirect(new moodle_url('/'));
@@ -56,11 +56,13 @@ if ($dir !== 'ASC') {
 
 $currenturl = new moodle_url('/enrol/programs/my/index.php', $pageparams);
 
+$title = get_string('myprograms', 'enrol_programs');
+$PAGE->navigation->extend_for_user($USER);
+$PAGE->set_title($title);
 $PAGE->set_url($currenturl);
-$PAGE->set_heading(get_string('myprograms', 'enrol_programs'));
-$PAGE->set_title(get_string('myprograms', 'enrol_programs'));
-$PAGE->navigation->override_active_url(new moodle_url('/enrol/programs/my/index.php'));
 $PAGE->set_pagelayout('report');
+$PAGE->navbar->add(get_string('profile'), new moodle_url('/user/profile.php', ['id' => $USER->id]));
+$PAGE->navbar->add($title);
 
 $buttons = [];
 $manageurl = \enrol_programs\local\management::get_management_url();
@@ -107,9 +109,13 @@ $data = [];
 $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
 $dateformat = get_string('strftimedatetimeshort');
 $strnotset = get_string('notset', 'enrol_programs');
+$sourceclasses = \enrol_programs\local\allocation::get_source_classes();
 
 foreach ($programs as $program) {
     $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $USER->id]);
+    $source = $DB->get_record('enrol_programs_sources', ['id' => $allocation->sourceid]);
+    /** @var \enrol_programs\local\source\base $sourceclass */
+    $sourceclass = $sourceclasses[$source->type];
     $pcontext = context::instance_by_id($program->contextid);
     $row = [];
     $fullname = $programicon . format_string($program->fullname);
@@ -138,6 +144,8 @@ foreach ($programs as $program) {
     } else {
         $row[] = $strnotset;
     }
+
+    $row[] = $sourceclass::render_allocation_source($program, $source, $allocation);
 
     $row[] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
 
@@ -217,6 +225,8 @@ if ($sort === 'end') {
     $column .= $columnicon;
 }
 $columns[] = $column;
+
+$columns[] = get_string('source', 'enrol_programs');
 
 $columns[] = get_string('programstatus', 'enrol_programs');
 

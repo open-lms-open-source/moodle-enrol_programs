@@ -53,6 +53,16 @@ class provider_test extends \core_privacy\tests\provider_testcase {
     /** @var stdClass A test program. */
     protected $program2;
 
+    public function tearDown(): void {
+        $this->user0 = null;
+        $this->user1 = null;
+        $this->user2 = null;
+        $this->user3 = null;
+        $this->program1 = null;
+        $this->program2 = null;
+        parent::tearDown();
+    }
+
     protected function set_instance_vars(): void {
         global $DB;
 
@@ -72,7 +82,6 @@ class provider_test extends \core_privacy\tests\provider_testcase {
         $programgenerator = $generator->get_plugin_generator('enrol_programs');
 
         // Set up and allocate users to programs.
-        $this->setAdminUser();
         $data = (object)[
             'fullname' => 'Some program',
             'idnumber' => 'SP1',
@@ -321,7 +330,6 @@ class provider_test extends \core_privacy\tests\provider_testcase {
         // Check for enrol_programs_usr_snapshots.
         $snapshots = $DB->get_records('enrol_programs_usr_snapshots', ['userid' => $this->user2->id]);
         $this->assertCount(1, $snapshots);
-
 
         // Convert $userlist2 into an approved_contextlist in the system context.
         $approvedlist2 = new approved_userlist($program2context, $component, $userlist2->get_userids());
