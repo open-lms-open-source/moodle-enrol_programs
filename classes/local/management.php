@@ -206,8 +206,9 @@ final class management {
 
         if (has_capability('enrol/programs:view', $syscontext) && has_capability('moodle/site:config', $syscontext)) {
             require_once($CFG->libdir . '/adminlib.php');
-            admin_externalpage_setup('programsmanagement', '', null, $pageurl, ['pagelayout' => 'admin']);
+            admin_externalpage_setup('programsmanagement', '', null, $pageurl, ['pagelayout' => 'admin', 'nosearch' => true]);
             $PAGE->set_heading(get_string('management', 'enrol_programs'));
+            $PAGE->set_secondary_navigation(false);
         } else {
             $PAGE->set_pagelayout('admin');
             $PAGE->set_context($context);
@@ -248,17 +249,18 @@ final class management {
 
         if (has_capability('enrol/programs:view', $syscontext) && has_capability('moodle/site:config', $syscontext)) {
             require_once($CFG->libdir . '/adminlib.php');
-            admin_externalpage_setup('programsmanagement', '', null, $pageurl, ['pagelayout' => 'admin']);
-            $PAGE->set_heading(get_string('management', 'enrol_programs'));
+            admin_externalpage_setup('programsmanagement', '', null, $pageurl, ['pagelayout' => 'admin', 'nosearch' => true]);
+            $PAGE->set_heading(format_string($program->fullname));
         } else {
             $PAGE->set_pagelayout('admin');
             $PAGE->set_context($context);
             $PAGE->set_url($pageurl);
             $PAGE->set_title(get_string('programs', 'enrol_programs'));
-            $PAGE->set_heading(get_string('management', 'enrol_programs'));
+            $PAGE->set_heading(format_string($program->fullname));
             $url = new moodle_url('/enrol/programs/management/index.php', ['contextid' => $context->id]);
             $PAGE->navbar->add(get_string('management', 'enrol_programs'), $url);
         }
+        $PAGE->set_secondary_navigation(false);
         $PAGE->navbar->add(format_string($program->fullname));
 
         $PAGE->set_docs_path("$CFG->wwwroot/enrol/programs/documentation.php/management.md");

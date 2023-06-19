@@ -57,7 +57,6 @@ $PAGE->set_docs_path("$CFG->wwwroot/enrol/programs/documentation.php/program_all
 $managementoutput = $PAGE->get_renderer('enrol_programs', 'management');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($program->fullname));
 
 echo $managementoutput->render_management_program_tabs($program, 'users');
 

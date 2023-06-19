@@ -74,7 +74,6 @@ if ($moveitem && $movetoparent && !$program->archived) {
 $managementoutput = $PAGE->get_renderer('enrol_programs', 'management');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($program->fullname));
 
 echo $managementoutput->render_management_program_tabs($program, 'content');
 

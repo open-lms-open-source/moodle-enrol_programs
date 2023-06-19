@@ -79,7 +79,6 @@ $managementoutput = $PAGE->get_renderer('enrol_programs', 'management');
 $catalogueoutput = $PAGE->get_renderer('enrol_programs', 'catalogue');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($program->fullname));
 
 echo $managementoutput->render_management_program_tabs($program, 'users');
 

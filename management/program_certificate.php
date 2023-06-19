@@ -59,7 +59,6 @@ $managementoutput = $PAGE->get_renderer('enrol_programs', 'management');
 $cert = $DB->get_record('enrol_programs_certs', ['programid' => $program->id]);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($program->fullname));
 
 echo $managementoutput->render_management_program_tabs($program, 'certificate');
 
