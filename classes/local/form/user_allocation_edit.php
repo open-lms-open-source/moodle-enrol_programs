@@ -35,7 +35,7 @@ final class user_allocation_edit extends \local_openlms\dialog_form {
 
         $mform->addElement('static', 'userfullname', get_string('user'), fullname($user));
 
-        $mform->addElement('date_time_selector', 'timeallocated', get_string('allocationdate', 'enrol_programs'), ['optional = false']);
+        $mform->addElement('date_time_selector', 'timeallocated', get_string('allocationdate', 'enrol_programs'), ['optional' => false]);
         $mform->freeze('timeallocated');
 
         $mform->addElement('date_time_selector', 'timestart', get_string('programstart_date', 'enrol_programs'), ['optional' => false]);

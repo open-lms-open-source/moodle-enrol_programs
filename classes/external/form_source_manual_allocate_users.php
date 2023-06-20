@@ -193,6 +193,10 @@ SQL;
     public static function validate_form_value(array $arguments, $value, \context $context): ?string {
         global $DB;
 
+        if (!$value) {
+            return null;
+        }
+
         $user = $DB->get_record('user', ['id' => $value, 'deleted' => 0, 'confirmed' => 1]);
         if (!$user) {
             return get_string('error');

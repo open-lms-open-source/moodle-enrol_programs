@@ -49,7 +49,7 @@ $source = $DB->get_record('enrol_programs_sources', ['programid' => $program->id
 $context = context::instance_by_id($program->contextid);
 require_capability('enrol/programs:edit', $context);
 
-$currenturl = new moodle_url('/enrol/programs/management/source_edit.php', ['id' => $program->id]);
+$currenturl = new moodle_url('/enrol/programs/management/program_source_edit.php', ['id' => $program->id]);
 $returnurl = new moodle_url('/enrol/programs/management/program_allocation.php', ['id' => $program->id]);
 
 /** @var \enrol_programs\local\source\base[] $sourceclasses */
