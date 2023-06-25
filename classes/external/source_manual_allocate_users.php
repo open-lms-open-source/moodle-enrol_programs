@@ -21,6 +21,9 @@ use external_function_parameters;
 use external_value;
 use enrol_programs\local\source\manual;
 
+global $CFG;
+require_once("$CFG->libdir/externallib.php");
+
 /**
  * Allocates the given users to the program.
  *

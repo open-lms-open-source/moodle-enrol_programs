@@ -21,6 +21,9 @@ use external_value;
 use external_api;
 use enrol_programs\local\source\cohort;
 
+global $CFG;
+require_once("$CFG->libdir/externallib.php");
+
 /**
  * Adds a cohort to the list of synchronised cohorts in a program.
  *

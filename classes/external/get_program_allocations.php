@@ -21,6 +21,9 @@ use external_api;
 use external_function_parameters;
 use external_value;
 
+global $CFG;
+require_once("$CFG->libdir/externallib.php");
+
 /**
  * Provides list of program allocations for given program and optional list of users.
  *

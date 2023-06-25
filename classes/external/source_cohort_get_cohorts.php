@@ -20,6 +20,9 @@ use external_function_parameters;
 use external_value;
 use external_api;
 
+global $CFG;
+require_once("$CFG->libdir/externallib.php");
+
 /**
  * Provides list of cohorts that are synchronized with a program.
  *

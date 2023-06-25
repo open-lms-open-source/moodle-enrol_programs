@@ -21,6 +21,9 @@ use external_value;
 use external_api;
 use enrol_programs\local\source\cohort;
 
+global $CFG;
+require_once("$CFG->libdir/externallib.php");
+
 /**
  * Remove cohort from the list of synchronised cohorts in a program.
  *
