@@ -74,10 +74,14 @@ function enrol_programs_migrate_notifications() {
          ORDER BY pa.id";
     $allocations = $DB->get_recordset_sql($sql);
     foreach ($allocations as $allocation) {
-        $notifications = $DB->get_records('local_openlms_notifications', [
+        $records = $DB->get_records('local_openlms_notifications', [
             'component' => 'enrol_programs',
             'instanceid' => $allocation->programid,
-        ], '', 'notificationtype, *');
+        ], '', '*');
+        $notifications = [];
+        foreach($records as $record) {
+            $notifications[$record->notificationtype] = $record;
+        }
         foreach ($mappings as $notificationtype => $info) {
             if (!isset($notifications[$notificationtype])) {
                 continue;
