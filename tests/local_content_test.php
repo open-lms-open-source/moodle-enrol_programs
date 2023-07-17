@@ -19,7 +19,7 @@ namespace enrol_programs;
 use enrol_programs\local\content\top;
 use enrol_programs\local\content\course;
 use enrol_programs\local\content\set;
-
+use enrol_programs\local\content\item;
 /**
  * Program content test.
  *
@@ -440,6 +440,83 @@ final class local_content_test extends \advanced_testcase {
         $this->assertFalse($top->delete_item($setitem2->get_id()));
         $this->assertTrue($top->delete_item($courseitem5->get_id()));
         $this->assertTrue($top->delete_item($setitem2->get_id()));
+    }
+
+    /**
+     * Assert that cloned item has the same structure.
+     * @param item $source
+     * @param item $target
+     * @return void
+     */
+    public static function assertItemCloned(item $source, item $target): void {
+        self::assertSame(get_class($source), get_class($target));
+        self::assertSame($source->get_fullname(), $target->get_fullname());
+        self::assertSame(count($source->get_children()), count($target->get_children()));
+
+        if ($source instanceof course) {
+            self::assertSame($source->get_courseid(), $target->get_courseid());
+        } else if ($source instanceof set) {
+            self::assertSame($source->get_sequencetype_info(), $target->get_sequencetype_info());
+        } else {
+            throw new \coding_exception('Unexpected class');
+        }
+
+        foreach ($source->get_children() as $k => $child) {
+            self::assertItemCloned($child, $target->get_children()[$k]);
+        }
+    }
+
+    public function test_content_import() {
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['fullname' => 'hokus']);
+        $program2 = $generator->create_program(['fullname' => 'pokus']);
+        $program3 = $generator->create_program(['fullname' => 'abraka']);
+
+        $course1 = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+        $course3 = $this->getDataGenerator()->create_course();
+        $course4 = $this->getDataGenerator()->create_course();
+        $course5 = $this->getDataGenerator()->create_course();
+
+        $top1 = top::load($program1->id);
+        $top1->update_set($top1, $top1->get_fullname(), $top1::SEQUENCE_TYPE_ALLINORDER, 1);
+        $item1x0 = $top1->append_course($top1, $course1->id);
+        $item1x1 = $top1->append_set($top1, 'Nice set', set::SEQUENCE_TYPE_ATLEAST, 1);
+        $item1x1x0 = $top1->append_set($item1x1, 'Other set', set::SEQUENCE_TYPE_ALLINORDER);
+        $item1x1x1 = $top1->append_course($item1x1, $course2->id);
+        $item1x1x2 = $top1->append_set($item1x1, 'Third set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $item1x1x2x0 = $top1->append_course($item1x1x2, $course3->id);
+        $item1x1x2x1 = $top1->append_course($item1x1x2, $course4->id);
+        $item1x1x2x3 = $top1->append_course($item1x1x2, $course5->id);
+
+        $top2 = top::load($program2->id);
+        $top2->update_set($top2, $top2->get_fullname(), $top2::SEQUENCE_TYPE_ALLINANYORDER, 1);
+
+        $top3 = top::load($program3->id);
+        $top3->update_set($top3, $top3->get_fullname(), $top3::SEQUENCE_TYPE_ALLINORDER, 1);
+        $item3x0 = $top3->append_set($top3, 'Repeated set', set::SEQUENCE_TYPE_ATLEAST, 1);
+        $item3x0x0 = $top3->append_course($item3x0, $course1->id);
+        $item3x0x1 = $top3->append_course($item3x0, $course2->id);
+        $item3x0x2 = $top3->append_course($item3x0, $course3->id);
+
+        $top2->content_import($program1->id);
+        $top2 = top::load($program2->id);
+        $this->assertSame($top1->get_sequencetype_info(), $top2->get_sequencetype_info());
+        $this->assertSame($program2->fullname, $top2->get_fullname());
+        $this->assertCount(2, $top2->get_children());
+        $this->assertItemCloned($top1->get_children()[0], $top2->get_children()[0]);
+        $this->assertItemCloned($top1->get_children()[1], $top2->get_children()[1]);
+
+        $top2->content_import($program3->id);
+        $top2 = top::load($program2->id);
+        $this->assertSame($top1->get_sequencetype_info(), $top2->get_sequencetype_info());
+        $this->assertSame($program2->fullname, $top2->get_fullname());
+        $this->assertCount(3, $top2->get_children());
+        $this->assertItemCloned($top1->get_children()[0], $top2->get_children()[0]);
+        $this->assertItemCloned($top1->get_children()[1], $top2->get_children()[1]);
+        $this->assertItemCloned($top3->get_children()[0], $top2->get_children()[2]);
     }
 
     public function test_orphaned_items() {

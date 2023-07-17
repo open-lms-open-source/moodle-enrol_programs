@@ -71,7 +71,7 @@ final class management {
     public static function fetch_programs(?\context $context, bool $archived, string $search, int $page, int $perpage, string $orderby = 'fullname ASC'): array {
         global $DB;
 
-        list($select, $params) = self::get_search_query($context, $search, '');
+        list($select, $params) = self::get_program_search_query($context, $search, '');
 
         $select .= ' AND archived = :archived';
         $params['archived'] = (int)$archived;
@@ -137,7 +137,15 @@ final class management {
         return $result;
     }
 
-    protected static function get_search_query(?\context $context, string $search, string $tablealias = ''): array {
+    /**
+     * Returns program query data.
+     *
+     * @param \context|null $context
+     * @param string $search
+     * @param string $tablealias
+     * @return array
+     */
+    public static function get_program_search_query(?\context $context, string $search, string $tablealias = ''): array {
         global $DB;
 
         if ($tablealias !== '' && substr($tablealias, -1) !== '.') {
@@ -148,13 +156,14 @@ final class management {
         $params = [];
 
         if ($context) {
-            $conditions[] = $tablealias . 'contextid = :prgcontextid';
+            $contextselect = 'AND ' . $tablealias . 'contextid = :prgcontextid';
             $params['prgcontextid'] = $context->id;
+        } else {
+            $contextselect = '';
         }
 
         if (trim($search) !== '') {
             $searchparam = '%' . $DB->sql_like_escape($search) . '%';
-            $conditions = [];
             $fields = ['fullname', 'idnumber', 'description'];
             $cnt = 0;
             foreach ($fields as $field) {
@@ -165,10 +174,10 @@ final class management {
         }
 
         if ($conditions) {
-            $sql = '(' . implode(' OR ', $conditions) . ')';
+            $sql = '(' . implode(' OR ', $conditions) . ') ' . $contextselect;
             return [$sql, $params];
         } else {
-            return ['1=1', $params];
+            return ['1=1 ' . $contextselect, $params];
         }
     }
 
@@ -268,33 +277,5 @@ final class management {
         $PAGE->navbar->add(format_string($program->fullname));
 
         $PAGE->set_docs_path("$CFG->wwwroot/enrol/programs/documentation.php/management.md");
-    }
-
-    /**
-     * Copy over content from one program to the other
-     *
-     * @param stdClass $fromprogram
-     * @param stdClass $toprogram
-     * @return void
-     */
-    public static function copy_program_content(stdClass $fromprogram, stdClass $toprogram) {
-        $topprogram1 = top::load($fromprogram->id);
-        $topprogram2 = top::load($toprogram->id);
-        if (empty($topprogram2->get_children())) {
-            $topprogram2->update_set($topprogram2, $topprogram2->get_fullname(), $topprogram1->get_sequencetype(), $topprogram1->get_minprerequisites());
-        }
-        $copyover_item = function ($item, $newparent, $programtop) use (&$copyover_item) {
-            if ($item instanceof course) {
-                $programtop->append_course($newparent, $item->get_courseid());
-            } else if ($item instanceof set) {
-                $newset = $programtop->append_set($newparent, $item->get_fullname(), $item->get_sequencetype(), $item->get_minprerequisites());
-                foreach ($item->get_children() as $child) {
-                    $copyover_item($child, $newset, $programtop);
-                }
-            }
-        };
-        foreach ($topprogram1->get_children() as $item) {
-            $copyover_item($item, $topprogram2, $topprogram2);
-        }
     }
 }

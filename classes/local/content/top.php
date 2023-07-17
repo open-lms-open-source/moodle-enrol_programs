@@ -532,6 +532,35 @@ final class top extends set {
     }
 
     /**
+     * Import content from another program.
+     *
+     * @param int $fromprogramid
+     * @return void
+     */
+    public function content_import(int $fromprogramid) {
+        if ($fromprogramid == $this->programid) {
+            throw new \coding_exception('invalid parameters');
+        }
+        $topfrom = top::load($fromprogramid);
+        if (!$this->get_children()) {
+            $this->update_set($this, $this->get_fullname(), $topfrom->get_sequencetype(), $topfrom->get_minprerequisites());
+        }
+        $copyfunction = function (item $item, set $newparent, top $top) use (&$copyfunction) {
+            if ($item instanceof course) {
+                $top->append_course($newparent, $item->get_courseid());
+            } else if ($item instanceof set) {
+                $newset = $top->append_set($newparent, $item->get_fullname(), $item->get_sequencetype(), $item->get_minprerequisites());
+                foreach ($item->get_children() as $child) {
+                    $copyfunction($child, $newset, $top);
+                }
+            }
+        };
+        foreach ($topfrom->get_children() as $item) {
+            $copyfunction($item, $this, $this);
+        }
+    }
+
+    /**
      * Update content in database to match the in-memory representation.
      *
      * @return void

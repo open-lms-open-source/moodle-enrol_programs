@@ -50,28 +50,26 @@ Feature: Import program content
       | Program 003 | PR3      | Cat 3    |
 
   @javascript
-  Scenario: Manager may import program content
+  Scenario: Manager may import content from another program
     Given I log in as "manager1"
+
+    # Add courses and sets
     And I am on all programs management page
     And I follow "Program 000"
     And I click on "Content" "link" in the ".nav-tabs" "css_element"
     And I should see "All in any order" in the "Program 000" "table_row"
-
-    # Add courses and sets
-    When I click on "Append item" "link" in the "Program 000" "table_row"
+    And I click on "Append item" "link" in the "Program 000" "table_row"
     And I set the following fields to these values:
       | Courses | Course 1 |
-    Then I press dialog form button "Append item"
-
-    When I click on "Append item" "link" in the "Program 000" "table_row"
+    And I press dialog form button "Append item"
+    And I click on "Append item" "link" in the "Program 000" "table_row"
     And I set the following fields to these values:
       | Add new set     | 1            |
       | Full name       | First set    |
       | Completion type | All in order |
     And I press dialog form button "Append item"
-    Then I should see "All in order" in the "First set" "table_row"
-
-    When I click on "Append item" "link" in the "First set" "table_row"
+    And I should see "All in order" in the "First set" "table_row"
+    And I click on "Append item" "link" in the "First set" "table_row"
     And I set the following fields to these values:
       | Courses         | Course 2, Course 3, Course 4 |
       | Add new set     | 1            |
@@ -79,24 +77,39 @@ Feature: Import program content
       | Completion type | At least X   |
       | At least X      | 2            |
     And I press dialog form button "Append item"
-    Then I should see "At least 2" in the "Second set" "table_row"
-
-    When I click on "Append item" "link" in the "Program 000" "table_row"
+    And I should see "At least 2" in the "Second set" "table_row"
+    And I click on "Append item" "link" in the "Program 000" "table_row"
     And I set the following fields to these values:
       | Courses         | Course 5         |
       | Add new set     | 1                |
       | Full name       | Third set        |
       | Completion type | All in any order |
     And I press dialog form button "Append item"
-    Then I should see "All in any order" in the "Third set" "table_row"
+    And I should see "All in any order" in the "Third set" "table_row"
 
-    When I am on all programs management page
+    And I am on all programs management page
+    And I follow "Program 002"
+    And I click on "Content" "link" in the ".nav-tabs" "css_element"
+    And I click on "Append item" "link" in the "Program 002" "table_row"
+    And I set the following fields to these values:
+      | Courses | Course 6 |
+    And I press dialog form button "Append item"
+
+    And I am on all programs management page
     And I follow "Program 001"
     And I click on "Content" "link" in the ".nav-tabs" "css_element"
-    And I press "Import program content"
+
+    When I click on "Import program content" "link" in the "Program 001" "table_row"
     And I set the following fields to these values:
      | Import program content | Program 000 |
     And I press dialog form button "Import program content"
-    And I should see "Course 1"
+    Then I should see "Course 1"
     And I should see "First set"
     And I should see "Second set"
+
+    When I click on "Import program content" "link" in the "Program 001" "table_row"
+    And I set the following fields to these values:
+      | Import program content | Program 002 |
+    And I press dialog form button "Import program content"
+    Then I should see "Course 6"
+    And I should see "Course 1"

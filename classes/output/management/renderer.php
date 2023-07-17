@@ -263,6 +263,12 @@ class renderer extends \plugin_renderer_base {
                     $appendurl = new moodle_url('/enrol/programs/management/item_append.php', ['parentitemid' => $id]);
                     $appendaction = new \local_openlms\output\dialog_form\icon($appendurl, 'appenditem', get_string('appenditem', 'enrol_programs'), 'enrol_programs');
                     $actions[] = $dialogformoutput->render($appendaction);
+                    if ($item instanceof top) {
+                        $importurl = new moodle_url('/enrol/programs/management/program_content_import.php', ['id' => $item->get_programid()]);
+                        $importaction = new \local_openlms\output\dialog_form\icon(
+                            $importurl, 'import', get_string('importprogramcontent', 'enrol_programs'), 'enrol_programs');
+                        $actions[] = $dialogformoutput->render($importaction);
+                    }
                 } else {
                     $actions[] = $output->pix_icon('i/empty', '');
                 }
@@ -382,13 +388,6 @@ class renderer extends \plugin_renderer_base {
             foreach ($table->data as $k => $v) {
                 array_pop($table->data[$k]);
             }
-        }
-
-        if ($canedit) {
-            $importurl = new moodle_url('/enrol/programs/management/program_import.php', ['targetprogram' => $programid]);
-            $importaction = new \local_openlms\output\dialog_form\button($importurl, get_string('importprogramcontent',
-                'enrol_programs'));
-            $result .= $dialogformoutput->render($importaction);
         }
 
         $result .= \html_writer::table($table);

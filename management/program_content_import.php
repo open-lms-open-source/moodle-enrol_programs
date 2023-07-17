@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Program import interface.
+ * Program content import interface.
  *
  * @package    enrol_programs
  * @copyright  2023 Open LMS (https://www.openlms.net/)
@@ -37,20 +37,19 @@ if (!empty($_SERVER['HTTP_X_LEGACY_DIALOG_FORM_REQUEST'])) {
 }
 
 require('../../../config.php');
-require_once($CFG->dirroot . '/lib/formslib.php');
 
-$targetprogramid = required_param('targetprogram', PARAM_INT);
+$id = required_param('id', PARAM_INT);
 
 require_login();
 
-$targetprogram = $DB->get_record('enrol_programs_programs', ['id' => $targetprogramid], '*', MUST_EXIST);
+$targetprogram = $DB->get_record('enrol_programs_programs', ['id' => $id], '*', MUST_EXIST);
 $context = context::instance_by_id($targetprogram->contextid);
 require_capability('enrol/programs:edit', $context);
 
-$currenturl = new moodle_url('/enrol/programs/management/program_import.php', ['targetprogramid' => $targetprogram->id]);
+$currenturl = new moodle_url('/enrol/programs/management/program_content_import.php', ['id' => $targetprogram->id]);
 management::setup_program_page($currenturl, $context, $targetprogram);
 
-$returnurl = new moodle_url('/enrol/programs/management/program_import.php', ['targetprogramid' => $targetprogram->id]);
+$returnurl = new moodle_url('/enrol/programs/management/program_content.php', ['id' => $targetprogram->id]);
 
 if ($targetprogram->archived) {
     redirect($returnurl);
@@ -58,7 +57,7 @@ if ($targetprogram->archived) {
 
 $top = program::load_content($targetprogram->id);
 
-$form = new \enrol_programs\local\form\import_program_content(null, ['targetprogram' => $targetprogram->id,
+$form = new \enrol_programs\local\form\program_content_import(null, ['id' => $targetprogram->id,
     'contextid' => $context->id]);
 
 if ($form->is_cancelled()) {
@@ -66,10 +65,8 @@ if ($form->is_cancelled()) {
 }
 
 if ($data = $form->get_data()) {
-
     $fromprogram = $DB->get_record('enrol_programs_programs', ['id' => $data->fromprogram], '*', MUST_EXIST);
-    $targetprogram = $DB->get_record('enrol_programs_programs', ['id' => $data->targetprogram], '*', MUST_EXIST);
-    management::copy_program_content($fromprogram, $targetprogram);
+    $top->content_import($fromprogram->id);
     $form->redirect_submitted($returnurl);
 }
 
@@ -81,7 +78,7 @@ echo $OUTPUT->heading(format_string($targetprogram->fullname));
 
 echo $managementoutput->render_management_program_tabs($targetprogram, 'content');
 
-echo $OUTPUT->heading(get_string('appenditem', 'enrol_programs'), 3);
+echo $OUTPUT->heading(get_string('importprogramcontent', 'enrol_programs'), 3);
 
 echo $form->render();
 

@@ -16,9 +16,6 @@
 
 namespace enrol_programs\local\form;
 
-use enrol_programs\local\management;
-use enrol_programs\local\program;
-
 /**
  * Add program content item.
  *
@@ -27,18 +24,19 @@ use enrol_programs\local\program;
  * @author     Farhan Karmali
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class import_program_content extends \local_openlms\dialog_form {
+final class program_content_import extends \local_openlms\dialog_form {
     protected function definition() {
-        global $DB;
         $mform = $this->_form;
         $customdata = $this->_customdata;
 
-        $this->arguments = ['programid' => $customdata['targetprogram']];
-        \enrol_programs\external\form_import_program_content::add_form_element(
+        $this->arguments = ['programid' => $customdata['id']];
+        \enrol_programs\external\form_program_content_import_fromprogram::add_form_element(
             $mform, $this->arguments, 'fromprogram', get_string('importprogramcontent', 'enrol_programs'));
+        $mform->addRule('fromprogram', null, 'required', null, 'client');
 
-        $mform->addElement('hidden', 'targetprogram', $customdata['targetprogram']);
-        $mform->setType('sourceprogram', PARAM_INT);
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->setDefault('id', $customdata['id']);
 
         $this->add_action_buttons(true, get_string('importprogramcontent', 'enrol_programs'));
     }
@@ -56,5 +54,4 @@ final class import_program_content extends \local_openlms\dialog_form {
         }
         return $errors;
     }
-
 }

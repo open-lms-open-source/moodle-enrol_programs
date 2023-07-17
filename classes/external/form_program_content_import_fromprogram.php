@@ -27,7 +27,9 @@ use external_value;
  * @author      Farhan Karmali
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class form_import_program_content extends \local_openlms\external\form_autocomplete_field {
+final class form_program_content_import_fromprogram extends \local_openlms\external\form_autocomplete_field {
+    const MAX_RESULTS = 20;
+
     /**
      * True means returned field data is array, false means value is scalar.
      *
@@ -64,41 +66,51 @@ final class form_import_program_content extends \local_openlms\external\form_aut
         $query = $params['query'];
         $programid = $params['programid'];
 
-
-        $targetprogram = $DB->get_record('enrol_programs_programs', ['id' => $programid]);
+        $targetprogram = $DB->get_record('enrol_programs_programs', ['id' => $programid], '*', MUST_EXIST);
         $context = \context::instance_by_id($targetprogram->contextid);
 
-        $targetprogramtenantid = $DB->get_field('context', 'tenantid', ['id' => $context->id]);
         self::validate_context($context);
         require_capability('enrol/programs:edit', $context);
 
-        $sql = "SELECT p.*, c.tenantid
+        list($searchsql, $params) = \enrol_programs\local\management::get_program_search_query(null, $query, 'p');
+        $params['programid'] = $programid;
+
+        $targetprogramtenantid = $DB->get_field('context', 'tenantid', ['id' => $context->id]);
+        if ($targetprogramtenantid) {
+            $tenantselect = "AND (c.tenantid = :tenantid OR c.tenantid IS NULL)";
+            $params['tenantid'] = $targetprogramtenantid;
+        } else {
+            $tenantselect = '';
+        }
+
+        $sql = "SELECT p.id, p.fullname, p.contextid
                   FROM {enrol_programs_programs} p
                   JOIN {context} c ON c.id = p.contextid
-                 WHERE ".$DB->sql_like('fullname', ':query', false);
-        $params = ['query' => $query.'%'];
-        if ($targetprogramtenantid) {
-            $sql .= " AND (c.tenantid = :tenantid OR c.tenantid IS NULL)";
-            $params['tenantid'] = $targetprogramtenantid;
-        }
-        $programs = $DB->get_records_sql($sql, $params);
-
-        unset($programs[$programid]);
+                 WHERE p.id <> :programid AND $searchsql
+                       $tenantselect
+              ORDER BY p.fullname ASC";
+        $rs = $DB->get_recordset_sql($sql, $params);
 
         $notice = null;
         $list = [];
-        foreach ($programs as $program) {
+        $count = 0;
+        foreach ($rs as $program) {
             $context = \context::instance_by_id($program->contextid);
-            if (has_capability('enrol/programs:clone', $context)) {
-                self::validate_context($context);
-                $list[] = ['value' => $program->id, 'label' => $program->fullname];
+            if (!has_capability('enrol/programs:clone', $context)) {
+                continue;
             }
+            $count++;
+            if ($count > self::MAX_RESULTS) {
+                $notice = get_string('toomanyrecords', 'local_openlms', self::MAX_RESULTS);
+                break;
+            }
+            $list[] = ['value' => $program->id, 'label' => format_string($program->fullname)];
         }
+        $rs->close();
 
         return [
             'notice' => $notice,
             'list' => $list,
         ];
     }
-
 }

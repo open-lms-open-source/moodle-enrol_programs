@@ -196,6 +196,7 @@ function enrol_programs_get_fontawesome_icon_map() {
         'enrol_programs:appenditem' => 'fa-plus-square',
         'enrol_programs:catalogue' => 'fa-cubes',
         'enrol_programs:deleteitem' => 'fa-trash-o',
+        'enrol_programs:import' => 'fa-copy',
         'enrol_programs:itemcourse' => 'fa-graduation-cap',
         'enrol_programs:itemset' => 'fa-list',
         'enrol_programs:itemtop' => 'fa-cubes',
