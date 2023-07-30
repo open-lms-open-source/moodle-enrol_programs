@@ -101,7 +101,8 @@ Feature: Import program content
 
     When I click on "Import program content" "link" in the "Program 001" "table_row"
     And I set the following fields to these values:
-     | Import program content | Program 000 |
+     | Select program | Program 000 |
+    And I press dialog form button "Continue"
     And I press dialog form button "Import program content"
     Then I should see "Course 1"
     And I should see "First set"
@@ -109,7 +110,8 @@ Feature: Import program content
 
     When I click on "Import program content" "link" in the "Program 001" "table_row"
     And I set the following fields to these values:
-      | Import program content | Program 002 |
+      | Select program | Program 002 |
+    And I press dialog form button "Continue"
     And I press dialog form button "Import program content"
     Then I should see "Course 6"
     And I should see "Course 1"

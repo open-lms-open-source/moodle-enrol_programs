@@ -17,7 +17,7 @@
 namespace enrol_programs\local\form;
 
 /**
- * Add program content item.
+ * Add program content items.
  *
  * @package    enrol_programs
  * @copyright  2023 Open LMS (https://www.openlms.net/)
@@ -31,14 +31,14 @@ final class program_content_import extends \local_openlms\dialog_form {
 
         $this->arguments = ['programid' => $customdata['id']];
         \enrol_programs\external\form_program_content_import_fromprogram::add_form_element(
-            $mform, $this->arguments, 'fromprogram', get_string('importprogramcontent', 'enrol_programs'));
+            $mform, $this->arguments, 'fromprogram', get_string('importselectprogram', 'enrol_programs'));
         $mform->addRule('fromprogram', null, 'required', null, 'client');
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->setDefault('id', $customdata['id']);
 
-        $this->add_action_buttons(true, get_string('importprogramcontent', 'enrol_programs'));
+        $this->add_action_buttons(true, get_string('continue'));
     }
 
     public function validation($data, $files) {

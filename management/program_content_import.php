@@ -39,6 +39,7 @@ if (!empty($_SERVER['HTTP_X_LEGACY_DIALOG_FORM_REQUEST'])) {
 require('../../../config.php');
 
 $id = required_param('id', PARAM_INT);
+$fromprogram = optional_param('fromprogram', 0, PARAM_INT);
 
 require_login();
 
@@ -46,7 +47,7 @@ $targetprogram = $DB->get_record('enrol_programs_programs', ['id' => $id], '*', 
 $context = context::instance_by_id($targetprogram->contextid);
 require_capability('enrol/programs:edit', $context);
 
-$currenturl = new moodle_url('/enrol/programs/management/program_content_import.php', ['id' => $targetprogram->id]);
+$currenturl = new moodle_url('/enrol/programs/management/program_content_import.php', ['id' => $targetprogram->id, 'fromprogram' => $fromprogram]);
 management::setup_program_page($currenturl, $context, $targetprogram);
 
 $returnurl = new moodle_url('/enrol/programs/management/program_content.php', ['id' => $targetprogram->id]);
@@ -57,17 +58,32 @@ if ($targetprogram->archived) {
 
 $top = program::load_content($targetprogram->id);
 
-$form = new \enrol_programs\local\form\program_content_import(null, ['id' => $targetprogram->id,
-    'contextid' => $context->id]);
-
-if ($form->is_cancelled()) {
-    redirect($returnurl);
+$form = null;
+if (!$fromprogram) {
+    $form = new \enrol_programs\local\form\program_content_import(null,
+        ['id' => $targetprogram->id, 'contextid' => $context->id]);
+    if ($form->is_cancelled()) {
+        redirect($returnurl);
+    } else if ($data = $form->get_data()) {
+        $fromprogram = $data->fromprogram;
+        unset($data);
+        $form = null;
+    }
 }
 
-if ($data = $form->get_data()) {
-    $fromprogram = $DB->get_record('enrol_programs_programs', ['id' => $data->fromprogram], '*', MUST_EXIST);
-    $top->content_import($fromprogram->id);
-    $form->redirect_submitted($returnurl);
+if (!$form) {
+    $form = new \enrol_programs\local\form\program_content_import_confirmation(null,
+        ['id' => $targetprogram->id, 'contextid' => $context->id, 'fromprogram' => $fromprogram]);
+
+    if ($form->is_cancelled()) {
+        redirect($returnurl);
+    }
+
+    if ($data = $form->get_data()) {
+        $from = $DB->get_record('enrol_programs_programs', ['id' => $data->fromprogram], '*', MUST_EXIST);
+        $top->content_import($data);
+        $form->redirect_submitted($returnurl);
+    }
 }
 
 /** @var \enrol_programs\output\management\renderer $managementoutput */

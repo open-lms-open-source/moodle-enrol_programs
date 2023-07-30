@@ -363,5 +363,4 @@ final class local_management_test extends \advanced_testcase {
             $program1
         );
     }
-
 }

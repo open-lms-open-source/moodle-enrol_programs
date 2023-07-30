@@ -402,12 +402,25 @@ final class approval extends base {
     }
 
     /**
-     * Allow to be imported
+     * Can settings of this source be imported to other program?
      *
-     * @param stdClass $program
+     * @param stdClass $fromprogram
+     * @param stdClass $targetprogram
      * @return bool
      */
-    public static function is_import_allowed(\stdClass $program): bool {
+    public static function is_import_allowed(stdClass $fromprogram, stdClass $targetprogram): bool {
+        global $DB;
+
+        if (!$DB->record_exists('enrol_programs_sources', ['type' => static::get_type(), 'programid' => $fromprogram->id])) {
+            return false;
+        }
+
+        if (!$DB->record_exists('enrol_programs_sources', ['type' => static::get_type(), 'programid' => $targetprogram->id])) {
+            if (!static::is_new_allowed($targetprogram)) {
+                return false;
+            }
+        }
+
         return true;
     }
 

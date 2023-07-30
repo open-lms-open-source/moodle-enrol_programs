@@ -190,4 +190,68 @@ final class local_source_selfallocation_test extends \advanced_testcase {
         $allocation2 = selfallocation::signup($program1->id, $source1a->id);
         $this->assertEquals($allocation, $allocation2);
     }
+
+    public function test_is_import_allowed() {
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['selfallocation' => []]]);
+        $program2 = $generator->create_program(['sources' => []]);
+        $program3 = $generator->create_program(['sources' => []]);
+        $program4 = $generator->create_program(['sources' => ['selfallocation' => []]]);
+
+        set_config('source_selfallocation_allownew', '1', 'enrol_programs');
+
+        $this->assertTrue(selfallocation::is_import_allowed($program1, $program3));
+        $this->assertFalse(selfallocation::is_import_allowed($program2, $program3));
+        $this->assertTrue(selfallocation::is_import_allowed($program1, $program4));
+        $this->assertFalse(selfallocation::is_import_allowed($program2, $program4));
+
+        set_config('source_selfallocation_allownew', '0', 'enrol_programs');
+
+        $this->assertFalse(selfallocation::is_import_allowed($program1, $program3));
+        $this->assertFalse(selfallocation::is_import_allowed($program2, $program3));
+        $this->assertTrue(selfallocation::is_import_allowed($program1, $program4));
+        $this->assertFalse(selfallocation::is_import_allowed($program2, $program4));
+    }
+
+    public function test_import_source_data() {
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['selfallocation' => []]]);
+        $program2 = $generator->create_program(['sources' => ['selfallocation' => []]]);
+        $program3 = $generator->create_program(['sources' => []]);
+
+        $source1 = selfallocation::update_source((object)[
+            'programid' => $program1->id,
+            'type' => 'selfallocation',
+            'enable' => 1,
+            'selfallocation_maxusers' => 2,
+        ]);
+        $source2 = selfallocation::update_source((object)[
+            'programid' => $program2->id,
+            'type' => 'selfallocation',
+            'enable' => 1,
+            'selfallocation_maxusers' => 10,
+            'selfallocation_key' => 'somesecret',
+        ]);
+
+        $source3 = selfallocation::import_source_data($program1->id, $program3->id);
+        $this->assertSame($program3->id, $source3->programid);
+        $this->assertSame('selfallocation', $source3->type);
+        $this->assertSame($source1->datajson, $source3->datajson);
+        $this->assertSame($source1->auxint1, $source3->auxint1);
+        $this->assertSame($source1->auxint2, $source3->auxint2);
+        $this->assertSame($source1->auxint3, $source3->auxint3);
+
+        $source3 = selfallocation::import_source_data($program2->id, $program3->id);
+        $this->assertSame($program3->id, $source3->programid);
+        $this->assertSame('selfallocation', $source3->type);
+        $this->assertSame($source2->datajson, $source3->datajson);
+        $this->assertSame($source2->auxint1, $source3->auxint1);
+        $this->assertSame($source2->auxint2, $source3->auxint2);
+        $this->assertSame($source2->auxint3, $source3->auxint3);
+    }
 }

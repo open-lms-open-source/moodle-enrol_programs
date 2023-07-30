@@ -63,14 +63,9 @@ if (has_capability('enrol/programs:edit', $context)) {
     $editbutton = new local_openlms\output\dialog_form\icon($editurl, 'i/settings', get_string('updateallocations', 'enrol_programs'));
     $editbutton->set_dialog_name(get_string('allocations', 'enrol_programs'));
     $editbutton = ' ' . $dialogformoutput->render($editbutton);
-    $importurl = new moodle_url('/enrol/programs/management/program_allocation_import.php', ['id' => $program->id]);
-    $importaction = new \local_openlms\output\dialog_form\button($importurl, get_string('importprogramallocation',
-        'enrol_programs'));
-    echo $dialogformoutput->render($importaction);
 } else {
     $editbutton = '';
 }
-
 echo $OUTPUT->heading(get_string('allocations', 'enrol_programs') . $editbutton, 3);
 echo $managementoutput->render_program_allocation($program);
 
@@ -87,5 +82,12 @@ echo $managementoutput->render_program_scheduling($program);
 
 echo $OUTPUT->heading(get_string('allocationsources', 'enrol_programs'), 3);
 echo $managementoutput->render_program_sources($program);
+
+if (has_capability('enrol/programs:edit', $context) && !$program->archived) {
+    $importurl = new moodle_url('/enrol/programs/management/program_allocation_import.php', ['id' => $program->id]);
+    $importaction = new \local_openlms\output\dialog_form\button($importurl, get_string('importprogramallocation',
+        'enrol_programs'));
+    echo $dialogformoutput->render($importaction);
+}
 
 echo $OUTPUT->footer();

@@ -263,6 +263,139 @@ final class local_program_test extends \advanced_testcase {
         $this->assertSame([], array_values($cohorts));
     }
 
+    public function test_import_program_allocation() {
+        global $DB;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $syscontext = \context_system::instance();
+        $data = (object)[
+            'fullname' => 'Some program',
+            'idnumber' => 'SP1',
+            'contextid' => $syscontext->id,
+        ];
+        $program1 = $generator->create_program($data);
+
+        $category = $this->getDataGenerator()->create_category([]);
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+        $cohort2 = $this->getDataGenerator()->create_cohort();
+        $cohort3 = $this->getDataGenerator()->create_cohort();
+        $catcontext = \context_coursecat::instance($category->id);
+        $data = (object)[
+            'fullname' => 'Some other program',
+            'idnumber' => 'SP2',
+            'contextid' => $catcontext->id,
+            'description' => 'Some desc',
+            'descriptionformat' => '2',
+            'presentation' => ['some' => 'test'],
+            'public' => '1',
+            'cohorts' => [$cohort1->id, $cohort2->id],
+            'archived' => '1',
+            'creategroups' => '1',
+            'timeallocationstart' => (string)(time() - 60 * 60 * 24),
+            'timeallocationend' => (string)(time() + 60 * 60 * 24),
+            'sources' => [
+                'manual' => [],
+                'approval' => [],
+                'cohort' => ['cohorts' => [$cohort2->id]],
+                'selfallocation' => [],
+            ],
+        ];
+        $program2 = $generator->create_program($data);
+        $data = (object)[
+            'id' => $program2->id,
+            'programstart_type' => 'date',
+            'programstart_date' => time() + 60 * 60,
+            'programdue_type' => 'date',
+            'programdue_date' => time() + 60 * 60 * 3,
+            'programend_type' => 'date',
+            'programend_date' => time() + 60 * 60 * 6,
+        ];
+        $program2 = program::update_program_scheduling($data);
+        $scohort2 = $DB->get_record('enrol_programs_sources', ['programid' => $program2->id, 'type' => 'cohort'], '*', MUST_EXIST);
+
+        $data = (object)[
+            'id' => $program1->id,
+            'fromprogram' => $program2->id,
+        ];
+        $program1x = program::import_program_allocation($data);
+        $this->assertSame((array)$program1, (array)$program1x);
+
+        $data = (object)[
+            'id' => $program1->id,
+            'fromprogram' => $program2->id,
+            'importallocationstart' => 1,
+            'importallocationend' => 1,
+        ];
+        $program1x = program::import_program_allocation($data);
+        $program1->timeallocationstart = $program2->timeallocationstart;
+        $program1->timeallocationend = $program2->timeallocationend;
+        $this->assertSame((array)$program1, (array)$program1x);
+
+        $data = (object)[
+            'id' => $program1->id,
+            'fromprogram' => $program2->id,
+            'importprogramstart' => 1,
+            'importprogramdue' => 1,
+            'importprogramend' => 1,
+        ];
+        $program1x = program::import_program_allocation($data);
+        $program1->startdatejson = $program2->startdatejson;
+        $program1->duedatejson = $program2->duedatejson;
+        $program1->enddatejson = $program2->enddatejson;
+        $this->assertSame((array)$program1, (array)$program1x);
+
+        $sources1 = $DB->get_records('enrol_programs_sources', ['programid' => $program1->id]);
+        $this->assertCount(0, $sources1);
+
+        $sources2 = $DB->get_records('enrol_programs_sources', ['programid' => $program2->id]);
+        $this->assertCount(4, $sources2);
+
+        $data = (object)[
+            'id' => $program1->id,
+            'fromprogram' => $program2->id,
+            'importsourcemanual' => 1,
+        ];
+        $program1x = program::import_program_allocation($data);
+        $sources1 = $DB->get_records('enrol_programs_sources', ['programid' => $program1->id]);
+        $this->assertCount(1, $sources1);
+        $smanual1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $data = (object)[
+            'id' => $program1->id,
+            'fromprogram' => $program2->id,
+            'importsourcemanual' => 1,
+            'importsourcecohort' => 1,
+            'importsourceapproval' => 1,
+            'importsourceselfallocation' => 1,
+        ];
+        $program1x = program::import_program_allocation($data);
+        $sources1 = $DB->get_records('enrol_programs_sources', ['programid' => $program1->id]);
+        $this->assertCount(4, $sources1);
+        $smanual1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+        $scohort1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'cohort'], '*', MUST_EXIST);
+        $sapproval1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'approval'], '*', MUST_EXIST);
+        $sselfallocation1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'selfallocation'], '*', MUST_EXIST);
+
+        $cohorts = $DB->get_records('enrol_programs_src_cohorts', ['sourceid' => $scohort1->id]);
+        $this->assertCount(1, $cohorts);
+        $cr = reset($cohorts);
+        $this->assertSame($cohort2->id, $cr->cohortid);
+
+        $DB->delete_records('enrol_programs_src_cohorts', ['sourceid' => $scohort2->id]);
+        $DB->insert_record('enrol_programs_src_cohorts', (object)['sourceid' => $scohort2->id, 'cohortid' => $cohort1->id]);
+        $DB->insert_record('enrol_programs_src_cohorts', (object)['sourceid' => $scohort2->id, 'cohortid' => $cohort3->id]);
+        $data = (object)[
+            'id' => $program1->id,
+            'fromprogram' => $program2->id,
+            'importsourcecohort' => 1,
+        ];
+        $program1x = program::import_program_allocation($data);
+        $cohorts = $DB->get_records('enrol_programs_src_cohorts', ['sourceid' => $scohort1->id]);
+        $this->assertCount(3, $cohorts);
+    }
+
     public function test_get_program_startdate_types() {
         $types = program::get_program_startdate_types();
         $this->assertIsArray($types);
@@ -440,35 +573,4 @@ final class local_program_test extends \advanced_testcase {
         $program2 = $DB->get_record('enrol_programs_programs', ['id' => $program2->id], '*', MUST_EXIST);
         $this->assertSame((string)$syscontext->id, $program2->contextid);
     }
-
-    public function test_import_program_dates() {
-        global $DB;
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
-
-        $starttime = time();
-        $endtime = time() + YEARSECS;
-
-        $cohort1 = $this->getDataGenerator()->create_cohort();
-        $cohort2 = $this->getDataGenerator()->create_cohort();
-        $cohort3 = $this->getDataGenerator()->create_cohort();
-
-        $program1 = $generator->create_program(['fullname' => 'hokus', 'timeallocationstart' => $starttime,
-            'timeallocationend' => $endtime, 'sources' => ['manual' => [], 'cohort' => ['auxint1' => 0, 'cohorts' => [$cohort1->id, $cohort2->id]]]]);
-
-        $program2 = $generator->create_program(['fullname' => 'pokus']);
-        $program2rec = $DB->get_record('enrol_programs_programs', ['id' => $program2->id]);
-
-        program::import_program_dates($program1->id, $program2->id, (object) ['importallocationstart' => 1]);
-        $program2rec = $DB->get_record('enrol_programs_programs', ['id' => $program2->id]);
-        $this->assertEquals($program1->timeallocationstart, $program2rec->timeallocationstart);
-        $this->assertNotEquals($program1->timeallocationend, $program2rec->timeallocationend);
-
-
-        program::import_program_dates($program1->id, $program2->id, (object) ['importallocationstart' => 1, 'importallocationend' => 1]);
-        $program2rec = $DB->get_record('enrol_programs_programs', ['id' => $program2->id]);
-        $this->assertEquals($program1->timeallocationstart, $program2rec->timeallocationstart);
-        $this->assertEquals($program1->timeallocationend, $program2rec->timeallocationend);
-    }
-    
 }

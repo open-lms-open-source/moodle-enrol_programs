@@ -383,4 +383,63 @@ final class local_source_cohort_test extends \advanced_testcase {
         $this->assertSame($source1c->id, $allocations[1]->sourceid);
         $this->assertSame('1', $allocations[1]->archived);
     }
+
+    public function test_is_import_allowed() {
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['cohort' => []]]);
+        $program2 = $generator->create_program(['sources' => []]);
+        $program3 = $generator->create_program(['sources' => []]);
+        $program4 = $generator->create_program(['sources' => ['cohort' => []]]);
+
+        set_config('source_cohort_allownew', '1', 'enrol_programs');
+
+        $this->assertTrue(cohort::is_import_allowed($program1, $program3));
+        $this->assertFalse(cohort::is_import_allowed($program2, $program3));
+        $this->assertTrue(cohort::is_import_allowed($program1, $program4));
+        $this->assertFalse(cohort::is_import_allowed($program2, $program4));
+
+        set_config('source_cohort_allownew', '0', 'enrol_programs');
+
+        $this->assertFalse(cohort::is_import_allowed($program1, $program3));
+        $this->assertFalse(cohort::is_import_allowed($program2, $program3));
+        $this->assertTrue(cohort::is_import_allowed($program1, $program4));
+        $this->assertFalse(cohort::is_import_allowed($program2, $program4));
+    }
+
+    public function test_import_source_data() {
+        global $DB;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+        $cohort2 = $this->getDataGenerator()->create_cohort();
+        $cohort3 = $this->getDataGenerator()->create_cohort();
+
+        $program1 = $generator->create_program(['sources' => ['cohort' => ['cohorts' => [$cohort1->id]]]]);
+        $program2 = $generator->create_program(['sources' => ['cohort' => ['cohorts' => [$cohort2->id, $cohort3->id]]]]);
+        $program3 = $generator->create_program(['sources' => []]);
+
+        $sql = "SELECT c.cohortid
+                  FROM {enrol_programs_src_cohorts} c
+                  JOIN {enrol_programs_sources} s ON s.id = c.sourceid AND s.type = 'cohort'
+                 WHERE s.programid = ?
+              ORDER BY c.cohortid ASC";
+
+        $cohortids = $DB->get_fieldset_sql($sql, [$program3->id]);
+        $this->assertSame([], $cohortids);
+
+        $source3 = cohort::import_source_data($program1->id, $program3->id);
+        $cohortids = $DB->get_fieldset_sql($sql, [$program3->id]);
+        $this->assertSame([$cohort1->id], $cohortids);
+        $this->assertSame($program3->id, $source3->programid);
+        $this->assertSame('cohort', $source3->type);
+
+        cohort::import_source_data($program2->id, $program3->id);
+        $cohortids = $DB->get_fieldset_sql($sql, [$program3->id]);
+        $this->assertSame([$cohort1->id, $cohort2->id, $cohort3->id], $cohortids);
+    }
 }

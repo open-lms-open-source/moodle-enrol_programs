@@ -29,6 +29,7 @@ use external_value;
  */
 final class form_program_allocation_import_fromprogram extends \local_openlms\external\form_autocomplete_field {
     const MAX_RESULTS = 20;
+
     /**
      * True means returned field data is array, false means value is scalar.
      *
@@ -112,5 +113,4 @@ final class form_program_allocation_import_fromprogram extends \local_openlms\ex
             'list' => $list,
         ];
     }
-
 }

@@ -534,14 +534,17 @@ final class top extends set {
     /**
      * Import content from another program.
      *
-     * @param int $fromprogramid
+     * @param \stdClass $data from \enrol_programs\local\form\program_content_import_confirmation
      * @return void
      */
-    public function content_import(int $fromprogramid) {
-        if ($fromprogramid == $this->programid) {
+    public function content_import(\stdClass $data) {
+        if ($data->fromprogram == $this->programid) {
             throw new \coding_exception('invalid parameters');
         }
-        $topfrom = top::load($fromprogramid);
+        if ($data->id != $this->programid) {
+            throw new \coding_exception('invalid parameters');
+        }
+        $topfrom = top::load($data->fromprogram);
         if (!$this->get_children()) {
             $this->update_set($this, $this->get_fullname(), $topfrom->get_sequencetype(), $topfrom->get_minprerequisites());
         }

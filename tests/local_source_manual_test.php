@@ -739,4 +739,44 @@ final class local_source_manual_test extends \advanced_testcase {
             'enrolments' => ['info' => ['Allocated to \'Program 2\'']],
         ], $upt->result);
     }
+
+    public function test_is_import_allowed() {
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+        
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program2 = $generator->create_program(['sources' => []]);
+        $program3 = $generator->create_program(['sources' => []]);
+        $program4 = $generator->create_program(['sources' => ['manual' => []]]);
+
+        $this->assertFalse(get_config('enrol_programs', 'source_manual_allownew'));
+
+        $this->assertTrue(manual::is_import_allowed($program1, $program3));
+        $this->assertFalse(manual::is_import_allowed($program2, $program3));
+        $this->assertTrue(manual::is_import_allowed($program1, $program4));
+        $this->assertFalse(manual::is_import_allowed($program2, $program4));
+    }
+
+    public function test_import_source_data() {
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $program2 = $generator->create_program(['sources' => []]);
+
+        $source1 = manual::update_source((object)[
+            'programid' => $program1->id,
+            'type' => 'manual',
+            'enable' => 1,
+        ]);
+
+        $source2 = manual::import_source_data($program1->id, $program2->id);
+        $this->assertSame($program2->id, $source2->programid);
+        $this->assertSame('manual', $source2->type);
+        $this->assertSame($source1->datajson, $source2->datajson);
+        $this->assertSame($source1->auxint1, $source2->auxint1);
+        $this->assertSame($source1->auxint2, $source2->auxint2);
+        $this->assertSame($source1->auxint3, $source2->auxint3);
+    }
 }

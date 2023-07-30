@@ -17,18 +17,18 @@
 namespace enrol_programs\external;
 
 /**
- * External API for form import program content
+ * External API for form import program allocation
  *
  * @group      openlms
  * @package    enrol_programs
  * @copyright  2023 Open LMS (https://www.openlms.net/)
- * @author     Farhan Karmali
+ * @author     Petr Skoda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @runTestsInSeparateProcesses
- * @covers \enrol_programs\external\form_program_content_import_fromprogram
+ * @covers \enrol_programs\external\form_program_allocation_import_fromprogram
  */
-final class form_program_content_import_fromprogram_test extends \advanced_testcase {
+final class form_program_allocation_import_fromprogram_test extends \advanced_testcase {
     public function setUp(): void {
         global $CFG;
         require_once("$CFG->dirroot/lib/externallib.php");
@@ -80,14 +80,14 @@ final class form_program_content_import_fromprogram_test extends \advanced_testc
         $user1 = $this->getDataGenerator()->create_user();
 
         $this->setAdminUser();
-        $response = form_program_content_import_fromprogram::execute ('', $program1->id);
-        $results = form_program_content_import_fromprogram::clean_returnvalue(form_program_content_import_fromprogram::execute_returns(), $response);
+        $response = form_program_allocation_import_fromprogram::execute ('', $program1->id);
+        $results = form_program_allocation_import_fromprogram::clean_returnvalue(form_program_allocation_import_fromprogram::execute_returns(), $response);
         $this->assertSame(null, $results['notice']);
         $this->assertCount(2, $results['list']);
 
         $this->setUser($user1);
         try {
-            $response = form_program_content_import_fromprogram::execute ('', $program1->id);
+            $response = form_program_allocation_import_fromprogram::execute ('', $program1->id);
             $this->fail('Exception excepted');
         } catch (\moodle_exception $ex) {
             $this->assertInstanceOf(\required_capability_exception::class, $ex);
@@ -138,12 +138,12 @@ final class form_program_content_import_fromprogram_test extends \advanced_testc
 
 
         $this->setAdminUser();
-        $response = form_program_content_import_fromprogram::execute('', $program0->id);
+        $response = form_program_allocation_import_fromprogram::execute('', $program0->id);
         $this->assertCount(3, $response['list']);
 
         $this->setUser($user0);
         try {
-            $response = form_program_content_import_fromprogram::execute ('', $program1->id);
+            $response = form_program_allocation_import_fromprogram::execute ('', $program1->id);
             $this->fail('Exception excepted');
         } catch (\moodle_exception $ex) {
             $this->assertInstanceOf(\required_capability_exception::class, $ex);
@@ -152,7 +152,7 @@ final class form_program_content_import_fromprogram_test extends \advanced_testc
         }
 
         $this->setUser($user1);
-        $response = form_program_content_import_fromprogram::execute ('', $program1->id);
+        $response = form_program_allocation_import_fromprogram::execute ('', $program1->id);
         $this->assertCount(1, $response['list']);
         $program3resp = array_pop($response['list']);
         $this->assertSame($program3->id, $program3resp['value']);

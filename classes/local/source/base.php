@@ -65,17 +65,6 @@ abstract class base {
     }
 
     /**
-     * Can this source be imported to other program?
-     *
-     * @param stdClass $program
-     * @return bool
-     */
-    public static function is_import_allowed(\stdClass $program): bool {
-        $type = static::get_type();
-        return (bool)get_config('enrol_programs', 'source_' . $type . '_allowimport');
-    }
-
-    /**
      * Can existing source of this type be updated or deleted to programs?
      *
      * NOTE: Existing enabled sources in programs cannot be deleted/hidden
@@ -295,27 +284,43 @@ abstract class base {
     }
 
     /**
+     * Can settings of this source be imported to other program?
+     *
+     * @param stdClass $fromprogram
+     * @param stdClass $targetprogram
+     * @return bool
+     */
+    public static function is_import_allowed(stdClass $fromprogram, stdClass $targetprogram): bool {
+        return false;
+    }
+
+    /**
      * Import source data from one program to another.
      *
      * @param int $fromprogramid
-     * @param int $toprogramid
-     * @param string $sourcename
+     * @param int $targetprogramid
+     * @return stdClass created or updated source record
      */
-    public static function import_source_data(int $fromprogramid, int $toprogramid, string $sourcename) {
+    public static function import_source_data(int $fromprogramid, int $targetprogramid): stdClass {
         global $DB;
-        $fromsource = $DB->get_record('enrol_programs_sources', ['programid' => $fromprogramid, 'type' => $sourcename], '*',MUST_EXIST);
 
-        $tosource = $DB->get_record('enrol_programs_sources', ['programid' => $toprogramid, 'type' => $sourcename]);
+        $fromsource = $DB->get_record('enrol_programs_sources',
+            ['programid' => $fromprogramid, 'type' => static::get_type()], '*', MUST_EXIST);
+        $targetsource = $DB->get_record('enrol_programs_sources',
+            ['programid' => $targetprogramid, 'type' => static::get_type()]);
 
-        if ($tosource) {
-            $fromsource->id = $tosource->id;
-            $fromsource->programid = $toprogramid;
+        if ($targetsource) {
+            $fromsource->id = $targetsource->id;
+            $fromsource->programid = $targetprogramid;
             $DB->update_record('enrol_programs_sources', $fromsource);
         } else {
             unset($fromsource->id);
-            $fromsource->programid = $toprogramid;
+            $fromsource->programid = $targetprogramid;
             $DB->insert_record('enrol_programs_sources', $fromsource);
         }
+
+        return $DB->get_record('enrol_programs_sources',
+            ['programid' => $targetprogramid, 'type' => static::get_type()], '*', MUST_EXIST);
     }
 
     /**

@@ -16,11 +16,8 @@
 
 namespace enrol_programs\local\form;
 
-use enrol_programs\local\management;
-use enrol_programs\local\program;
-
 /**
- * Import program allocation
+ * Import program allocation - program selection step.
  *
  * @package    enrol_programs
  * @copyright  2023 Open LMS (https://www.openlms.net/)
@@ -29,24 +26,32 @@ use enrol_programs\local\program;
  */
 final class program_allocation_import extends \local_openlms\dialog_form {
     protected function definition() {
-        global $DB;
         $mform = $this->_form;
         $customdata = $this->_customdata;
 
         $this->arguments = ['programid' => $customdata['id']];
         \enrol_programs\external\form_program_allocation_import_fromprogram::add_form_element(
-            $mform, $this->arguments, 'fromprogram', get_string('importprogramallocation', 'enrol_programs'));
+            $mform, $this->arguments, 'fromprogram', get_string('importselectprogram', 'enrol_programs'));
         $mform->addRule('fromprogram', null, 'required', null, 'client');
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->setDefault('id', $customdata['id']);
 
-
-        $this->add_action_buttons(true, get_string('selectprogram', 'enrol_programs'));
+        $this->add_action_buttons(true, get_string('continue'));
     }
 
     public function validation($data, $files) {
+        global $DB;
+        $errors = parent::validation($data, $files);
 
+        // Check if the user has capability to copy the selected program.
+        $programid = $data['fromprogram'];
+        $programcontextid = $DB->get_field('enrol_programs_programs', 'contextid', ['id' => $programid]);
+        $context = \context::instance_by_id($programcontextid);
+        if (!has_capability('enrol/programs:clone', $context )) {
+            $errors['fromprogram'] = get_string('error');
+        }
+        return $errors;
     }
 }

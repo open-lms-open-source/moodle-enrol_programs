@@ -39,12 +39,28 @@ final class cohort extends base {
     }
 
     /**
-     * Allow to be imported
+     * Can settings of this source be imported to other program?
      *
-     * @param stdClass $program
+    /**
+     * Can settings of this source be imported to other program?
+     *
+     * @param stdClass $fromprogram
+     * @param stdClass $targetprogram
      * @return bool
      */
-    public static function is_import_allowed(\stdClass $program): bool {
+    public static function is_import_allowed(stdClass $fromprogram, stdClass $targetprogram): bool {
+        global $DB;
+
+        if (!$DB->record_exists('enrol_programs_sources', ['type' => static::get_type(), 'programid' => $fromprogram->id])) {
+            return false;
+        }
+
+        if (!$DB->record_exists('enrol_programs_sources', ['type' => static::get_type(), 'programid' => $targetprogram->id])) {
+            if (!static::is_new_allowed($targetprogram)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -52,34 +68,29 @@ final class cohort extends base {
      * Import source data from one program to another.
      *
      * @param int $fromprogramid
-     * @param int $toprogramid
-     * @param string $sourcename
+     * @param int $targetprogramid
+     * @return stdClass created or updated source record
      */
-    public static function import_source_data(int $fromprogramid, int $toprogramid, string $sourcename) {
+    public static function import_source_data(int $fromprogramid, int $targetprogramid): stdClass {
         global $DB;
-        $fromsource = $DB->get_record('enrol_programs_sources', ['programid' => $fromprogramid, 'type' => $sourcename], '*',MUST_EXIST);
-        $fromsourceid = $fromsource->id;
-        $tosource = $DB->get_record('enrol_programs_sources', ['programid' => $toprogramid, 'type' => $sourcename]);
 
-        if ($tosource) {
-            $fromsource->id = $tosource->id;
-            $fromsource->programid = $toprogramid;
-            $DB->update_record('enrol_programs_sources', $fromsource);
-        } else {
-            unset($fromsource->id);
-            $fromsource->programid = $toprogramid;
-            $newid = $DB->insert_record('enrol_programs_sources', $fromsource);
-            $tosource = $DB->get_record('enrol_programs_sources', ['id' => $newid]);
+        $targetsource = parent::import_source_data($fromprogramid, $targetprogramid);
+
+        $sql = "SELECT fc.*
+                  FROM {enrol_programs_src_cohorts} fc
+                  JOIN {enrol_programs_sources} fs ON fs.id = fc.sourceid AND fs.programid = :fromprogramid AND fs.type = 'cohort'
+             LEFT JOIN {enrol_programs_src_cohorts} tc ON tc.cohortid = fc.cohortid AND tc.sourceid = :targetsourceid
+                 WHERE tc.id IS NULL
+              ORDER BY fc.id ASC";
+        $params = ['fromprogramid' => $fromprogramid, 'targetsourceid' => $targetsource->id];
+        $records = $DB->get_records_sql($sql, $params);
+        foreach ($records as $record) {
+            unset($record->id);
+            $record->sourceid = $targetsource->id;
+            $DB->insert_record('enrol_programs_src_cohorts', $record);
         }
 
-        $cohortrecs = $DB->get_records('enrol_programs_src_cohorts', ['sourceid' => $fromsourceid]);
-        foreach ($cohortrecs as $cohortrec) {
-            if (!$DB->record_exists('enrol_programs_src_cohorts', ['cohortid' => $cohortrec->cohortid,
-                'sourceid' => $tosource->id])) {
-                $cohortrec->sourceid = $tosource->id;
-                $DB->insert_record('enrol_programs_src_cohorts', $cohortrec);
-            }
-        }
+        return $targetsource;
     }
 
     /**

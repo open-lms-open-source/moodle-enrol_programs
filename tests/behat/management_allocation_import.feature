@@ -58,13 +58,13 @@ Feature: Import program allocation
       | Program 003 | PR3      | Cat 3    |
 
   @javascript
-  Scenario: Manager may import allocation from another program
+  Scenario: Manager may import allocation settings from another program
     Given I log in as "manager1"
 
     And I am on all programs management page
     And I follow "Program 000"
-    And I follow "Allocation settings"
-    When I click on "Update allocations" "link"
+    And I click on "Allocation settings" "link" in the "#region-main" "css_element"
+    And I click on "Update allocations" "link"
     And I set the following fields to these values:
       | timeallocationstart[enabled] | 1    |
       | timeallocationstart[day]     | 5    |
@@ -72,32 +72,106 @@ Feature: Import program allocation
       | timeallocationstart[year]    | 2020 |
       | timeallocationstart[hour]    | 09   |
       | timeallocationstart[minute]  | 00   |
+    And I set the following fields to these values:
+      | timeallocationend[enabled] | 1    |
+      | timeallocationend[day]     | 5    |
+      | timeallocationend[month]   | 11   |
+      | timeallocationend[year]    | 2028 |
+      | timeallocationend[hour]    | 09   |
+      | timeallocationend[minute]  | 00   |
     And I press dialog form button "Update allocations"
-    Then I should see "Thursday, 5 November 2020, 9:00" in the "Allocation start:" definition list item
-    And I should see "Not set" in the "Allocation end:" definition list item
-
-    And I am on all programs management page
-    And I follow "Program 001"
-    And I follow "Allocation settings"
-    And I should see "Not set" in the "Allocation start:" definition list item
-    And I should see "Not set" in the "Allocation end:" definition list item
-    And I click on "Import program allocation" "button"
-    And I set the following fields to these values:
-      | Import program allocation | Program 000 |
-    And I press dialog form button "Select program"
-    And I set the following fields to these values:
-      | Import program allocation start setting | 1 |
-    And I press dialog form button "Import program allocation"
-    Then I should see "Thursday, 5 November 2020, 9:00" in the "Allocation start:" definition list item
-    And I should see "Not set" in the "Allocation end:" definition list item
-
-    And I am on all programs management page
-    And I follow "Program 000"
-    And I follow "Allocation settings"
-    When I click on "Update scheduling" "link"
+    And I click on "Update scheduling" "link"
     And I set the following fields to these values:
       | Program start             | Delay start after allocation |
       | programstart_delay[value] | 5      |
       | programstart_delay[type]  | months |
+      | Program due               | Due after start |
+      | programdue_delay[value]   | 8      |
+      | programdue_delay[type]    | months |
+      | Program end               | End after start |
+      | programend_delay[value]   | 10     |
+      | programend_delay[type]    | months |
     And I press dialog form button "Update scheduling"
-    Then I should see "Delay start after allocation - 5 months" in the "Program start:" definition list item
+    And I click on "Update Automatic cohort allocation" "link"
+    And I set the following fields to these values:
+      | Active           | Yes                |
+      | Allocate cohorts | Cohort 1, Cohort 2 |
+    And I press dialog form button "Update"
+    And I click on "Update Requests with approval" "link"
+    And I set the following fields to these values:
+      | Active             | Yes |
+      | Allow new requests | No  |
+    And I press dialog form button "Update"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I click on "Update Self allocation" "link"
+    And I set the following fields to these values:
+      | Active             | Yes |
+      | Allow new sign ups | No  |
+    And I press dialog form button "Update"
+    And I should see "Thursday, 5 November 2020, 9:00" in the "Allocation start:" definition list item
+    And I should see "Sunday, 5 November 2028, 9:00" in the "Allocation end:" definition list item
+    And I should see "Delay start after allocation - 5 months" in the "Program start:" definition list item
+    And I should see "Due after start - 8 months" in the "Program due:" definition list item
+    And I should see "End after start - 10 months" in the "Program end:" definition list item
+    And I should see "Active; Requests are not allowed" in the "Requests with approval:" definition list item
+    And I should see "Active (Cohort 1, Cohort 2)" in the "Automatic cohort allocation:" definition list item
+    And I should see "Active" in the "Manual allocation:" definition list item
+    And I should see "Active; Sign ups are not allowed" in the "Self allocation:" definition list item
+
+    And I am on all programs management page
+    And I follow "Program 001"
+    And I click on "Allocation settings" "link" in the "#region-main" "css_element"
+    And I should see "Not set" in the "Allocation start:" definition list item
+    And I should see "Not set" in the "Allocation end:" definition list item
+    And I should see "Start immediately after allocation" in the "Program start:" definition list item
+    And I should see "Not set" in the "Program due:" definition list item
+    And I should see "Not set" in the "Program end:" definition list item
+    And I should see "Inactive" in the "Manual allocation:" definition list item
+    And I should see "Inactive" in the "Self allocation:" definition list item
+    And I should see "Inactive" in the "Requests with approval:" definition list item
+    And I should see "Inactive" in the "Automatic cohort allocation:" definition list item
+
+    When I click on "Import program allocation" "button"
+    And I set the following fields to these values:
+      | Select program | Program 000 |
+    And I press dialog form button "Continue"
+    And I set the following fields to these values:
+      | Allocation start | 1 |
+    And I press dialog form button "Import program allocation"
+    Then I should see "Thursday, 5 November 2020, 9:00" in the "Allocation start:" definition list item
+    And I should see "Not set" in the "Allocation end:" definition list item
+    And I should see "Start immediately after allocation" in the "Program start:" definition list item
+    And I should see "Not set" in the "Program due:" definition list item
+    And I should see "Not set" in the "Program end:" definition list item
+    And I should see "Inactive" in the "Manual allocation:" definition list item
+    And I should see "Inactive" in the "Self allocation:" definition list item
+    And I should see "Inactive" in the "Requests with approval:" definition list item
+    And I should see "Inactive" in the "Automatic cohort allocation:" definition list item
+
+    When I click on "Import program allocation" "button"
+    And I set the following fields to these values:
+      | Select program | Program 000 |
+    And I press dialog form button "Continue"
+    And I set the following fields to these values:
+      | Allocation start            | 1 |
+      | Allocation end              | 1 |
+      | Program start               | 1 |
+      | Program due                 | 1 |
+      | Program end                 | 1 |
+      | Requests with approval      | 1 |
+      | Automatic cohort allocation | 1 |
+      | Manual allocation           | 1 |
+      | Self allocation             | 1 |
+    And I press dialog form button "Import program allocation"
+    Then I should see "Thursday, 5 November 2020, 9:00" in the "Allocation start:" definition list item
+    And I should see "Sunday, 5 November 2028, 9:00" in the "Allocation end:" definition list item
+    And I should see "Delay start after allocation - 5 months" in the "Program start:" definition list item
+    And I should see "Due after start - 8 months" in the "Program due:" definition list item
+    And I should see "End after start - 10 months" in the "Program end:" definition list item
+    And I should see "Active; Requests are not allowed" in the "Requests with approval:" definition list item
+    And I should see "Active (Cohort 1, Cohort 2)" in the "Automatic cohort allocation:" definition list item
+    And I should see "Active" in the "Manual allocation:" definition list item
+    And I should see "Active; Sign ups are not allowed" in the "Self allocation:" definition list item

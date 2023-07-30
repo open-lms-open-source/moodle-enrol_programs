@@ -501,7 +501,7 @@ final class local_content_test extends \advanced_testcase {
         $item3x0x1 = $top3->append_course($item3x0, $course2->id);
         $item3x0x2 = $top3->append_course($item3x0, $course3->id);
 
-        $top2->content_import($program1->id);
+        $top2->content_import((object)['id' => $program2->id,'fromprogram' => $program1->id]);
         $top2 = top::load($program2->id);
         $this->assertSame($top1->get_sequencetype_info(), $top2->get_sequencetype_info());
         $this->assertSame($program2->fullname, $top2->get_fullname());
@@ -509,7 +509,7 @@ final class local_content_test extends \advanced_testcase {
         $this->assertItemCloned($top1->get_children()[0], $top2->get_children()[0]);
         $this->assertItemCloned($top1->get_children()[1], $top2->get_children()[1]);
 
-        $top2->content_import($program3->id);
+        $top2->content_import((object)['id' => $program2->id,'fromprogram' => $program3->id]);
         $top2 = top::load($program2->id);
         $this->assertSame($top1->get_sequencetype_info(), $top2->get_sequencetype_info());
         $this->assertSame($program2->fullname, $top2->get_fullname());

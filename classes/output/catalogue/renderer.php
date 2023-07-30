@@ -108,7 +108,7 @@ EOT;
         return $result;
     }
 
-    protected function render_program_content(stdClass $program): string {
+    public function render_program_content(stdClass $program): string {
         global $DB;
 
         $top = program::load_content($program->id);
