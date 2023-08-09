@@ -1286,12 +1286,12 @@ final class allocation_test extends \advanced_testcase {
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
 
         $top = program::load_content($program1->id);
-        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
-        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->update_set($top, ['fullname' => '', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $set1 = $top->append_set($top, ['fullname' => 'Optional set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
         $item1x1 = $top->append_course($set1, $course1->id);
         $item1x2 = $top->append_course($set1, $course2->id);
         $item1x3 = $top->append_course($set1, $course3->id);
-        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $set2 = $top->append_set($top, ['fullname' => 'Any order set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         $item2x1 = $top->append_course($set2, $course4->id);
         $item2x2 = $top->append_course($set2, $course5->id);
         $item3 = $top->append_course($top, $course6->id);
@@ -1398,6 +1398,131 @@ final class allocation_test extends \advanced_testcase {
         $this->assertTimeCurrent($allocation1->timecompleted);
     }
 
+    /**
+     * Test that sequencing works for minimum points.
+     *
+     * @return void
+     */
+    public function test_enrol_sequencing_points() {
+        global $DB, $CFG;
+        require_once("$CFG->libdir/completionlib.php");
+        $CFG->enablecompletion = true;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+        $user4 = $this->getDataGenerator()->create_user();
+
+        $course1 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context1 = \context_course::instance($course1->id);
+        $course2 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context2 = \context_course::instance($course2->id);
+        $course3 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context3 = \context_course::instance($course3->id);
+        $course4 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context4 = \context_course::instance($course4->id);
+        $course5 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context5 = \context_course::instance($course5->id);
+        $course6 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context6 = \context_course::instance($course6->id);
+        $course7 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context7 = \context_course::instance($course7->id);
+        $course8 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context8 = \context_course::instance($course8->id);
+        $course9 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context9 = \context_course::instance($course9->id);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $top = program::load_content($program1->id);
+        $top->update_set($top, ['fullname' => '', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $set1 = $top->append_set($top, ['fullname' => 'Optional set', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 3]);
+        $item1x1 = $top->append_course($set1, $course1->id, ['points' => 2]);
+        $item1x2 = $top->append_course($set1, $course2->id, ['points' => 0]);
+        $item1x3 = $top->append_course($set1, $course3->id, ['points' => 1]);
+        $item1x4 = $top->append_course($set1, $course4->id, ['points' => 3]);
+        $set2 = $top->append_set($top, ['fullname' => 'Any order set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
+        $item2x1 = $top->append_course($set2, $course5->id);
+        $item2x2 = $top->append_course($set2, $course6->id);
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id, $user3->id]);
+        $this->assertCount(18, $DB->get_records('user_enrolments', []));
+        $this->assertCount(12, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+        $this->assertTrue(is_enrolled($context1, $user2, '', true));
+        $this->assertTrue(is_enrolled($context2, $user2, '', true));
+        $this->assertTrue(is_enrolled($context3, $user2, '', true));
+        $this->assertTrue(is_enrolled($context3, $user2, '', true));
+        $this->assertTrue(is_enrolled($context4, $user2, '', true));
+        $this->assertFalse(is_enrolled($context6, $user2, '', true));
+        $this->assertFalse(is_enrolled($context7, $user2, '', true));
+        $this->assertTrue(is_enrolled($context1, $user3, '', true));
+        $this->assertTrue(is_enrolled($context2, $user3, '', true));
+        $this->assertTrue(is_enrolled($context3, $user3, '', true));
+        $this->assertFalse(is_enrolled($context6, $user3, '', true));
+        $this->assertFalse(is_enrolled($context7, $user3, '', true));
+
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $allocation2 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user2->id], '*', MUST_EXIST);
+        $allocation3 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user3->id], '*', MUST_EXIST);
+
+        $ccompletion = new \completion_completion(['course' => $course3->id, 'userid' => $user1->id]);
+        $ccompletion->mark_complete();
+        $this->assertCount(4, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $item1x2->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $this->assertCount(4, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $item1x1->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $this->assertCount(6, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+        $this->assertTrue(is_enrolled($context5, $user1, '', true));
+        $this->assertTrue(is_enrolled($context6, $user1, '', true));
+
+        $this->assertCount(4, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user2->id]));
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation2->id,
+            'itemid' => $item1x4->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $this->assertCount(6, $DB->get_records('user_enrolments', ['status' => ENROL_USER_ACTIVE, 'userid' => $user2->id]));
+        $this->assertTrue(is_enrolled($context1, $user2, '', true));
+        $this->assertTrue(is_enrolled($context2, $user2, '', true));
+        $this->assertTrue(is_enrolled($context3, $user2, '', true));
+        $this->assertTrue(is_enrolled($context4, $user2, '', true));
+        $this->assertTrue(is_enrolled($context5, $user2, '', true));
+        $this->assertTrue(is_enrolled($context6, $user2, '', true));
+    }
+
     public function test_enrol_before_start() {
         global $DB, $CFG;
         require_once("$CFG->libdir/completionlib.php");
@@ -1442,12 +1567,12 @@ final class allocation_test extends \advanced_testcase {
         ]);
 
         $top = program::load_content($program1->id);
-        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
-        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->update_set($top, ['fullname' => '', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $set1 = $top->append_set($top, ['fullname' => 'Optional set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
         $item1x1 = $top->append_course($set1, $course1->id);
         $item1x2 = $top->append_course($set1, $course2->id);
         $item1x3 = $top->append_course($set1, $course3->id);
-        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $set2 = $top->append_set($top, ['fullname' => 'Any order set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         $item2x1 = $top->append_course($set2, $course4->id);
         $item2x2 = $top->append_course($set2, $course5->id);
         $item3 = $top->append_course($top, $course6->id);
@@ -1513,12 +1638,12 @@ final class allocation_test extends \advanced_testcase {
         ]);
 
         $top = program::load_content($program1->id);
-        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
-        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->update_set($top, ['fullname' => '', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $set1 = $top->append_set($top, ['fullname' => 'Optional set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
         $item1x1 = $top->append_course($set1, $course1->id);
         $item1x2 = $top->append_course($set1, $course2->id);
         $item1x3 = $top->append_course($set1, $course3->id);
-        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $set2 = $top->append_set($top, ['fullname' => 'Any order set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         $item2x1 = $top->append_course($set2, $course4->id);
         $item2x2 = $top->append_course($set2, $course5->id);
         $item3 = $top->append_course($top, $course6->id);
@@ -1584,12 +1709,12 @@ final class allocation_test extends \advanced_testcase {
         ]);
 
         $top = program::load_content($program1->id);
-        $top->update_set($top, '', set::SEQUENCE_TYPE_ALLINORDER);
-        $set1 = $top->append_set($top, 'Optional set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->update_set($top, ['fullname' => '', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $set1 = $top->append_set($top, ['fullname' => 'Optional set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
         $item1x1 = $top->append_course($set1, $course1->id);
         $item1x2 = $top->append_course($set1, $course2->id);
         $item1x3 = $top->append_course($set1, $course3->id);
-        $set2 = $top->append_set($top, 'Any order set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $set2 = $top->append_set($top, ['fullname' => 'Any order set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         $item2x1 = $top->append_course($set2, $course4->id);
         $item2x2 = $top->append_course($set2, $course5->id);
         $item3 = $top->append_course($top, $course6->id);

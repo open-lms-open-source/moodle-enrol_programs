@@ -47,6 +47,10 @@ final class item_append extends \local_openlms\dialog_form {
         $mform->setType('fullname', PARAM_TEXT);
         $mform->hideIf('fullname', 'addset', 'eq', 0);
 
+        $mform->addElement('text', 'points', get_string('itempoints', 'enrol_programs'));
+        $mform->setType('points', PARAM_INT);
+        $mform->setDefault('points', '1');
+
         $stypes = set::get_sequencetype_types();
         $mform->addElement('select', 'sequencetype', get_string('sequencetype', 'enrol_programs'), $stypes);
         $mform->hideIf('sequencetype', 'addset', 'eq', 0);
@@ -56,6 +60,11 @@ final class item_append extends \local_openlms\dialog_form {
         $mform->setDefault('minprerequisites', 1);
         $mform->hideIf('minprerequisites', 'addset', 'eq', 0);
         $mform->hideIf('minprerequisites', 'sequencetype', 'noteq', set::SEQUENCE_TYPE_ATLEAST);
+
+        $mform->addElement('text', 'minpoints', $stypes[set::SEQUENCE_TYPE_MINPOINTS]);
+        $mform->setType('minpoints', PARAM_INT);
+        $mform->hideIf('minpoints', 'sequencetype', 'noteq', set::SEQUENCE_TYPE_MINPOINTS);
+        $mform->setDefault('minpoints', 1);
 
         $mform->addElement('hidden', 'parentitemid');
         $mform->setType('parentitemid', PARAM_INT);
@@ -69,6 +78,10 @@ final class item_append extends \local_openlms\dialog_form {
 
         $context = $this->_customdata['context'];
 
+        if ($data['points'] < 0) {
+            $errors['points'] = get_string('error');
+        }
+
         if ($data['addset']) {
             if (trim($data['fullname']) === '') {
                 $errors['fullname'] = get_string('required');
@@ -76,6 +89,10 @@ final class item_append extends \local_openlms\dialog_form {
             if ($data['sequencetype'] === set::SEQUENCE_TYPE_ATLEAST) {
                 if ($data['minprerequisites'] <= 0) {
                     $errors['minprerequisites'] = get_string('required');
+                }
+            } else if ($data['sequencetype'] === set::SEQUENCE_TYPE_MINPOINTS) {
+                if ($data['minpoints'] <= 0) {
+                    $errors['minpoints'] = get_string('required');
                 }
             }
         } else {

@@ -181,9 +181,10 @@ final class top extends set {
      *
      * @param set $parent
      * @param int $courseid
+     * @param array $data
      * @return course
      */
-    public function append_course(set $parent, int $courseid): course {
+    public function append_course(set $parent, int $courseid, array $data = []): course {
         global $DB;
 
         if ($parent->programid != $this->programid) {
@@ -191,6 +192,15 @@ final class top extends set {
         }
         if (isset($this->orphanedsets[$parent->id])) {
             throw new \coding_exception('orphaned set cannot be modified');
+        }
+
+        if (array_key_exists('points', $data)) {
+            if ($data['points'] < 0) {
+                throw new \invalid_parameter_exception('Points cannot be negative');
+            }
+            $points = (string)(int)$data['points'];
+        } else {
+            $points = '1';
         }
 
         $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
@@ -203,7 +213,9 @@ final class top extends set {
             'previtemid' => null,
             'fullname' => $course->fullname,
             'sequencejson' => util::json_encode([]),
-            'minprerequisites' => '1',
+            'minprerequisites' => null,
+            'points' => $points,
+            'minpoints' => null,
         ];
         $fakerecords = [];
         $fakeprerequisites = [];
@@ -228,15 +240,13 @@ final class top extends set {
     }
 
     /**
-     * Add new course set to given parent set.
+     * Add new set to given parent set.
      *
      * @param set $parent
-     * @param string $fullname
-     * @param string $sequencetype
-     * @param int $minprerequisites
+     * @param array $data
      * @return set
      */
-    public function append_set(set $parent, string $fullname, string $sequencetype, int $minprerequisites = 1): set {
+    public function append_set(set $parent, array $data): set {
         global $DB;
 
         if ($parent->programid != $this->programid) {
@@ -245,17 +255,42 @@ final class top extends set {
         if (isset($this->orphanedsets[$parent->id])) {
             throw new \coding_exception('orphaned set cannot be modified');
         }
+
         $types = set::get_sequencetype_types();
-        if (!isset($types[$sequencetype])) {
+        if (empty($data['sequencetype']) || !isset($types[$data['sequencetype']])) {
             throw new \coding_exception('invalid sequence type');
         }
+        $sequencetype = $data['sequencetype'];
 
-        if ($sequencetype !== set::SEQUENCE_TYPE_ATLEAST) {
-            $minprerequisites = 1;
+        if (array_key_exists('points', $data)) {
+            if ($data['points'] < 0) {
+                throw new \invalid_parameter_exception('Points cannot be negative');
+            }
+            $points = (string)(int)$data['points'];
         } else {
-            if ($minprerequisites <= 0) {
+            $points = '1';
+        }
+
+        $fullname = $data['fullname'] ?? '';
+        if (trim($fullname) === '') {
+            throw new \invalid_parameter_exception('Fullname is required');
+        }
+
+        if ($sequencetype === set::SEQUENCE_TYPE_MINPOINTS) {
+            if (!isset($data['minpoints']) || $data['minpoints'] <= 0) {
+                throw new \coding_exception('Minimum points number is required');
+            }
+            $minprerequisites = null;
+            $minpoints = (string)(int)$data['minpoints'];
+        } else if ($sequencetype === set::SEQUENCE_TYPE_ATLEAST) {
+            if (!isset($data['minprerequisites']) || $data['minprerequisites'] <= 0) {
                 throw new \coding_exception('Minimum prerequisites number is required');
             }
+            $minprerequisites = (string)(int)$data['minprerequisites'];
+            $minpoints = null;
+        } else {
+            $minprerequisites = '1';
+            $minpoints = null;
         }
 
         $sequence = [
@@ -271,7 +306,9 @@ final class top extends set {
             'previtemid' => null,
             'fullname' => $fullname,
             'sequencejson' => util::json_encode($sequence),
-            'minprerequisites' => (string)$minprerequisites,
+            'minprerequisites' => $minprerequisites,
+            'points' => $points,
+            'minpoints' => $minpoints,
         ];
 
         $fakerecords = [];
@@ -297,15 +334,13 @@ final class top extends set {
     }
 
     /**
-     * Update course set.
+     * Update item set.
      *
      * @param set $set
-     * @param string $fullname ignored in case of top item
-     * @param string $sequencetype
-     * @param int $minprerequisites
+     * @param array $data
      * @return set
      */
-    public function update_set(set $set, string $fullname, string $sequencetype, int $minprerequisites = 1): set {
+    public function update_set(set $set, array $data): set {
         global $DB;
 
         if ($set->programid != $this->programid) {
@@ -314,30 +349,51 @@ final class top extends set {
         if (isset($this->orphanedsets[$set->id])) {
             throw new \coding_exception('orphaned set cannot be modified');
         }
-        $types = set::get_sequencetype_types();
-        if (!isset($types[$sequencetype])) {
-            throw new \coding_exception('invalid sequence type');
+
+        if (array_key_exists('fullname', $data)) {
+            if ($set->get_id() != $this->id) {
+                $set->fullname = $data['fullname'];
+            }
         }
 
-        if ($set->get_id() != $this->id) {
-            $set->fullname = $fullname;
-        }
-        $set->sequencetype = $sequencetype;
-        if ($sequencetype !== set::SEQUENCE_TYPE_ALLINORDER) {
-            $set->inorder = false;
-        } else {
-            $set->inorder = true;
-        }
-        if ($set->sequencetype !== set::SEQUENCE_TYPE_ATLEAST) {
-            $set->minprerequisites = count($set->get_children());
-            if (!$set->minprerequisites) {
-                $set->minprerequisites = 1;
+        if (array_key_exists('sequencetype', $data)) {
+            $sequencetype = $data['sequencetype'];
+            $types = set::get_sequencetype_types();
+            if (!isset($types[$sequencetype])) {
+                throw new \coding_exception('invalid sequence type');
             }
-        } else {
-            if ($minprerequisites <= 0) {
-                throw new \coding_exception('Minimum prerequisites number is required');
+            $set->sequencetype = $sequencetype;
+            if ($sequencetype === set::SEQUENCE_TYPE_ALLINORDER) {
+                $set->inorder = true;
+            } else {
+                $set->inorder = false;
             }
-            $set->minprerequisites = $minprerequisites;
+            if ($sequencetype === set::SEQUENCE_TYPE_MINPOINTS) {
+                if (!isset($data['minpoints']) || $data['minpoints'] <= 0) {
+                    throw new \coding_exception('Minimum points number is required');
+                }
+                $set->minprerequisites = null;
+                $set->minpoints = (string)(int)$data['minpoints'];
+            } else if ($set->sequencetype === set::SEQUENCE_TYPE_ATLEAST) {
+                if (!isset($data['minprerequisites']) || $data['minprerequisites'] <= 0) {
+                    throw new \coding_exception('Minimum prerequisites number is required');
+                }
+                $set->minprerequisites = (string)(int)$data['minprerequisites'];
+                $set->minpoints = null;
+            } else {
+                $set->minprerequisites = count($set->get_children());
+                if (!$set->minprerequisites) {
+                    $set->minprerequisites = 1;
+                }
+                $set->minpoints = null;
+            }
+        }
+
+        if (array_key_exists('points', $data)) {
+            if ($data['points'] < 0) {
+                throw new \coding_exception('Points cannot be negative');
+            }
+            $set->points = (string)(int)$data['points'];
         }
 
         $trans = $DB->start_delegated_transaction();
@@ -353,6 +409,45 @@ final class top extends set {
         allocation::fix_user_enrolments($this->programid, null);
 
         return $set;
+    }
+
+    /**
+     * Update course item.
+     *
+     * @param course $course
+     * @param array $data
+     * @return course
+     */
+    public function update_course(course $course, array $data): course {
+        global $DB;
+
+        if ($course->programid != $this->programid) {
+            throw new \coding_exception('invalid programid');
+        }
+
+        if (!array_key_exists('points', $data)) {
+            return $course;
+        }
+
+        if ($data['points'] < 0) {
+            throw new \invalid_parameter_exception('Points cannot be negative');
+        }
+
+        $course->points = (string)(int)$data['points'];
+
+        $trans = $DB->start_delegated_transaction();
+        $DB->update_record('enrol_programs_items', (object)$course->get_record());
+
+        $this->fix_content();
+
+        program::make_snapshot($course->programid, 'item_update');
+        $trans->allow_commit();
+
+        // Do not use transactions for enrolments, we can always fix them later.
+        allocation::fix_enrol_instances($this->programid);
+        allocation::fix_user_enrolments($this->programid, null);
+
+        return $course;
     }
 
     /**
@@ -406,11 +501,13 @@ final class top extends set {
                     break;
                 }
             }
-            if ($oldparent->sequencetype !== set::SEQUENCE_TYPE_ATLEAST) {
+            if ($oldparent->sequencetype === set::SEQUENCE_TYPE_ALLINORDER || $oldparent->sequencetype === set::SEQUENCE_TYPE_ALLINANYORDER) {
                 $oldparent->minprerequisites = count($oldparent->children);
             }
-            if ($oldparent->minprerequisites < 1) {
-                $oldparent->minprerequisites = 1;
+            if ($oldparent->sequencetype !== set::SEQUENCE_TYPE_MINPOINTS) {
+                if ($oldparent->minprerequisites < 1) {
+                    $oldparent->minprerequisites = 1;
+                }
             }
             $DB->update_record('enrol_programs_items', (object)$oldparent->get_record());
         }
@@ -432,11 +529,13 @@ final class top extends set {
             $newchildren[] = $item;
         }
         $newparent->children = $newchildren;
-        if ($newparent->sequencetype !== set::SEQUENCE_TYPE_ATLEAST) {
+        if ($newparent->sequencetype === set::SEQUENCE_TYPE_ALLINORDER || $newparent->sequencetype === set::SEQUENCE_TYPE_ALLINANYORDER) {
             $newparent->minprerequisites = count($newparent->children);
         }
-        if ($newparent->minprerequisites < 1) {
-            $newparent->minprerequisites = 1;
+        if ($newparent->sequencetype !== set::SEQUENCE_TYPE_MINPOINTS) {
+            if ($newparent->minprerequisites < 1) {
+                $newparent->minprerequisites = 1;
+            }
         }
         $DB->update_record('enrol_programs_items', (object)$newparent->get_record());
 
@@ -479,7 +578,7 @@ final class top extends set {
                 }
             }
             $parent->children = array_values($parent->children);
-            if ($parent->sequencetype !== set::SEQUENCE_TYPE_ATLEAST) {
+            if ($parent->sequencetype === set::SEQUENCE_TYPE_ALLINORDER || $parent->sequencetype === set::SEQUENCE_TYPE_ALLINANYORDER) {
                 $parent->minprerequisites = count($parent->get_children());
                 if (!$parent->minprerequisites) {
                     $parent->minprerequisites = 1;
@@ -546,13 +645,25 @@ final class top extends set {
         }
         $topfrom = top::load($data->fromprogram);
         if (!$this->get_children()) {
-            $this->update_set($this, $this->get_fullname(), $topfrom->get_sequencetype(), $topfrom->get_minprerequisites());
+            $this->update_set($this, [
+                'fullname' => $this->get_fullname(),
+                'sequencetype' => $topfrom->get_sequencetype(),
+                'minprerequisites' => $topfrom->get_minprerequisites(),
+                'minpoints' => $topfrom->get_minpoints(),
+                'points' => $topfrom->get_points()
+            ]);
         }
         $copyfunction = function (item $item, set $newparent, top $top) use (&$copyfunction) {
             if ($item instanceof course) {
-                $top->append_course($newparent, $item->get_courseid());
+                $top->append_course($newparent, $item->get_courseid(), ['points' => $item->get_points()]);
             } else if ($item instanceof set) {
-                $newset = $top->append_set($newparent, $item->get_fullname(), $item->get_sequencetype(), $item->get_minprerequisites());
+                $newset = $top->append_set($newparent, [
+                    'fullname' => $item->get_fullname(),
+                    'sequencetype' => $item->get_sequencetype(),
+                    'minprerequisites' => $item->get_minprerequisites(),
+                    'minpoints' => $item->get_minpoints(),
+                    'points' => $item->get_points()
+                ]);
                 foreach ($item->get_children() as $child) {
                     $copyfunction($child, $newset, $top);
                 }

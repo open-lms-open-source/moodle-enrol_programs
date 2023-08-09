@@ -30,6 +30,7 @@ class set extends item {
     public const SEQUENCE_TYPE_ALLINANYORDER = 'allinanyorder';
     public const SEQUENCE_TYPE_ALLINORDER = 'allinorder';
     public const SEQUENCE_TYPE_ATLEAST = 'atleast';
+    public const SEQUENCE_TYPE_MINPOINTS = 'minpoints';
 
     /** @var item[] list of children */
     protected $children = [];
@@ -37,8 +38,11 @@ class set extends item {
     /** @var string one of SEQUENCE_TYPE_ constants */
     protected $sequencetype;
 
-    /** @var int how many prerequisites/children are required to complete this item */
+    /** @var ?int how many prerequisites/children are required to complete this item */
     protected $minprerequisites;
+
+    /** @var ?int how many points from children are required to complete this item */
+    protected $minpoints;
 
     /**
      * Returns all known set sequence types.
@@ -49,10 +53,12 @@ class set extends item {
             self::SEQUENCE_TYPE_ALLINANYORDER,
             self::SEQUENCE_TYPE_ALLINORDER,
             self::SEQUENCE_TYPE_ATLEAST,
+            self::SEQUENCE_TYPE_MINPOINTS,
         ];
         $result = [];
         $a = new \stdClass();
         $a->min = 'X';
+        $a->minpoints = 'X';
         $a->total = 'Y';
         foreach ($types as $type) {
             $result[$type] = get_string('sequencetype_' . $type, 'enrol_programs', $a);
@@ -73,10 +79,19 @@ class set extends item {
     /**
      * How many prerequisite items are required?
      *
-     * @return int
+     * @return int|null
      */
-    public function get_minprerequisites(): int {
+    public function get_minprerequisites(): ?int {
         return $this->minprerequisites;
+    }
+
+    /**
+     * How many points are required for completion?
+     *
+     * @return int|null
+     */
+    public function get_minpoints(): ?int {
+        return $this->minpoints;
     }
 
     /**
@@ -87,6 +102,7 @@ class set extends item {
     public function get_sequencetype_info(): string {
         $a = new \stdClass();
         $a->min = $this->minprerequisites;
+        $a->minpoints = $this->minpoints;
         $a->total = count($this->children);
         return get_string('sequencetype_' . $this->sequencetype, 'enrol_programs', $a);
     }
@@ -112,6 +128,7 @@ class set extends item {
         $item->id = $record->id;
         $item->programid = $record->programid;
         $item->fullname = $record->fullname;
+        $item->points = $record->points;
 
         $sequence = (object)json_decode($record->sequencejson);
         $inorder = ($sequence->type === self::SEQUENCE_TYPE_ALLINORDER);
@@ -142,12 +159,10 @@ class set extends item {
             }
         }
 
-        if ($sequence->type === self::SEQUENCE_TYPE_ALLINANYORDER) {
-            $item->sequencetype = self::SEQUENCE_TYPE_ALLINANYORDER;
-            $item->minprerequisites = count($item->children);
-            if (!$item->minprerequisites) {
-                $item->minprerequisites = 1;
-            }
+        if ($sequence->type === self::SEQUENCE_TYPE_MINPOINTS) {
+            $item->minprerequisites = null;
+            $item->minpoints = $record->minpoints;
+            $item->sequencetype = self::SEQUENCE_TYPE_MINPOINTS;
         } else if ($sequence->type === self::SEQUENCE_TYPE_ATLEAST) {
             $item->sequencetype = self::SEQUENCE_TYPE_ATLEAST;
             if ($record->minprerequisites) {
@@ -155,6 +170,14 @@ class set extends item {
             } else {
                 $item->minprerequisites = 1;
             }
+            $item->minpoints = null;
+        } else if ($sequence->type === self::SEQUENCE_TYPE_ALLINANYORDER) {
+            $item->sequencetype = self::SEQUENCE_TYPE_ALLINANYORDER;
+            $item->minprerequisites = count($item->children);
+            if (!$item->minprerequisites) {
+                $item->minprerequisites = 1;
+            }
+            $item->minpoints = null;
         } else {
             if ($sequence->type !== self::SEQUENCE_TYPE_ALLINORDER) {
                 debugging('Invalid program item sequence type in itemid: ' . $item->id, DEBUG_DEVELOPER);
@@ -166,10 +189,15 @@ class set extends item {
             if (!$item->minprerequisites) {
                 $item->minprerequisites = 1;
             }
+            $item->minpoints = null;
         }
 
         if ($item->minprerequisites != $record->minprerequisites) {
             debugging('Invalid minimum prerequisites in itemid: ' . $item->id, DEBUG_DEVELOPER);
+            $item->problemdetected = true;
+        }
+        if ($item->minpoints != $record->minpoints) {
+            debugging('Invalid minimum minpoints in itemid: ' . $item->id, DEBUG_DEVELOPER);
             $item->problemdetected = true;
         }
 
@@ -287,7 +315,9 @@ class set extends item {
             'previtemid' => null,
             'fullname' => $this->fullname,
             'sequencejson' => util::json_encode($sequence),
-            'minprerequisites' => (string)$this->minprerequisites,
+            'minprerequisites' => isset($this->minprerequisites) ? (string)$this->minprerequisites : null,
+            'points' => (string)$this->points,
+            'minpoints' => isset($this->minpoints) ? (string)$this->minpoints : null,
         ];
     }
 
@@ -299,7 +329,7 @@ class set extends item {
      */
     protected function add_child(item $item): void {
         $this->children[] = $item;
-        if ($this->sequencetype !== self::SEQUENCE_TYPE_ATLEAST) {
+        if ($this->sequencetype === self::SEQUENCE_TYPE_ALLINORDER || $this->sequencetype === self::SEQUENCE_TYPE_ALLINANYORDER) {
             $this->minprerequisites = count($this->children);
             if (!$this->minprerequisites) {
                 $this->minprerequisites = 1;
@@ -321,7 +351,7 @@ class set extends item {
                 break;
             }
         }
-        if ($this->sequencetype !== self::SEQUENCE_TYPE_ATLEAST) {
+        if ($this->sequencetype === self::SEQUENCE_TYPE_ALLINORDER || $this->sequencetype === self::SEQUENCE_TYPE_ALLINANYORDER) {
             $this->minprerequisites = count($this->children);
             if (!$this->minprerequisites) {
                 $this->minprerequisites = 1;

@@ -262,6 +262,7 @@ class renderer extends \plugin_renderer_base {
 
             $actions = [];
             if ($canedit) {
+                $importurl = null;
                 if ($item instanceof set) {
                     $appendurl = new moodle_url('/enrol/programs/management/item_append.php', ['parentitemid' => $id]);
                     $appendaction = new \local_openlms\output\dialog_form\icon($appendurl, 'appenditem', get_string('appenditem', 'enrol_programs'), 'enrol_programs');
@@ -273,7 +274,7 @@ class renderer extends \plugin_renderer_base {
                         $actions[] = $dialogformoutput->render($importaction);
                     }
                 } else {
-                    $actions[] = $output->pix_icon('i/empty', '');
+                    $actions[] = $output->pix_icon('i/empty', '') . ' ';
                 }
                 if ($item->is_deletable()) {
                     if ($item instanceof set) {
@@ -285,15 +286,17 @@ class renderer extends \plugin_renderer_base {
                     $deleteaction = new \local_openlms\output\dialog_form\icon($deleteurl, 'deleteitem', $deletestr, 'enrol_programs');
                     $actions[] = $dialogformoutput->render($deleteaction);
                 } else {
-                    $actions[] = $output->pix_icon('i/empty', '');
+                    if (!$importurl) {
+                        $actions[] = $output->pix_icon('i/empty', '') . ' ';
+                    }
                 }
 
                 $targetpre = false;
                 $targetpost = false;
                 if ($item instanceof top) {
-                    $actions[] = $output->pix_icon('i/empty', '');
+                    $actions[] = $output->pix_icon('i/empty', '') . ' ';
                 } else if ($movetargetsfor) {
-                    $actions[] = $output->pix_icon('i/empty', '');
+                    $actions[] = $output->pix_icon('i/empty', '') . ' ';
                     if ($showtargets) {
                         if ($position == 0 || $parent->get_children()[$position - 1]->get_id() != $movetargetsfor) {
                             $targetpre = true;
@@ -309,11 +312,16 @@ class renderer extends \plugin_renderer_base {
                 }
 
                 if ($item instanceof set) {
-                    $editurl = new moodle_url('/enrol/programs/management/item_edit.php', ['id' => $id]);
+                    $editurl = new moodle_url('/enrol/programs/management/item_set_edit.php', ['id' => $id]);
                     $editaction = new \local_openlms\output\dialog_form\icon($editurl, 'i/settings', get_string('updateset', 'enrol_programs'));
                     $actions[] = $dialogformoutput->render($editaction);
+                } else if ($item instanceof course) {
+                    $editurl = new moodle_url('/enrol/programs/management/item_course_edit.php', ['id' => $id]);
+                    $editaction = new \local_openlms\output\dialog_form\icon($editurl, 'i/settings', get_string('updatecourse', 'enrol_programs'));
+                    $actions[] = $dialogformoutput->render($editaction);
+                    $actions[] = $output->pix_icon('i/empty', '') . ' ';
                 } else {
-                    $actions[] = $output->pix_icon('i/empty', '');
+                    $actions[] = $output->pix_icon('i/empty', '') . ' ';
                 }
             }
 
@@ -347,7 +355,14 @@ class renderer extends \plugin_renderer_base {
                 $target = $padding . \html_writer::link($turl, $movehere, ['class' => 'movehere']);
                 $rows[]  = [$target, '', ''];
             }
-            $rows[] = [$itemname, $completion, implode('', $actions)];
+
+            if ($item instanceof top) {
+                $points = '';
+            } else {
+                $points = $item->get_points();
+            }
+
+            $rows[] = [$itemname, $points, $completion, implode('', $actions)];
 
             $children = $item->get_children();
             if ($children) {
@@ -377,7 +392,12 @@ class renderer extends \plugin_renderer_base {
         $renderercolumns($top, 0, 0, null, isset($movetargetsfor));
 
         $table = new \html_table();
-        $table->head = [get_string('item', 'enrol_programs'), get_string('sequencetype', 'enrol_programs'), get_string('actions')];
+        $table->head = [
+            get_string('item', 'enrol_programs'),
+            get_string('itempoints', 'enrol_programs'),
+            get_string('sequencetype', 'enrol_programs'),
+            get_string('actions'),
+        ];
         $table->id = 'program_content';
         $table->attributes['class'] = 'admintable generaltable';
         $table->data = $rows;
@@ -602,6 +622,12 @@ class renderer extends \plugin_renderer_base {
                 $itemname = $padding . $output->pix_icon('itemset', get_string('set', 'enrol_programs'), 'enrol_programs') . $fullname;
             }
 
+            if ($item instanceof top) {
+                $points = '';
+            } else {
+                $points = $item->get_points();
+            }
+
             // Completion stuff.
             $completioninfo = '';
             $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $item->get_id(), 'allocationid' => $allocation->id]);
@@ -621,7 +647,7 @@ class renderer extends \plugin_renderer_base {
                 $evidenceinfo .= format_text($jsondata->details);
             }
 
-            $rows[] = [$itemname, $completiontype, $completioninfo, $evidenceinfo, implode('', $actions)];
+            $rows[] = [$itemname, $points, $completiontype, $completioninfo, $evidenceinfo, implode('', $actions)];
 
             foreach ($item->get_children() as $child) {
                 $renderercolumns($child, $itemdepth + 1);
@@ -630,8 +656,14 @@ class renderer extends \plugin_renderer_base {
         $renderercolumns($top, 0);
 
         $table = new \html_table();
-        $table->head = [get_string('item', 'enrol_programs'), get_string('sequencetype', 'enrol_programs'), get_string('completiondate', 'enrol_programs'),
-            get_string('evidence', 'enrol_programs'), get_string('actions')];
+        $table->head = [
+            get_string('item', 'enrol_programs'),
+            get_string('itempoints', 'enrol_programs'),
+            get_string('sequencetype', 'enrol_programs'),
+            get_string('completiondate', 'enrol_programs'),
+            get_string('evidence', 'enrol_programs'),
+            get_string('actions'),
+        ];
         $table->id = 'program_content';
         $table->attributes['class'] = 'admintable generaltable';
         $table->data = $rows;

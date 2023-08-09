@@ -549,18 +549,27 @@ final class allocation {
 
         // Calculate set completions ignoring course items,
         // do max 100 dependencies to prevent infinite loop.
+        $params = [];
+        $programselect = '';
+        if ($programid) {
+            $programselect = "AND p.id = :programid";
+            $params['programid'] = $programid;
+        }
+        $userselect = '';
+        if ($userid) {
+            $userselect = "AND pa.userid = :userid";
+            $params['userid'] = $userid;
+        }
+        $sql = "SELECT 1
+                  FROM {enrol_programs_items} pi
+                  JOIN {enrol_programs_programs} p ON p.id = pi.programid
+                  JOIN {enrol_programs_allocations} pa ON pa.programid = p.id
+                 WHERE pi.minpoints IS NOT NULL
+                       $programselect $userselect";
+        $minpointsfound = $DB->record_exists_sql($sql, $params);
+
         for ($i = 0; $i < 100; $i++) {
-            $params = [];
-            $programselect = '';
-            if ($programid) {
-                $programselect = "AND p.id = :programid";
-                $params['programid'] = $programid;
-            }
-            $userselect = '';
-            if ($userid) {
-                $userselect = "AND pa.userid = :userid";
-                $params['userid'] = $userid;
-            }
+            $count = 0;
             $now = time();
             $params['now1'] = $now;
             $params['now2'] = $now;
@@ -571,7 +580,7 @@ final class allocation {
                  LEFT JOIN {enrol_programs_completions} psic ON psic.itemid = psi.id AND psic.allocationid = pa.id
                       JOIN {enrol_programs_prerequisites} pr ON pr.itemid = psi.id
                       JOIN {enrol_programs_completions} pric ON pric.itemid = pr.prerequisiteitemid AND pric.allocationid = pa.id
-                     WHERE psic.id IS NULL AND psi.courseid IS NULL
+                     WHERE psi.minprerequisites IS NOT NULL AND psic.id IS NULL
                            AND p.archived = 0 AND pa.archived = 0
                            AND (pa.timestart <= :now1)
                            AND (pa.timeend IS NULL OR pa.timeend > :now2)
@@ -580,7 +589,6 @@ final class allocation {
                     HAVING psi.minprerequisites <= COUNT(pric.id)
                   ORDER BY psi.id ASC, pa.id ASC";
             $rs = $DB->get_recordset_sql($sql, $params);
-            $count = 0;
             foreach ($rs as $completion) {
                 // NOTE: this should not return many records because this
                 // should be called with userid parameter from event observers.
@@ -592,6 +600,40 @@ final class allocation {
                 $count++;
             }
             $rs->close();
+
+            if ($minpointsfound) {
+                $now = time();
+                $params['now1'] = $now;
+                $params['now2'] = $now;
+                $sql = "SELECT psi.id AS itemid, pa.id AS allocationid, psi.minpoints, SUM(pri.points) AS pointcount
+                          FROM {enrol_programs_items} psi
+                          JOIN {enrol_programs_programs} p ON p.id = psi.programid
+                          JOIN {enrol_programs_allocations} pa ON pa.programid = p.id
+                     LEFT JOIN {enrol_programs_completions} psic ON psic.itemid = psi.id AND psic.allocationid = pa.id
+                          JOIN {enrol_programs_prerequisites} pr ON pr.itemid = psi.id
+                          JOIN {enrol_programs_items} pri ON pri.id = pr.prerequisiteitemid    
+                          JOIN {enrol_programs_completions} pric ON pric.itemid = pr.prerequisiteitemid AND pric.allocationid = pa.id
+                         WHERE psi.minpoints IS NOT NULL AND psic.id IS NULL
+                               AND p.archived = 0 AND pa.archived = 0
+                               AND (pa.timestart <= :now1)
+                               AND (pa.timeend IS NULL OR pa.timeend > :now2)
+                               $programselect $userselect
+                      GROUP BY psi.id, pa.id, psi.minpoints
+                        HAVING psi.minpoints <= SUM(pri.points)
+                      ORDER BY psi.id ASC, pa.id ASC";
+                $rs = $DB->get_recordset_sql($sql, $params);
+                foreach ($rs as $completion) {
+                    // NOTE: this should not return many records because this
+                    // should be called with userid parameter from event observers.
+                    $record = new stdClass();
+                    $record->itemid = $completion->itemid;
+                    $record->allocationid = $completion->allocationid;
+                    $record->timecompleted = time(); // Use real time, we are not in a transaction here.
+                    $DB->insert_record('enrol_programs_completions', $record);
+                    $count++;
+                }
+                $rs->close();
+            }
 
             if (!$count) {
                 // Stop when nothing found.

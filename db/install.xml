@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/programs/db" VERSION="20230429" COMMENT="XMLDB file for Open LMS enrol/programs"
+<XMLDB PATH="enrol/programs/db" VERSION="20230809" COMMENT="XMLDB file for Open LMS enrol/programs"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -40,7 +40,9 @@
         <FIELD NAME="previtemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Previous item needs to be completed in order to allow courseid access, this is ignored for sets"/>
         <FIELD NAME="fullname" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false" COMMENT="Human readable name of course-set, copy of course.fullname if courseid set, copy of program name for top item"/>
         <FIELD NAME="sequencejson" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="List of children with ordering and completion rules, optional start delay info if courseid set"/>
-        <FIELD NAME="minprerequisites" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Number of required prerequisite item completions needed for this item completion - derived from sequencejson, 1 for empty set means cannot be completed, 1 if courseid set"/>
+        <FIELD NAME="minprerequisites" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Number of required prerequisite item completions needed for this item completion - derived from sequencejson, 1 for empty set means cannot be completed, 1 if courseid set"/>
+        <FIELD NAME="points" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Point-based value for item/set completion"/>
+        <FIELD NAME="minpoints" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Point-based alternative to minprerequisites"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -48,6 +50,11 @@
         <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
         <KEY NAME="previtemid" TYPE="foreign" FIELDS="previtemid" REFTABLE="enrol_programs_items" REFFIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="minprerequisites" UNIQUE="false" FIELDS="minprerequisites"/>
+        <INDEX NAME="points" UNIQUE="false" FIELDS="points"/>
+        <INDEX NAME="minpoints" UNIQUE="false" FIELDS="minpoints"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="enrol_programs_groups" COMMENT="Course groups that were created for course items">
       <FIELDS>

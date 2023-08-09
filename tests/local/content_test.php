@@ -57,6 +57,8 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(set::SEQUENCE_TYPE_ALLINANYORDER, $top->get_sequencetype());
         $this->assertSame('All in any order', $top->get_sequencetype_info());
         $this->assertSame(1, $top->get_minprerequisites());
+        $this->assertSame(1, $top->get_points());
+        $this->assertSame(null, $top->get_minpoints());
     }
 
     public function test_append_items() {
@@ -84,6 +86,8 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(set::SEQUENCE_TYPE_ALLINANYORDER, $top->get_sequencetype());
         $this->assertSame('All in any order', $top->get_sequencetype_info());
         $this->assertSame(1, $top->get_minprerequisites());
+        $this->assertSame(1, $top->get_points());
+        $this->assertSame(null, $top->get_minpoints());
         /** @var course $courseitem1 */
         $courseitem1 = $top->get_children()[0];
         $this->assertInstanceOf(course::class, $courseitem1);
@@ -93,69 +97,78 @@ final class content_test extends \advanced_testcase {
         $this->assertSame([], $courseitem1->get_children());
         $this->assertSame((int)$course1->id, $courseitem1->get_courseid());
         $this->assertSame(null, $courseitem1->get_previous());
+        $this->assertSame(1, $courseitem1->get_points());
 
         $top = top::load($program1->id);
         $this->assertSame(false, $top->is_problem_detected());
 
-        $top->append_set($top, 'Nice set', set::SEQUENCE_TYPE_ALLINORDER);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER, 'points' => 3]);
         $this->assertSame(false, $top->is_problem_detected());
         $this->assertCount(2, $top->get_children());
         $this->assertSame([], $top->get_orphaned_sets());
         $this->assertSame([], $top->get_orphaned_courses());
         $this->assertSame(set::SEQUENCE_TYPE_ALLINANYORDER, $top->get_sequencetype());
         $this->assertSame(2, $top->get_minprerequisites());
-        /** @var set $setitem1 */
-        $setitem1 = $top->get_children()[1];
-        $this->assertInstanceOf(set::class, $setitem1);
-        $this->assertSame((int)$program1->id, $setitem1->get_programid());
-        $this->assertSame('Nice set', $setitem1->get_fullname());
-        $this->assertSame(false, $setitem1->is_problem_detected());
-        $this->assertSame(set::SEQUENCE_TYPE_ALLINORDER, $setitem1->get_sequencetype());
-        $this->assertSame('All in order', $setitem1->get_sequencetype_info());
-        $this->assertSame(1, $setitem1->get_minprerequisites());
-        $this->assertSame([], $setitem1->get_children());
+        /** @var set $setitem2 */
+        $setitem2 = $top->get_children()[1];
+        $this->assertInstanceOf(set::class, $setitem2);
+        $this->assertSame((int)$program1->id, $setitem2->get_programid());
+        $this->assertSame('Nice set', $setitem2->get_fullname());
+        $this->assertSame(false, $setitem2->is_problem_detected());
+        $this->assertSame(set::SEQUENCE_TYPE_ALLINORDER, $setitem2->get_sequencetype());
+        $this->assertSame('All in order', $setitem2->get_sequencetype_info());
+        $this->assertSame(1, $setitem2->get_minprerequisites());
+        $this->assertSame([], $setitem2->get_children());
+        $this->assertSame(3, $setitem2->get_points());
+        $this->assertSame(null, $setitem2->get_minpoints());
 
-        $top->append_course($setitem1, $course2->id);
-        $top->append_course($setitem1, $course3->id);
-        $this->assertCount(2, $setitem1->get_children());
-        $this->assertSame(2, $setitem1->get_minprerequisites());
+        $top->append_course($setitem2, $course2->id, ['points' => 7]);
+        $top->append_course($setitem2, $course3->id, ['points' => 0]);
+        $this->assertCount(2, $setitem2->get_children());
+        $this->assertSame(2, $setitem2->get_minprerequisites());
         /** @var course $courseitem2 */
-        $courseitem2 = $setitem1->get_children()[0];
+        $courseitem2 = $setitem2->get_children()[0];
         $this->assertSame(null, $courseitem2->get_previous());
+        $this->assertSame(7, $courseitem2->get_points());
         /** @var course $courseitem3 */
-        $courseitem3 = $setitem1->get_children()[1];
+        $courseitem3 = $setitem2->get_children()[1];
         $this->assertSame($courseitem2, $courseitem3->get_previous());
+        $this->assertSame(7, $courseitem2->get_points());
 
         $top = top::load($program1->id);
         $this->assertSame(false, $top->is_problem_detected());
 
-        $top->append_set($top, 'Other set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->append_set($top, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2, 'points' => 8]);
         $this->assertSame(false, $top->is_problem_detected());
         $this->assertCount(3, $top->get_children());
         $this->assertSame([], $top->get_orphaned_sets());
         $this->assertSame([], $top->get_orphaned_courses());
         $this->assertSame(set::SEQUENCE_TYPE_ALLINANYORDER, $top->get_sequencetype());
         $this->assertSame(3, $top->get_minprerequisites());
-        /** @var set $setitem2 */
-        $setitem2 = $top->get_children()[2];
-        $this->assertInstanceOf(set::class, $setitem2);
-        $this->assertSame((int)$program1->id, $setitem2->get_programid());
-        $this->assertSame('Other set', $setitem2->get_fullname());
-        $this->assertSame(false, $setitem2->is_problem_detected());
-        $this->assertSame(set::SEQUENCE_TYPE_ATLEAST, $setitem2->get_sequencetype());
-        $this->assertSame('At least 2', $setitem2->get_sequencetype_info());
-        $this->assertSame(2, $setitem2->get_minprerequisites());
-        $this->assertSame([], $setitem2->get_children());
+        $this->assertSame(1, $top->get_points());
+        $this->assertSame(null, $top->get_minpoints());
+        /** @var set $setitem4 */
+        $setitem4 = $top->get_children()[2];
+        $this->assertInstanceOf(set::class, $setitem4);
+        $this->assertSame((int)$program1->id, $setitem4->get_programid());
+        $this->assertSame('Other set', $setitem4->get_fullname());
+        $this->assertSame(false, $setitem4->is_problem_detected());
+        $this->assertSame(set::SEQUENCE_TYPE_ATLEAST, $setitem4->get_sequencetype());
+        $this->assertSame('At least 2', $setitem4->get_sequencetype_info());
+        $this->assertSame(2, $setitem4->get_minprerequisites());
+        $this->assertSame(8, $setitem4->get_points());
+        $this->assertSame(null, $setitem4->get_minpoints());
+        $this->assertSame([], $setitem4->get_children());
 
-        $top->append_course($setitem2, $course4->id);
-        $top->append_course($setitem2, $course5->id);
-        $this->assertCount(2, $setitem2->get_children());
-        $this->assertSame(2, $setitem2->get_minprerequisites());
+        $top->append_course($setitem4, $course4->id);
+        $top->append_course($setitem4, $course5->id);
+        $this->assertCount(2, $setitem4->get_children());
+        $this->assertSame(2, $setitem4->get_minprerequisites());
         /** @var course $courseitem2 */
-        $courseitem2 = $setitem2->get_children()[0];
+        $courseitem2 = $setitem4->get_children()[0];
         $this->assertSame(null, $courseitem2->get_previous());
         /** @var course $courseitem3 */
-        $courseitem3 = $setitem2->get_children()[1];
+        $courseitem3 = $setitem4->get_children()[1];
         $this->assertSame(null, $courseitem3->get_previous());
 
         $top = top::load($program1->id);
@@ -178,6 +191,28 @@ final class content_test extends \advanced_testcase {
         $this->assertSame([], $courseitem1->get_children());
         $this->assertSame((int)$course1->id, $courseitem1->get_courseid());
         $this->assertSame(null, $courseitem1->get_previous());
+
+        $top->append_set($top, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 9, 'points' => 3]);
+        $this->assertSame(false, $top->is_problem_detected());
+        $this->assertCount(4, $top->get_children());
+        $this->assertSame([], $top->get_orphaned_sets());
+        $this->assertSame([], $top->get_orphaned_courses());
+        $this->assertSame(set::SEQUENCE_TYPE_ALLINANYORDER, $top->get_sequencetype());
+        $this->assertSame(4, $top->get_minprerequisites());
+        $this->assertSame(1, $top->get_points());
+        $this->assertSame(null, $top->get_minpoints());
+        /** @var set $setitem4 */
+        $setitem4 = $top->get_children()[3];
+        $this->assertInstanceOf(set::class, $setitem4);
+        $this->assertSame((int)$program1->id, $setitem4->get_programid());
+        $this->assertSame('Other set', $setitem4->get_fullname());
+        $this->assertSame(false, $setitem4->is_problem_detected());
+        $this->assertSame(set::SEQUENCE_TYPE_MINPOINTS, $setitem4->get_sequencetype());
+        $this->assertSame('Minimum 9 points', $setitem4->get_sequencetype_info());
+        $this->assertSame(null, $setitem4->get_minprerequisites());
+        $this->assertSame(3, $setitem4->get_points());
+        $this->assertSame(9, $setitem4->get_minpoints());
+        $this->assertSame([], $setitem4->get_children());
     }
 
     public function test_update_set() {
@@ -195,21 +230,21 @@ final class content_test extends \advanced_testcase {
 
         $top = top::load($program1->id);
         $top->append_course($top, $course1->id);
-        $top->append_set($top, 'Nice set', set::SEQUENCE_TYPE_ALLINORDER);
-        $top->append_set($top, 'Other set', set::SEQUENCE_TYPE_ATLEAST, 2);
-        /** @var set $setitem1 */
-        $setitem1 = $top->get_children()[1];
-        $top->append_course($setitem1, $course2->id);
-        $top->append_course($setitem1, $course3->id);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $top->append_set($top, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
         /** @var set $setitem2 */
-        $setitem2 = $top->get_children()[2];
-        $top->append_course($setitem2, $course4->id);
-        $top->append_course($setitem2, $course5->id);
+        $setitem2 = $top->get_children()[1];
+        $top->append_course($setitem2, $course2->id);
+        $top->append_course($setitem2, $course3->id);
+        /** @var set $setitem4 */
+        $setitem4 = $top->get_children()[2];
+        $top->append_course($setitem4, $course4->id);
+        $top->append_course($setitem4, $course5->id);
 
         $top = top::load($program1->id);
         $this->assertSame(false, $top->is_problem_detected());
 
-        $top->update_set($top, 'ignored', set::SEQUENCE_TYPE_ALLINORDER, 10);
+        $top->update_set($top, ['fullname' => 'ignored', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER, 'minprerequisites' => 10]);
         $this->assertFalse(top::load($program1->id)->is_problem_detected());
         $this->assertSame((int)$program1->id, $top->get_programid());
         $this->assertSame($program1->fullname, $top->get_fullname());
@@ -220,22 +255,22 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(set::SEQUENCE_TYPE_ALLINORDER, $top->get_sequencetype());
         $this->assertSame('All in order', $top->get_sequencetype_info());
         $this->assertSame(3, $top->get_minprerequisites());
-        /** @var set $setitem1 */
-        $setitem1 = $top->get_children()[1];
-        $this->assertInstanceOf(set::class, $setitem1);
-        $this->assertSame(set::SEQUENCE_TYPE_ALLINORDER, $setitem1->get_sequencetype());
-        $this->assertSame(2, $setitem1->get_minprerequisites());
+        /** @var set $setitem2 */
+        $setitem2 = $top->get_children()[1];
+        $this->assertInstanceOf(set::class, $setitem2);
+        $this->assertSame(set::SEQUENCE_TYPE_ALLINORDER, $setitem2->get_sequencetype());
+        $this->assertSame(2, $setitem2->get_minprerequisites());
         /** @var course $courseitem1 */
         $courseitem1 = $top->get_children()[0];
         $this->assertSame(null, $courseitem1->get_previous());
         /** @var course $courseitem2 */
-        $courseitem2 = $setitem1->get_children()[0];
+        $courseitem2 = $setitem2->get_children()[0];
         $this->assertSame($courseitem1, $courseitem2->get_previous());
         /** @var course $courseitem3 */
-        $courseitem3 = $setitem1->get_children()[1];
+        $courseitem3 = $setitem2->get_children()[1];
         $this->assertSame($courseitem2, $courseitem3->get_previous());
 
-        $top->update_set($top, 'ignored', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->update_set($top, ['fullname' => 'ignored', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
         $this->assertFalse(top::load($program1->id)->is_problem_detected());
         $this->assertSame((int)$program1->id, $top->get_programid());
         $this->assertSame($program1->fullname, $top->get_fullname());
@@ -246,22 +281,86 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(set::SEQUENCE_TYPE_ATLEAST, $top->get_sequencetype());
         $this->assertSame('At least 2', $top->get_sequencetype_info());
         $this->assertSame(2, $top->get_minprerequisites());
+        $this->assertSame(1, $top->get_points());
+        $this->assertSame(null, $top->get_minpoints());
         $this->assertSame(null, $courseitem1->get_previous());
         $this->assertSame(null, $courseitem2->get_previous());
         $this->assertSame($courseitem2, $courseitem3->get_previous());
 
-        $top->update_set($setitem1, 'Very nice set', set::SEQUENCE_TYPE_ALLINANYORDER, 10);
+        $top->update_set($setitem2, ['fullname' => 'Very nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER, 'minprerequisites' => 10]);
         $this->assertFalse(top::load($program1->id)->is_problem_detected());
-        $this->assertSame((int)$program1->id, $setitem1->get_programid());
-        $this->assertSame('Very nice set', $setitem1->get_fullname());
-        $this->assertSame(false, $setitem1->is_problem_detected());
-        $this->assertSame(set::SEQUENCE_TYPE_ALLINANYORDER, $setitem1->get_sequencetype());
-        $this->assertSame('All in any order', $setitem1->get_sequencetype_info());
-        $this->assertSame(2, $setitem1->get_minprerequisites());
-        $this->assertCount(2, $setitem1->get_children());
+        $this->assertSame((int)$program1->id, $setitem2->get_programid());
+        $this->assertSame('Very nice set', $setitem2->get_fullname());
+        $this->assertSame(false, $setitem2->is_problem_detected());
+        $this->assertSame(set::SEQUENCE_TYPE_ALLINANYORDER, $setitem2->get_sequencetype());
+        $this->assertSame('All in any order', $setitem2->get_sequencetype_info());
+        $this->assertSame(2, $setitem2->get_minprerequisites());
+        $this->assertCount(2, $setitem2->get_children());
         $this->assertSame(null, $courseitem1->get_previous());
         $this->assertSame(null, $courseitem2->get_previous());
         $this->assertSame(null, $courseitem3->get_previous());
+
+        $top->update_set($setitem2, ['sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 7, 'points' => 11]);
+        $this->assertFalse(top::load($program1->id)->is_problem_detected());
+        $this->assertSame((int)$program1->id, $setitem2->get_programid());
+        $this->assertSame('Very nice set', $setitem2->get_fullname());
+        $this->assertSame(false, $setitem2->is_problem_detected());
+        $this->assertSame(set::SEQUENCE_TYPE_MINPOINTS, $setitem2->get_sequencetype());
+        $this->assertSame('Minimum 7 points', $setitem2->get_sequencetype_info());
+        $this->assertSame(null, $setitem2->get_minprerequisites());
+        $this->assertSame(11, $setitem2->get_points());
+        $this->assertSame(7, $setitem2->get_minpoints());
+        $this->assertCount(2, $setitem2->get_children());
+
+        $top->update_set($setitem2, ['points' => 88]);
+        $this->assertFalse(top::load($program1->id)->is_problem_detected());
+        $this->assertSame((int)$program1->id, $setitem2->get_programid());
+        $this->assertSame('Very nice set', $setitem2->get_fullname());
+        $this->assertSame(false, $setitem2->is_problem_detected());
+        $this->assertSame(set::SEQUENCE_TYPE_MINPOINTS, $setitem2->get_sequencetype());
+        $this->assertSame('Minimum 7 points', $setitem2->get_sequencetype_info());
+        $this->assertSame(null, $setitem2->get_minprerequisites());
+        $this->assertSame(88, $setitem2->get_points());
+        $this->assertSame(7, $setitem2->get_minpoints());
+        $this->assertCount(2, $setitem2->get_children());
+    }
+
+    public function test_update_course() {
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['fullname' => 'hokus']);
+        $program2 = $generator->create_program(['fullname' => 'pokus']);
+
+        $course1 = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+
+        $top = top::load($program1->id);
+        $top->append_course($top, $course1->id);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $top->append_set($top, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
+
+        /** @var course $courseitem1 */
+        $courseitem1 = $top->get_children()[0];
+        $this->assertSame((int)$program1->id, $courseitem1->get_programid());
+        $this->assertSame($course1->fullname, $courseitem1->get_fullname());
+        $this->assertSame(false, $courseitem1->is_problem_detected());
+        $this->assertSame(1, $courseitem1->get_points());
+
+        $courseitem1 = $top->update_course($courseitem1, []);
+        $this->assertSame($course1->fullname, $courseitem1->get_fullname());
+        $this->assertSame(false, $courseitem1->is_problem_detected());
+        $this->assertSame(1, $courseitem1->get_points());
+
+        $courseitem1 = $top->update_course($courseitem1, ['points' => 23]);
+        $this->assertSame($course1->fullname, $courseitem1->get_fullname());
+        $this->assertSame(false, $courseitem1->is_problem_detected());
+        $this->assertSame(23, $courseitem1->get_points());
+
+        $courseitem1 = $top->update_course($courseitem1, ['points' => 0]);
+        $this->assertSame($course1->fullname, $courseitem1->get_fullname());
+        $this->assertSame(false, $courseitem1->is_problem_detected());
+        $this->assertSame(0, $courseitem1->get_points());
     }
 
     public function test_move_item() {
@@ -281,113 +380,125 @@ final class content_test extends \advanced_testcase {
         $top->append_course($top, $course1->id);
         /** @var course $courseitem1 */
         $courseitem1 = $top->get_children()[0];
-        $top->append_set($top, 'Nice set', set::SEQUENCE_TYPE_ALLINORDER);
-        /** @var set $setitem1 */
-        $setitem1 = $top->get_children()[1];
-        $top->append_set($top, 'Other set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
         /** @var set $setitem2 */
-        $setitem2 = $top->get_children()[2];
-        $top->append_set($top, 'Third set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $setitem2 = $top->get_children()[1];
+        $top->append_set($top, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
+        /** @var set $setitem4 */
+        $setitem4 = $top->get_children()[2];
+        $top->append_set($top, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         /** @var set $setitem3 */
         $setitem3 = $top->get_children()[3];
-        $top->append_course($setitem1, $course2->id);
+        $top->append_set($top, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 2, 'points' => 7]);
+        /** @var set $setitem5 */
+        $setitem5 = $top->get_children()[4];
+        $top->append_course($setitem2, $course2->id);
         /** @var course $courseitem2 */
-        $courseitem2 = $setitem1->get_children()[0];
-        $top->append_course($setitem1, $course3->id);
+        $courseitem2 = $setitem2->get_children()[0];
+        $top->append_course($setitem2, $course3->id);
         /** @var course $courseitem3 */
-        $courseitem3 = $setitem1->get_children()[1];
-        $top->append_course($setitem1, $course4->id);
+        $courseitem3 = $setitem2->get_children()[1];
+        $top->append_course($setitem2, $course4->id);
         /** @var course $courseitem4 */
-        $courseitem4 = $setitem1->get_children()[2];
-        $top->append_course($setitem1, $course5->id);
+        $courseitem4 = $setitem2->get_children()[2];
+        $top->append_course($setitem2, $course5->id);
         /** @var course $courseitem5 */
-        $courseitem5 = $setitem1->get_children()[3];
+        $courseitem5 = $setitem2->get_children()[3];
         $this->assertSame(false, $top->is_problem_detected());
 
-        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem1->get_id(), 1));
+        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem2->get_id(), 1));
         $this->assertSame(false, $top->is_problem_detected());
-        $this->assertCount(4, $setitem1->get_children());
-        $this->assertSame($courseitem2, $setitem1->get_children()[0]);
-        $this->assertSame($courseitem3, $setitem1->get_children()[1]);
-        $this->assertSame($courseitem4, $setitem1->get_children()[2]);
-        $this->assertSame($courseitem5, $setitem1->get_children()[3]);
+        $this->assertCount(4, $setitem2->get_children());
+        $this->assertSame($courseitem2, $setitem2->get_children()[0]);
+        $this->assertSame($courseitem3, $setitem2->get_children()[1]);
+        $this->assertSame($courseitem4, $setitem2->get_children()[2]);
+        $this->assertSame($courseitem5, $setitem2->get_children()[3]);
 
-        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem1->get_id(), 0));
+        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem2->get_id(), 0));
         $this->assertSame(false, $top->is_problem_detected());
-        $this->assertCount(4, $setitem1->get_children());
-        $this->assertSame($courseitem3, $setitem1->get_children()[0]);
-        $this->assertSame($courseitem2, $setitem1->get_children()[1]);
-        $this->assertSame($courseitem4, $setitem1->get_children()[2]);
-        $this->assertSame($courseitem5, $setitem1->get_children()[3]);
+        $this->assertCount(4, $setitem2->get_children());
+        $this->assertSame($courseitem3, $setitem2->get_children()[0]);
+        $this->assertSame($courseitem2, $setitem2->get_children()[1]);
+        $this->assertSame($courseitem4, $setitem2->get_children()[2]);
+        $this->assertSame($courseitem5, $setitem2->get_children()[3]);
 
-        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem1->get_id(), 10));
+        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem2->get_id(), 10));
         $this->assertSame(false, $top->is_problem_detected());
-        $this->assertCount(4, $setitem1->get_children());
-        $this->assertSame($courseitem2, $setitem1->get_children()[0]);
-        $this->assertSame($courseitem4, $setitem1->get_children()[1]);
-        $this->assertSame($courseitem5, $setitem1->get_children()[2]);
-        $this->assertSame($courseitem3, $setitem1->get_children()[3]);
+        $this->assertCount(4, $setitem2->get_children());
+        $this->assertSame($courseitem2, $setitem2->get_children()[0]);
+        $this->assertSame($courseitem4, $setitem2->get_children()[1]);
+        $this->assertSame($courseitem5, $setitem2->get_children()[2]);
+        $this->assertSame($courseitem3, $setitem2->get_children()[3]);
 
-        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem1->get_id(), 1));
+        $this->assertTrue($top->move_item($courseitem3->get_id(), $setitem2->get_id(), 1));
         $this->assertSame(false, $top->is_problem_detected());
-        $this->assertCount(4, $setitem1->get_children());
-        $this->assertSame($courseitem2, $setitem1->get_children()[0]);
-        $this->assertSame($courseitem3, $setitem1->get_children()[1]);
-        $this->assertSame($courseitem4, $setitem1->get_children()[2]);
-        $this->assertSame($courseitem5, $setitem1->get_children()[3]);
+        $this->assertCount(4, $setitem2->get_children());
+        $this->assertSame($courseitem2, $setitem2->get_children()[0]);
+        $this->assertSame($courseitem3, $setitem2->get_children()[1]);
+        $this->assertSame($courseitem4, $setitem2->get_children()[2]);
+        $this->assertSame($courseitem5, $setitem2->get_children()[3]);
 
+        $this->assertCount(5, $top->get_children());
+        $this->assertTrue($top->move_item($courseitem1->get_id(), $setitem2->get_id(), 1));
+        $this->assertSame(false, $top->is_problem_detected());
         $this->assertCount(4, $top->get_children());
-        $this->assertTrue($top->move_item($courseitem1->get_id(), $setitem1->get_id(), 1));
-        $this->assertSame(false, $top->is_problem_detected());
-        $this->assertCount(3, $top->get_children());
-        $this->assertCount(5, $setitem1->get_children());
-        $this->assertSame($courseitem2, $setitem1->get_children()[0]);
-        $this->assertSame($courseitem1, $setitem1->get_children()[1]);
-        $this->assertSame($courseitem3, $setitem1->get_children()[2]);
-        $this->assertSame($courseitem4, $setitem1->get_children()[3]);
-        $this->assertSame($courseitem5, $setitem1->get_children()[4]);
+        $this->assertCount(5, $setitem2->get_children());
+        $this->assertSame($courseitem2, $setitem2->get_children()[0]);
+        $this->assertSame($courseitem1, $setitem2->get_children()[1]);
+        $this->assertSame($courseitem3, $setitem2->get_children()[2]);
+        $this->assertSame($courseitem4, $setitem2->get_children()[3]);
+        $this->assertSame($courseitem5, $setitem2->get_children()[4]);
 
         $this->assertTrue($top->move_item($courseitem1->get_id(), $setitem3->get_id(), 0));
         $this->assertSame(false, $top->is_problem_detected());
         $this->assertCount(1, $setitem3->get_children());
         $this->assertSame($courseitem1, $setitem3->get_children()[0]);
-        $this->assertCount(4, $setitem1->get_children());
-        $this->assertSame($courseitem2, $setitem1->get_children()[0]);
-        $this->assertSame($courseitem3, $setitem1->get_children()[1]);
-        $this->assertSame($courseitem4, $setitem1->get_children()[2]);
-        $this->assertSame($courseitem5, $setitem1->get_children()[3]);
+        $this->assertCount(4, $setitem2->get_children());
+        $this->assertSame($courseitem2, $setitem2->get_children()[0]);
+        $this->assertSame($courseitem3, $setitem2->get_children()[1]);
+        $this->assertSame($courseitem4, $setitem2->get_children()[2]);
+        $this->assertSame($courseitem5, $setitem2->get_children()[3]);
 
-        $this->assertTrue($top->move_item($setitem3->get_id(), $setitem1->get_id(), 2));
+        $this->assertTrue($top->move_item($setitem3->get_id(), $setitem2->get_id(), 2));
         $this->assertSame(false, $top->is_problem_detected());
         $this->assertCount(1, $setitem3->get_children());
         $this->assertSame($courseitem1, $setitem3->get_children()[0]);
-        $this->assertCount(5, $setitem1->get_children());
-        $this->assertSame($courseitem2, $setitem1->get_children()[0]);
-        $this->assertSame($courseitem3, $setitem1->get_children()[1]);
-        $this->assertSame($setitem3, $setitem1->get_children()[2]);
-        $this->assertSame($courseitem4, $setitem1->get_children()[3]);
-        $this->assertSame($courseitem5, $setitem1->get_children()[4]);
+        $this->assertCount(5, $setitem2->get_children());
+        $this->assertSame($courseitem2, $setitem2->get_children()[0]);
+        $this->assertSame($courseitem3, $setitem2->get_children()[1]);
+        $this->assertSame($setitem3, $setitem2->get_children()[2]);
+        $this->assertSame($courseitem4, $setitem2->get_children()[3]);
+        $this->assertSame($courseitem5, $setitem2->get_children()[4]);
+
+        $this->assertTrue($top->move_item($setitem3->get_id(), $setitem5->get_id(), 0));
+        $this->assertSame(false, $top->is_problem_detected());
+        $this->assertCount(1, $setitem3->get_children());
+        $this->assertSame($courseitem1, $setitem3->get_children()[0]);
+        $this->assertCount(1, $setitem5->get_children());
+        $this->assertSame(null, $setitem5->get_minprerequisites());
+        $this->assertSame(7, $setitem5->get_points());
+        $this->assertSame(2, $setitem5->get_minpoints());
 
         // Test all invalid operations.
         $this->assertDebuggingNotCalled();
 
-        $this->assertFalse($top->move_item($top->get_id(), $setitem1->get_id(), 0));
+        $this->assertFalse($top->move_item($top->get_id(), $setitem2->get_id(), 0));
         $this->assertDebuggingCalled('Top item cannot be moved');
 
-        $this->assertFalse($top->move_item($setitem1->get_id(), $setitem1->get_id(), 0));
+        $this->assertFalse($top->move_item($setitem2->get_id(), $setitem2->get_id(), 0));
         $this->assertDebuggingCalled('Item cannot be moved to self');
 
-        $this->assertFalse($top->move_item(-1, $setitem1->get_id(), 0));
+        $this->assertFalse($top->move_item(-1, $setitem2->get_id(), 0));
         $this->assertDebuggingCalled('Cannot find new item');
 
-        $this->assertFalse($top->move_item($setitem1->get_id(), -1, 0));
+        $this->assertFalse($top->move_item($setitem2->get_id(), -1, 0));
         $this->assertDebuggingCalled('Cannot find new parent of item');
 
-        $this->assertFalse($top->move_item($setitem1->get_id(), $setitem3->get_id(), 0));
+        $this->assertFalse($top->move_item($setitem5->get_id(), $setitem3->get_id(), 0));
         $this->assertDebuggingCalled('Cannot move item to own child');
 
         $top2 = top::load($program2->id);
-        $this->assertFalse($top->move_item($setitem1->get_id(), $top2->get_id(), 0));
+        $this->assertFalse($top->move_item($setitem2->get_id(), $top2->get_id(), 0));
         $this->assertDebuggingCalled('Cannot find new parent of item');
     }
 
@@ -410,15 +521,18 @@ final class content_test extends \advanced_testcase {
         $top->append_course($top, $course1->id);
         /** @var course $courseitem1 */
         $courseitem1 = $top->get_children()[0];
-        $top->append_set($top, 'Nice set', set::SEQUENCE_TYPE_ALLINORDER);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
         /** @var set $setitem1 */
         $setitem1 = $top->get_children()[1];
-        $top->append_set($top, 'Other set', set::SEQUENCE_TYPE_ATLEAST, 2);
-        /** @var set $setitem2 */
-        $setitem2 = $top->get_children()[2];
-        $top->append_set($top, 'Third set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $top->append_set($top, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
+        /** @var set $setitem4 */
+        $setitem4 = $top->get_children()[2];
+        $top->append_set($top, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         /** @var set $setitem3 */
         $setitem3 = $top->get_children()[3];
+        $top->append_set($top, ['fullname' => 'Extra set', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 3]);
+        /** @var set $setitem5 */
+        $setitem5 = $top->get_children()[4];
         $top->append_course($setitem1, $course2->id);
         /** @var course $courseitem2 */
         $courseitem2 = $setitem1->get_children()[0];
@@ -428,18 +542,20 @@ final class content_test extends \advanced_testcase {
         $top->append_course($setitem1, $course4->id);
         /** @var course $courseitem4 */
         $courseitem4 = $setitem1->get_children()[2];
-        $top->append_course($setitem2, $course5->id);
+        $top->append_course($setitem4, $course5->id);
         /** @var course $courseitem5 */
-        $courseitem5 = $setitem2->get_children()[0];
+        $courseitem5 = $setitem4->get_children()[0];
         $this->assertSame(false, $top->is_problem_detected());
 
-        $this->assertFalse($setitem2->is_deletable());
+        $this->assertFalse($setitem4->is_deletable());
         $this->assertTrue($setitem3->is_deletable());
         $this->assertTrue($courseitem5->is_deletable());
+        $this->assertTrue($setitem5->is_deletable());
 
-        $this->assertFalse($top->delete_item($setitem2->get_id()));
+        $this->assertFalse($top->delete_item($setitem4->get_id()));
         $this->assertTrue($top->delete_item($courseitem5->get_id()));
-        $this->assertTrue($top->delete_item($setitem2->get_id()));
+        $this->assertTrue($top->delete_item($setitem4->get_id()));
+        $this->assertTrue($top->delete_item($setitem5->get_id()));
     }
 
     /**
@@ -452,6 +568,7 @@ final class content_test extends \advanced_testcase {
         self::assertSame(get_class($source), get_class($target));
         self::assertSame($source->get_fullname(), $target->get_fullname());
         self::assertSame(count($source->get_children()), count($target->get_children()));
+        self::assertSame($source->get_points(), $target->get_points());
 
         if ($source instanceof course) {
             self::assertSame($source->get_courseid(), $target->get_courseid());
@@ -481,22 +598,22 @@ final class content_test extends \advanced_testcase {
         $course5 = $this->getDataGenerator()->create_course();
 
         $top1 = top::load($program1->id);
-        $top1->update_set($top1, $top1->get_fullname(), $top1::SEQUENCE_TYPE_ALLINORDER, 1);
+        $top1->update_set($top1, ['fullname' => $top1->get_fullname(), 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
         $item1x0 = $top1->append_course($top1, $course1->id);
-        $item1x1 = $top1->append_set($top1, 'Nice set', set::SEQUENCE_TYPE_ATLEAST, 1);
-        $item1x1x0 = $top1->append_set($item1x1, 'Other set', set::SEQUENCE_TYPE_ALLINORDER);
+        $item1x1 = $top1->append_set($top1, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 1]);
+        $item1x1x0 = $top1->append_set($item1x1, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
         $item1x1x1 = $top1->append_course($item1x1, $course2->id);
-        $item1x1x2 = $top1->append_set($item1x1, 'Third set', set::SEQUENCE_TYPE_ALLINANYORDER);
-        $item1x1x2x0 = $top1->append_course($item1x1x2, $course3->id);
+        $item1x1x2 = $top1->append_set($item1x1, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'points' => 2, 'minpoints' => 4]);
+        $item1x1x2x0 = $top1->append_course($item1x1x2, $course3->id, ['points' => 3]);
         $item1x1x2x1 = $top1->append_course($item1x1x2, $course4->id);
         $item1x1x2x3 = $top1->append_course($item1x1x2, $course5->id);
 
         $top2 = top::load($program2->id);
-        $top2->update_set($top2, $top2->get_fullname(), $top2::SEQUENCE_TYPE_ALLINANYORDER, 1);
+        $top2->update_set($top2, ['fullname' => $top2->get_fullname(), 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
 
         $top3 = top::load($program3->id);
-        $top3->update_set($top3, $top3->get_fullname(), $top3::SEQUENCE_TYPE_ALLINORDER, 1);
-        $item3x0 = $top3->append_set($top3, 'Repeated set', set::SEQUENCE_TYPE_ATLEAST, 1);
+        $top3->update_set($top3, ['fullname' => $top3->get_fullname(), 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $item3x0 = $top3->append_set($top3, ['fullname' => 'Repeated set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 1]);
         $item3x0x0 = $top3->append_course($item3x0, $course1->id);
         $item3x0x1 = $top3->append_course($item3x0, $course2->id);
         $item3x0x2 = $top3->append_course($item3x0, $course3->id);
@@ -505,6 +622,7 @@ final class content_test extends \advanced_testcase {
         $top2 = top::load($program2->id);
         $this->assertSame($top1->get_sequencetype_info(), $top2->get_sequencetype_info());
         $this->assertSame($program2->fullname, $top2->get_fullname());
+        $this->assertSame($top1->get_points(), $top2->get_points());
         $this->assertCount(2, $top2->get_children());
         $this->assertItemCloned($top1->get_children()[0], $top2->get_children()[0]);
         $this->assertItemCloned($top1->get_children()[1], $top2->get_children()[1]);
@@ -538,30 +656,30 @@ final class content_test extends \advanced_testcase {
         $top->append_course($top, $course1->id);
         /** @var course $courseitem1 */
         $courseitem1 = $top->get_children()[0];
-        $top->append_set($top, 'Nice set', set::SEQUENCE_TYPE_ALLINORDER);
-        /** @var set $setitem1 */
-        $setitem1 = $top->get_children()[1];
-        $top->append_set($setitem1, 'Other set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
         /** @var set $setitem2 */
-        $setitem2 = $setitem1->get_children()[0];
-        $top->append_set($setitem2, 'Third set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $setitem2 = $top->get_children()[1];
+        $top->append_set($setitem2, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
+        /** @var set $setitem4 */
+        $setitem4 = $setitem2->get_children()[0];
+        $top->append_set($setitem4, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         /** @var set $setitem3 */
-        $setitem3 = $setitem2->get_children()[0];
-        $top->append_course($setitem1, $course2->id);
+        $setitem3 = $setitem4->get_children()[0];
+        $top->append_course($setitem2, $course2->id);
         /** @var course $courseitem2 */
-        $courseitem2 = $setitem1->get_children()[1];
-        $top->append_course($setitem1, $course3->id);
+        $courseitem2 = $setitem2->get_children()[1];
+        $top->append_course($setitem2, $course3->id);
         /** @var course $courseitem3 */
-        $courseitem3 = $setitem1->get_children()[2];
-        $top->append_course($setitem2, $course4->id);
+        $courseitem3 = $setitem2->get_children()[2];
+        $top->append_course($setitem4, $course4->id);
         /** @var course $courseitem4 */
-        $courseitem4 = $setitem2->get_children()[1];
+        $courseitem4 = $setitem4->get_children()[1];
         $top->append_course($setitem3, $course5->id);
         /** @var course $courseitem5 */
         $courseitem5 = $setitem3->get_children()[0];
         $this->assertSame(false, $top->is_problem_detected());
 
-        $DB->delete_records('enrol_programs_items', ['id' => $setitem2->get_id()]);
+        $DB->delete_records('enrol_programs_items', ['id' => $setitem4->get_id()]);
         $this->assertDebuggingNotCalled();
         $top = top::load($program1->id);
         $this->assertTrue($top->is_problem_detected());
@@ -584,8 +702,8 @@ final class content_test extends \advanced_testcase {
         $this->assertDebuggingNotCalled();
         $this->assertCount(2, $top->get_children());
         $courseitem1 = $top->get_children()[0];
-        $setitem1 = $top->get_children()[1];
-        $this->assertCount(2, $setitem1->get_children());
+        $setitem2 = $top->get_children()[1];
+        $this->assertCount(2, $setitem2->get_children());
     }
 
     public function test_autorepair() {
@@ -607,24 +725,24 @@ final class content_test extends \advanced_testcase {
         $top->append_course($top, $course1->id);
         /** @var course $courseitem1 */
         $courseitem1 = $top->get_children()[0];
-        $top->append_set($top, 'Nice set', set::SEQUENCE_TYPE_ALLINORDER);
-        /** @var set $setitem1 */
-        $setitem1 = $top->get_children()[1];
-        $top->append_set($setitem1, 'Other set', set::SEQUENCE_TYPE_ATLEAST, 2);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
         /** @var set $setitem2 */
-        $setitem2 = $setitem1->get_children()[0];
-        $top->append_set($setitem2, 'Third set', set::SEQUENCE_TYPE_ALLINANYORDER);
+        $setitem2 = $top->get_children()[1];
+        $top->append_set($setitem2, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 2]);
+        /** @var set $setitem4 */
+        $setitem4 = $setitem2->get_children()[0];
+        $top->append_set($setitem4, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER]);
         /** @var set $setitem3 */
-        $setitem3 = $setitem2->get_children()[0];
-        $top->append_course($setitem1, $course2->id);
+        $setitem3 = $setitem4->get_children()[0];
+        $top->append_course($setitem2, $course2->id);
         /** @var course $courseitem2 */
-        $courseitem2 = $setitem1->get_children()[1];
-        $top->append_course($setitem1, $course3->id);
+        $courseitem2 = $setitem2->get_children()[1];
+        $top->append_course($setitem2, $course3->id);
         /** @var course $courseitem3 */
-        $courseitem3 = $setitem1->get_children()[2];
-        $top->append_course($setitem2, $course4->id);
+        $courseitem3 = $setitem2->get_children()[2];
+        $top->append_course($setitem4, $course4->id);
         /** @var course $courseitem4 */
-        $courseitem4 = $setitem2->get_children()[1];
+        $courseitem4 = $setitem4->get_children()[1];
         $top->append_course($setitem3, $course5->id);
         /** @var course $courseitem5 */
         $courseitem5 = $setitem3->get_children()[0];

@@ -60,15 +60,19 @@ Feature: Program content management tests
     When I click on "Append item" "link" in the "Program 000" "table_row"
     And I set the following fields to these values:
       | Courses | Course 1 |
+      | Points  | 123      |
     Then I press dialog form button "Append item"
+    And I should see "123" in the "Course 1" "table_row"
 
     When I click on "Append item" "link" in the "Program 000" "table_row"
     And I set the following fields to these values:
       | Add new set     | 1            |
       | Full name       | First set    |
       | Completion type | All in order |
+      | Points          | 321          |
     And I press dialog form button "Append item"
     Then I should see "All in order" in the "First set" "table_row"
+    And I should see "321" in the "First set" "table_row"
 
     When I click on "Append item" "link" in the "First set" "table_row"
     And I set the following fields to these values:
@@ -89,28 +93,75 @@ Feature: Program content management tests
     And I press dialog form button "Append item"
     Then I should see "All in any order" in the "Third set" "table_row"
 
-    # Update sets
+    When I click on "Append item" "link" in the "Program 000" "table_row"
+    And I set the following fields to these values:
+      | Add new set      | 1                |
+      | Full name        | Fourth set       |
+      | Completion type  | Minimum X points |
+      | Minimum X points | 7                |
+      | Points           | 456              |
+    And I press dialog form button "Append item"
+    Then I should see "Minimum 7 points" in the "Fourth set" "table_row"
+    And I should see "456" in the "Fourth set" "table_row"
 
+    # Update sets
     When I click on "Update set" "link" in the "Program 000" "table_row"
+    And the following fields match these values:
+      | Completion type | All in any order |
     And I set the following fields to these values:
       | Completion type | All in order |
     And I press dialog form button "Update"
     Then I should see "All in order" in the "Program 000" "table_row"
 
     When I click on "Update set" "link" in the "Third set" "table_row"
+    And the following fields match these values:
+      | Completion type | All in any order |
+      | Full name       | Third set        |
+      | Completion type | All in any order |
+      | Points          | 1                |
     And I set the following fields to these values:
       | Full name       | Treti set        |
-      | Completion type | All in any order |
+      | Completion type | All in order     |
+      | Points          | 77               |
     And I press dialog form button "Update set"
-    Then I should see "All in any order" in the "Treti set" "table_row"
+    Then I should see "All in order" in the "Treti set" "table_row"
+    And I should see "77" in the "Treti set" "table_row"
 
     When I click on "Update set" "link" in the "Treti set" "table_row"
+    And the following fields match these values:
+      | Full name       | Treti set        |
+      | Completion type | All in order     |
+      | Points          | 77               |
     And I set the following fields to these values:
       | Full name       | Third set        |
       | Completion type | At least X       |
       | At least X      | 3                |
+      | Points          | 0                |
     And I press dialog form button "Update set"
     Then I should see "At least 3" in the "Third set" "table_row"
+    And I should see "0" in the "Third set" "table_row"
+
+    When I click on "Update set" "link" in the "Third set" "table_row"
+    And the following fields match these values:
+      | Full name       | Third set        |
+      | Completion type | At least X       |
+      | At least X      | 3                |
+      | Points          | 0                |
+    And I set the following fields to these values:
+      | Completion type | Minimum X points |
+      | Minimum X points| 10               |
+      | Points          | 11               |
+    And I press dialog form button "Update set"
+    Then I should see "Minimum 10 points" in the "Third set" "table_row"
+    And I should see "11" in the "Third set" "table_row"
+
+    When I click on "Update course" "link" in the "Course 1" "table_row"
+    And the following fields match these values:
+      | Points          | 123              |
+    And I set the following fields to these values:
+      | Points          | 789              |
+    And I press dialog form button "Update course"
+    Then I should see "789" in the "Course 1" "table_row"
 
     # Move items
 
@@ -119,7 +170,7 @@ Feature: Program content management tests
     Then I should see "Actions"
 
     When I click on "Move item" "link" in the "Course 1" "table_row"
-    And I click on "Move \"Course 1\" after \"Third set\"" "link"
+    And I click on "Move \"Course 1\" after \"Fourth set\"" "link"
     Then I should see "Actions"
 
     When I click on "Move item" "link" in the "Course 1" "table_row"
@@ -159,6 +210,10 @@ Feature: Program content management tests
     When I click on "Remove course" "link" in the "Course 5" "table_row"
     And I press dialog form button "Remove course"
     Then I should not see "Course 5"
+
+    When I click on "Delete set" "link" in the "Fourth set" "table_row"
+    And I press dialog form button "Delete set"
+    Then I should not see "Fourth set"
 
     When I click on "Delete set" "link" in the "Third set" "table_row"
     And I press dialog form button "Cancel"

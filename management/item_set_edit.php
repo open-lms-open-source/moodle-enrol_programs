@@ -31,7 +31,6 @@
 
 use enrol_programs\local\management;
 use enrol_programs\local\program;
-use enrol_programs\local\content\course;
 use enrol_programs\local\content\set;
 use enrol_programs\local\content\top;
 
@@ -51,7 +50,7 @@ $program = $DB->get_record('enrol_programs_programs', ['id' => $item->programid]
 $context = context::instance_by_id($program->contextid);
 require_capability('enrol/programs:edit', $context);
 
-$currenturl = new moodle_url('/enrol/programs/management/item_edit.php', ['id' => $item->id]);
+$currenturl = new moodle_url('/enrol/programs/management/item_set_edit.php', ['id' => $item->id]);
 management::setup_program_page($currenturl, $context, $program);
 
 $returnurl = new moodle_url('/enrol/programs/management/program_content.php', ['id' => $program->id]);
@@ -73,7 +72,7 @@ if ($form->is_cancelled()) {
 }
 
 if ($data = $form->get_data()) {
-    $top->update_set($set, $data->fullname, $data->sequencetype, $data->minprerequisites);
+    $top->update_set($set, (array)$data);
     $form->redirect_submitted($returnurl);
 }
 

@@ -99,9 +99,12 @@ final class course extends item {
             }
         }
         $item->fullname = $record->fullname;
-        $sequence = (object)json_decode($record->sequencejson);
+        $item->points = $record->points;
 
-        if ($record->minprerequisites != 1) {
+        if ($record->minprerequisites !== null) {
+            $item->problemdetected = true;
+        }
+        if ($record->minpoints !== null) {
             $item->problemdetected = true;
         }
 
@@ -142,7 +145,9 @@ final class course extends item {
             'previtemid' => (isset($this->previous) ? (string)$this->previous->id : null),
             'fullname' => $fullname,
             'sequencejson' => util::json_encode([]),
-            'minprerequisites' => '1',
+            'minprerequisites' => null,
+            'points' => (string)$this->points,
+            'minpoints' => null,
         ];
     }
 }

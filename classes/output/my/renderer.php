@@ -149,14 +149,19 @@ EOT;
                 $itemname = $padding . $this->output->pix_icon('itemset', get_string('set', 'enrol_programs'), 'enrol_programs') . $fullname;
             }
 
-            $row = [$itemname, $completiontype];
+            if ($item instanceof top) {
+                $points = '';
+            } else {
+                $points = $item->get_points();
+            }
 
             $completioninfo = '';
             $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $item->get_id(), 'allocationid' => $allocation->id]);
             if ($completion) {
                 $completioninfo = userdate($completion->timecompleted, get_string('strftimedatetimeshort'));
             }
-            $row[] = $completioninfo;
+
+            $row = [$itemname, $points, $completiontype, $completioninfo];
 
             $rows[] = $row;
 
@@ -167,8 +172,12 @@ EOT;
         $renderercolumns($top, 0);
 
         $table = new \html_table();
-        $table->head = [get_string('item', 'enrol_programs'), get_string('sequencetype', 'enrol_programs')];
-        $table->head[] = get_string('completiondate', 'enrol_programs');
+        $table->head = [
+            get_string('item', 'enrol_programs'),
+            get_string('itempoints', 'enrol_programs'),
+            get_string('sequencetype', 'enrol_programs'),
+            get_string('completiondate', 'enrol_programs'),
+        ];
         $table->id = 'program_content';
         $table->attributes['class'] = 'admintable generaltable';
         $table->data = $rows;

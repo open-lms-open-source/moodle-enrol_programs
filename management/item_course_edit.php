@@ -31,7 +31,7 @@
 
 use enrol_programs\local\management;
 use enrol_programs\local\program;
-use enrol_programs\local\content\set;
+use enrol_programs\local\content\course;
 
 if (!empty($_SERVER['HTTP_X_LEGACY_DIALOG_FORM_REQUEST'])) {
     define('AJAX_SCRIPT', true);
@@ -40,16 +40,16 @@ if (!empty($_SERVER['HTTP_X_LEGACY_DIALOG_FORM_REQUEST'])) {
 require('../../../config.php');
 require_once($CFG->dirroot . '/lib/formslib.php');
 
-$parentitemid = required_param('parentitemid', PARAM_INT);
+$id = required_param('id', PARAM_INT);
 
 require_login();
 
-$parentitem = $DB->get_record('enrol_programs_items', ['id' => $parentitemid], '*', MUST_EXIST);
-$program = $DB->get_record('enrol_programs_programs', ['id' => $parentitem->programid], '*', MUST_EXIST);
+$item = $DB->get_record('enrol_programs_items', ['id' => $id], '*', MUST_EXIST);
+$program = $DB->get_record('enrol_programs_programs', ['id' => $item->programid], '*', MUST_EXIST);
 $context = context::instance_by_id($program->contextid);
 require_capability('enrol/programs:edit', $context);
 
-$currenturl = new moodle_url('/enrol/programs/management/item_append.php', ['parentitemid' => $parentitem->id]);
+$currenturl = new moodle_url('/enrol/programs/management/item_course_edit.php', ['id' => $item->id]);
 management::setup_program_page($currenturl, $context, $program);
 
 $returnurl = new moodle_url('/enrol/programs/management/program_content.php', ['id' => $program->id]);
@@ -59,27 +59,19 @@ if ($program->archived) {
 }
 
 $top = program::load_content($program->id);
-$set = $top->find_item($parentitem->id);
-if (!$set || !($set instanceof \enrol_programs\local\content\set)) {
+$course = $top->find_item($item->id);
+if (!$course || !($course instanceof course)) {
     redirect($returnurl);
 }
 
-$form = new \enrol_programs\local\form\item_append(null, ['parentset' => $set, 'context' => $context]);
+$form = new \enrol_programs\local\form\item_course_edit(null, ['course' => $course, 'context' => $context]);
 
 if ($form->is_cancelled()) {
     redirect($returnurl);
 }
 
 if ($data = $form->get_data()) {
-    if ($data->addset) {
-        $set = $top->append_set($set, (array)$data);
-    }
-    foreach ($data->courses as $cid) {
-        $coursecontext = context_course::instance($cid);
-        require_capability('enrol/programs:addcourse', $coursecontext);
-        $top->append_course($set, $cid, ['points' => $data->points]);
-    }
-
+    $top->update_course($course, (array)$data);
     $form->redirect_submitted($returnurl);
 }
 
@@ -90,7 +82,7 @@ echo $OUTPUT->header();
 
 echo $managementoutput->render_management_program_tabs($program, 'content');
 
-echo $OUTPUT->heading(get_string('appenditem', 'enrol_programs'), 3);
+echo $OUTPUT->heading(get_string('updatecourse', 'enrol_programs'), 3);
 
 echo $form->render();
 

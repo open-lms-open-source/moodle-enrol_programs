@@ -211,7 +211,7 @@ final class event_observer_test extends \advanced_testcase {
         $program1 = $generator->create_program(['sources' => ['manual' => []]]);
         $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
         $top1 = program::load_content($program1->id);
-        $top1->update_set($top1, '', \enrol_programs\local\content\set::SEQUENCE_TYPE_ALLINORDER, 2);
+        $top1->update_set($top1, ['fullname' => '', 'sequencetype' => \enrol_programs\local\content\set::SEQUENCE_TYPE_ALLINORDER]);
         $item1 = $top1->append_course($top1, $course1->id);
         $item2 = $top1->append_course($top1, $course2->id);
         \enrol_programs\local\source\manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);

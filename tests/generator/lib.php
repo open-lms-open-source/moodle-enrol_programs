@@ -174,7 +174,7 @@ class enrol_programs_generator extends component_generator_base {
             } else {
                 $minprerequisites = 1;
             }
-            return $top->append_set($parent, $record->fullname, $sequencetype, $minprerequisites);
+            return $top->append_set($parent, ['fullname' => $record->fullname, 'sequencetype' => $sequencetype, 'minprerequisites' => $minprerequisites]);
         }
     }
 

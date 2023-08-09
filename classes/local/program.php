@@ -149,7 +149,6 @@ final class program {
         $sequence = [
             'children' => [],
             'type' => content\set::SEQUENCE_TYPE_ALLINANYORDER,
-            'minprerequisites' => 1, // No completion possible yet.
         ];
 
         $item = new \stdClass();
@@ -158,7 +157,9 @@ final class program {
         $item->courseid = null;
         $item->fullname = $data->fullname;
         $item->sequencejson = util::json_encode($sequence);
-        $item->minprerequisites = $sequence['minprerequisites'];
+        $item->minprerequisites = 1; // Prevent completion.
+        $item->points = 1;
+        $item->minpoints = null;
         $DB->insert_record('enrol_programs_items', $item);
 
         $program = self::make_snapshot($data->id, 'add');

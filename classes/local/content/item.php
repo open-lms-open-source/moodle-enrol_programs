@@ -31,6 +31,8 @@ abstract class item {
     protected $programid;
     /** @var string */
     protected $fullname;
+    /** @var int */
+    protected $points;
     /** @var bool */
     protected $problemdetected = false;
 
@@ -84,6 +86,15 @@ abstract class item {
      */
     public function get_id(): ?int {
         return $this->id;
+    }
+
+    /**
+     * Returns point based value.
+     *
+     * @return int
+     */
+    public function get_points(): int {
+        return $this->points;
     }
 
     /**
