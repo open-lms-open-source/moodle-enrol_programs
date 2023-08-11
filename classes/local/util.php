@@ -127,6 +127,46 @@ final class util {
     }
 
     /**
+     * Format duration of interval specified using seconds value.
+     *
+     * @param int|null $duration seconds
+     * @return string
+     */
+    public static function format_duration(?int $duration): string {
+        if ($duration < 0) {
+            return get_string('error');
+        }
+        if (!$duration) {
+            return get_string('notset', 'tool_certify');
+        }
+        $days = intval($duration / DAYSECS);
+        $duration = $duration - $days * DAYSECS;
+        $hours = intval($duration / HOURSECS);
+        $duration = $duration - $hours * HOURSECS;
+        $minutes = intval($duration / MINSECS);
+        $seconds = $duration - $minutes * MINSECS;
+
+        $interval = 'P';
+        if ($days) {
+            $interval .= $days . 'D';
+        }
+        if ($hours || $minutes || $seconds) {
+            $interval .= 'T';
+            if ($hours) {
+                $interval .= $hours . 'H';
+            }
+            if ($minutes) {
+                $interval .= $minutes . 'M';
+            }
+            if ($seconds) {
+                $interval .= $seconds . 'S';
+            }
+        }
+
+        return self::format_delay($interval);
+    }
+
+    /**
      * Convert SELECT query to format suitable for $DB->count_records_sql().
      *
      * @param string $sql

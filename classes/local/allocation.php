@@ -534,7 +534,7 @@ final class allocation {
         $params['now3'] = $now;
         $sql = "INSERT INTO {enrol_programs_completions} (itemid, allocationid, timecompleted)
 
-                SELECT pi.id, pa.id, :now3
+                SELECT pi.id, pa.id, (:now3 + pi.completiondelay)
                   FROM {enrol_programs_allocations} pa
                   JOIN {enrol_programs_programs} p ON p.id = pa.programid
                   JOIN {enrol_programs_items} pi ON pi.programid = pa.programid
@@ -573,19 +573,20 @@ final class allocation {
             $now = time();
             $params['now1'] = $now;
             $params['now2'] = $now;
-            $sql = "SELECT psi.id AS itemid, pa.id AS allocationid, psi.minprerequisites, COUNT(pric.id) AS precount
+            $params['now3'] = $now;
+            $sql = "SELECT psi.id AS itemid, pa.id AS allocationid, psi.minprerequisites, psi.completiondelay, COUNT(pric.id) AS precount
                       FROM {enrol_programs_items} psi
                       JOIN {enrol_programs_programs} p ON p.id = psi.programid
                       JOIN {enrol_programs_allocations} pa ON pa.programid = p.id
                  LEFT JOIN {enrol_programs_completions} psic ON psic.itemid = psi.id AND psic.allocationid = pa.id
                       JOIN {enrol_programs_prerequisites} pr ON pr.itemid = psi.id
-                      JOIN {enrol_programs_completions} pric ON pric.itemid = pr.prerequisiteitemid AND pric.allocationid = pa.id
+                      JOIN {enrol_programs_completions} pric ON pric.itemid = pr.prerequisiteitemid AND pric.allocationid = pa.id AND pric.timecompleted <= :now3
                      WHERE psi.minprerequisites IS NOT NULL AND psic.id IS NULL
                            AND p.archived = 0 AND pa.archived = 0
                            AND (pa.timestart <= :now1)
                            AND (pa.timeend IS NULL OR pa.timeend > :now2)
                            $programselect $userselect
-                  GROUP BY psi.id, pa.id, psi.minprerequisites
+                  GROUP BY psi.id, pa.id, psi.minprerequisites, psi.completiondelay
                     HAVING psi.minprerequisites <= COUNT(pric.id)
                   ORDER BY psi.id ASC, pa.id ASC";
             $rs = $DB->get_recordset_sql($sql, $params);
@@ -595,7 +596,7 @@ final class allocation {
                 $record = new stdClass();
                 $record->itemid = $completion->itemid;
                 $record->allocationid = $completion->allocationid;
-                $record->timecompleted = time(); // Use real time, we are not in a transaction here.
+                $record->timecompleted = time() + $completion->completiondelay; // Use real time, we are not in a transaction here.
                 $DB->insert_record('enrol_programs_completions', $record);
                 $count++;
             }
@@ -605,20 +606,21 @@ final class allocation {
                 $now = time();
                 $params['now1'] = $now;
                 $params['now2'] = $now;
-                $sql = "SELECT psi.id AS itemid, pa.id AS allocationid, psi.minpoints, SUM(pri.points) AS pointcount
+                $params['now3'] = $now;
+                $sql = "SELECT psi.id AS itemid, pa.id AS allocationid, psi.minpoints, psi.completiondelay, SUM(pri.points) AS pointcount
                           FROM {enrol_programs_items} psi
                           JOIN {enrol_programs_programs} p ON p.id = psi.programid
                           JOIN {enrol_programs_allocations} pa ON pa.programid = p.id
                      LEFT JOIN {enrol_programs_completions} psic ON psic.itemid = psi.id AND psic.allocationid = pa.id
                           JOIN {enrol_programs_prerequisites} pr ON pr.itemid = psi.id
                           JOIN {enrol_programs_items} pri ON pri.id = pr.prerequisiteitemid    
-                          JOIN {enrol_programs_completions} pric ON pric.itemid = pr.prerequisiteitemid AND pric.allocationid = pa.id
+                          JOIN {enrol_programs_completions} pric ON pric.itemid = pr.prerequisiteitemid AND pric.allocationid = pa.id AND pric.timecompleted <= :now3
                          WHERE psi.minpoints IS NOT NULL AND psic.id IS NULL
                                AND p.archived = 0 AND pa.archived = 0
                                AND (pa.timestart <= :now1)
                                AND (pa.timeend IS NULL OR pa.timeend > :now2)
                                $programselect $userselect
-                      GROUP BY psi.id, pa.id, psi.minpoints
+                      GROUP BY psi.id, pa.id, psi.minpoints, psi.completiondelay
                         HAVING psi.minpoints <= SUM(pri.points)
                       ORDER BY psi.id ASC, pa.id ASC";
                 $rs = $DB->get_recordset_sql($sql, $params);
@@ -628,7 +630,7 @@ final class allocation {
                     $record = new stdClass();
                     $record->itemid = $completion->itemid;
                     $record->allocationid = $completion->allocationid;
-                    $record->timecompleted = time(); // Use real time, we are not in a transaction here.
+                    $record->timecompleted = time() + $completion->completiondelay; // Use real time, we are not in a transaction here.
                     $DB->insert_record('enrol_programs_completions', $record);
                     $count++;
                 }
@@ -656,6 +658,7 @@ final class allocation {
         $now = time();
         $params['now1'] = $now;
         $params['now2'] = $now;
+        $params['now3'] = $now;
         $sql = "SELECT e.*, pa.userid
                   FROM {user_enrolments} ue
                   JOIN {enrol} e ON e.enrol = 'programs' AND e.id = ue.enrolid
@@ -665,7 +668,7 @@ final class allocation {
              LEFT JOIN {enrol_programs_items} previ ON previ.programid = p.id AND previ.id = pi.previtemid
              LEFT JOIN {enrol_programs_completions} previc ON previc.itemid = previ.id AND previc.allocationid = pa.id
                  WHERE ue.status = :suspended
-                       AND (pi.previtemid IS NULL OR previc.timecompleted IS NOT NULL)
+                       AND (pi.previtemid IS NULL OR previc.timecompleted <= :now3)
                        AND p.archived = 0 AND pa.archived = 0
                        AND (pa.timestart <= :now1)
                        AND (pa.timeend IS NULL OR pa.timeend > :now2)
@@ -743,6 +746,7 @@ final class allocation {
         // Finally, if top program item is completed, copy the completion time to program allocation,
         // we do this in a loop one by one in order to trigger the program_completed event.
         $params = [];
+        $params['now'] = time();
         $programselect = '';
         if ($programid) {
             $programselect = "AND pi.programid = :programid";
@@ -757,7 +761,7 @@ final class allocation {
                   FROM {enrol_programs_allocations} pa
                   JOIN {enrol_programs_programs} p ON p.id = pa.programid
                   JOIN {enrol_programs_items} pi ON pi.programid = pa.programid AND pi.topitem = 1
-                  JOIN {enrol_programs_completions} pc ON pc.allocationid = pa.id AND pc.itemid = pi.id
+                  JOIN {enrol_programs_completions} pc ON pc.allocationid = pa.id AND pc.itemid = pi.id AND pc.timecompleted <= :now
                  WHERE pa.timecompleted IS NULL
                        AND p.archived = 0 AND pa.archived = 0
                        $programselect $userselect

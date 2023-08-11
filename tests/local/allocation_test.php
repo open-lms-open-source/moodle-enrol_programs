@@ -1523,6 +1523,223 @@ final class allocation_test extends \advanced_testcase {
         $this->assertTrue(is_enrolled($context6, $user2, '', true));
     }
 
+    /**
+     * Test that sequencing delays work.
+     *
+     * @return void
+     */
+    public function test_enrol_sequencing_delay() {
+        global $DB, $CFG;
+        require_once("$CFG->libdir/completionlib.php");
+        $CFG->enablecompletion = true;
+
+        /** @var \enrol_programs_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $user1 = $this->getDataGenerator()->create_user();
+
+        $course1 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context1 = \context_course::instance($course1->id);
+        $course2 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context2 = \context_course::instance($course2->id);
+        $course3 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context3 = \context_course::instance($course3->id);
+        $course4 = $this->getDataGenerator()->create_course(['enablecompletion' => true]);
+        $context4 = \context_course::instance($course4->id);
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []]]);
+        $source1 = $DB->get_record('enrol_programs_sources', ['programid' => $program1->id, 'type' => 'manual'], '*', MUST_EXIST);
+
+        $top = program::load_content($program1->id);
+        $top->update_set($top, ['fullname' => '', 'sequencetype' => set::SEQUENCE_TYPE_ALLINANYORDER, 'completiondelay' => 500]);
+        $set1 = $top->append_set($top, ['fullname' => 'All required', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 3]);
+        $item1x1 = $top->append_course($set1, $course1->id, ['points' => 2, 'completiondelay' => 100]);
+        $item1x2 = $top->append_course($set1, $course2->id, ['points' => 1]);
+        $set2 = $top->append_set($top, ['fullname' => 'Points', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER, 'completiondelay' => 300]);
+        $item2x1 = $top->append_course($set2, $course3->id, ['completiondelay' => 400]);
+        $item2x2 = $top->append_course($set2, $course4->id);
+
+        manual::allocate_users($program1->id, $source1->id, [$user1->id]);
+
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertFalse(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        $ccompletion = new \completion_completion(['course' => $course1->id, 'userid' => $user1->id]);
+        $ccompletion->mark_complete();
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $c1completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($c1completion - 100);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertFalse(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        $ccompletion = new \completion_completion(['course' => $course2->id, 'userid' => $user1->id]);
+        $ccompletion->mark_complete();
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
+        $c2completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($c2completion);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertFalse(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $item1x1->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]));
+        $s1completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($s1completion);
+        $c1completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($c1completion);
+        $this->assertSame($c2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertFalse(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        $ccompletion = new \completion_completion(['course' => $course3->id, 'userid' => $user1->id]);
+        $ccompletion->mark_complete();
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($s1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]));
+        $c3completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($c3completion - 400);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertFalse(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $item2x1->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($s1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]));
+        $c3completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($c3completion);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        $ccompletion = new \completion_completion(['course' => $course4->id, 'userid' => $user1->id]);
+        $ccompletion->mark_complete();
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $this->assertFalse($DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($s1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $s2completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($s2completion - 300);
+        $this->assertSame($c3completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
+        $c4completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($c4completion);
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $set2->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertNull($allocation1->timecompleted);
+        $tcompletion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($tcompletion - 500);
+        $this->assertSame($s1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $s2completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($s2completion);
+        $this->assertSame($c3completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c4completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+
+        $this->setCurrentTimeStart();
+        allocation::update_item_completion((object)[
+            'allocationid' => $allocation1->id,
+            'itemid' => $top->get_id(),
+            'timecompleted' => time(),
+            'evidencetimecompleted' => null,
+        ]);
+        $allocation1 = $DB->get_record('enrol_programs_allocations', ['programid' => $program1->id, 'userid' => $user1->id], '*', MUST_EXIST);
+        $this->assertTimeCurrent($allocation1->timecompleted);
+        $tcompletion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $top->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($tcompletion);
+        $this->assertSame($s1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
+        $s2completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]);
+        $this->assertTimeCurrent($s2completion);
+        $this->assertSame($c3completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertSame($c4completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
+        $this->assertTrue(is_enrolled($context1, $user1, '', true));
+        $this->assertTrue(is_enrolled($context2, $user1, '', true));
+        $this->assertTrue(is_enrolled($context3, $user1, '', true));
+        $this->assertTrue(is_enrolled($context4, $user1, '', true));
+    }
+
     public function test_enrol_before_start() {
         global $DB, $CFG;
         require_once("$CFG->libdir/completionlib.php");

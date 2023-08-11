@@ -66,6 +66,9 @@ final class item_append extends \local_openlms\dialog_form {
         $mform->hideIf('minpoints', 'sequencetype', 'noteq', set::SEQUENCE_TYPE_MINPOINTS);
         $mform->setDefault('minpoints', 1);
 
+        $mform->addElement('duration', 'completiondelay', get_string('completiondelay', 'enrol_programs'),
+            ['optional' => true, 'defaultunit' => DAYSECS]);
+
         $mform->addElement('hidden', 'parentitemid');
         $mform->setType('parentitemid', PARAM_INT);
         $mform->setDefault('parentitemid', $parentset->get_id());

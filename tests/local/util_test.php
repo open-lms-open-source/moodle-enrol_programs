@@ -61,6 +61,14 @@ final class util_test extends \advanced_testcase {
         $this->assertSame('', util::format_delay(null));
     }
 
+    public function test_format_duration() {
+        $this->assertSame('2 days', util::format_duration(DAYSECS * 2));
+        $this->assertSame('38 days, 4 hours, 35 seconds', util::format_duration(DAYSECS * 3 + HOURSECS * 4 + WEEKSECS * 5 + 35));
+        $this->assertSame('Not set', util::format_duration(null));
+        $this->assertSame('Not set', util::format_duration(0));
+        $this->assertSame('Error', util::format_duration(DAYSECS * -1));
+    }
+
     public function test_convert_to_count_sql() {
         $sql = 'SELECT *
                   FROM {user}

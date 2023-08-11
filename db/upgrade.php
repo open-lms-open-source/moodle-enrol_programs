@@ -266,5 +266,24 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023080900, 'enrol', 'programs');
     }
 
+    if ($oldversion < 2023081100) {
+        // Define field completiondelay to be added to enrol_programs_items.
+        $table = new xmldb_table('enrol_programs_items');
+        $field = new xmldb_field('completiondelay', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'minpoints');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define index timecompleted (not unique) to be added to enrol_programs_completions.
+        $table = new xmldb_table('enrol_programs_completions');
+        $index = new xmldb_index('timecompleted', XMLDB_INDEX_NOTUNIQUE, ['timecompleted']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2023081100, 'enrol', 'programs');
+    }
+
     return true;
 }

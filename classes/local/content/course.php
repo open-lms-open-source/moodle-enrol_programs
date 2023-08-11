@@ -100,6 +100,7 @@ final class course extends item {
         }
         $item->fullname = $record->fullname;
         $item->points = $record->points;
+        $item->completiondelay = $record->completiondelay;
 
         if ($record->minprerequisites !== null) {
             $item->problemdetected = true;
@@ -148,6 +149,7 @@ final class course extends item {
             'minprerequisites' => null,
             'points' => (string)$this->points,
             'minpoints' => null,
+            'completiondelay' => (string)$this->completiondelay,
         ];
     }
 }

@@ -33,6 +33,8 @@ abstract class item {
     protected $fullname;
     /** @var int */
     protected $points;
+    /** @var int */
+    protected $completiondelay;
     /** @var bool */
     protected $problemdetected = false;
 
@@ -95,6 +97,15 @@ abstract class item {
      */
     public function get_points(): int {
         return $this->points;
+    }
+
+    /**
+     * Returns point based value.
+     *
+     * @return int
+     */
+    public function get_completiondelay(): int {
+        return $this->completiondelay;
     }
 
     /**

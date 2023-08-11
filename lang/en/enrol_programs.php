@@ -52,6 +52,7 @@ $string['cohorts_help'] = 'Non-public programs can be made visible to specified 
 Visibility status does not affect already allocated programs.';
 $string['columnusedalready'] = 'Column is used already';
 $string['completiondate'] = 'Completion date';
+$string['completiondelay'] = 'Completion delay';
 $string['creategroups'] = 'Course groups';
 $string['creategroups_help'] = 'If enabled a group will be created in each course added to program and all allocated users will be added as group members.';
 $string['deleteallocation'] = 'Delete program allocation';

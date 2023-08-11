@@ -38,6 +38,10 @@ final class item_course_edit extends \local_openlms\dialog_form {
         $mform->setType('points', PARAM_INT);
         $mform->setDefault('points', $course->get_points());
 
+        $mform->addElement('duration', 'completiondelay', get_string('completiondelay', 'enrol_programs'),
+            ['optional' => true, 'defaultunit' => DAYSECS]);
+        $mform->setDefault('completiondelay', $course->get_completiondelay());
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->setDefault('id', $course->get_id());

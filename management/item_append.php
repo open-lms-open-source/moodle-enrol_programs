@@ -77,7 +77,11 @@ if ($data = $form->get_data()) {
     foreach ($data->courses as $cid) {
         $coursecontext = context_course::instance($cid);
         require_capability('enrol/programs:addcourse', $coursecontext);
-        $top->append_course($set, $cid, ['points' => $data->points]);
+        $idata = ['points' => $data->points];
+        if (!empty($data->completiondelay)) {
+            $idata['completiondelay'] = $data->completiondelay;
+        }
+        $top->append_course($set, $cid, $idata);
     }
 
     $form->redirect_submitted($returnurl);

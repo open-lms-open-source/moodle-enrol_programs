@@ -18,6 +18,7 @@ namespace enrol_programs\output\my;
 
 use enrol_programs\local\allocation;
 use enrol_programs\local\program;
+use enrol_programs\local\util;
 use enrol_programs\local\content\item,
     enrol_programs\local\content\top,
     enrol_programs\local\content\set,
@@ -119,6 +120,12 @@ EOT;
             $completiontype = '';
             if ($item instanceof set) {
                 $completiontype = $item->get_sequencetype_info();
+            }
+            if ($completiondelay = $item->get_completiondelay()) {
+                if ($completiontype !== '') {
+                    $completiontype .= '<br />';
+                }
+                $completiontype .= '<small>' . get_string('completiondelay', 'enrol_programs') . ': ' . util::format_duration($completiondelay) . '</small>';
             }
 
             if ($item instanceof course) {

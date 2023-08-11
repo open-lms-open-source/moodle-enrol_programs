@@ -59,6 +59,7 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(1, $top->get_minprerequisites());
         $this->assertSame(1, $top->get_points());
         $this->assertSame(null, $top->get_minpoints());
+        $this->assertSame(0, $top->get_completiondelay());
     }
 
     public function test_append_items() {
@@ -88,6 +89,7 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(1, $top->get_minprerequisites());
         $this->assertSame(1, $top->get_points());
         $this->assertSame(null, $top->get_minpoints());
+        $this->assertSame(0, $top->get_completiondelay());
         /** @var course $courseitem1 */
         $courseitem1 = $top->get_children()[0];
         $this->assertInstanceOf(course::class, $courseitem1);
@@ -98,11 +100,12 @@ final class content_test extends \advanced_testcase {
         $this->assertSame((int)$course1->id, $courseitem1->get_courseid());
         $this->assertSame(null, $courseitem1->get_previous());
         $this->assertSame(1, $courseitem1->get_points());
+        $this->assertSame(0, $courseitem1->get_completiondelay());
 
         $top = top::load($program1->id);
         $this->assertSame(false, $top->is_problem_detected());
 
-        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER, 'points' => 3]);
+        $top->append_set($top, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER, 'points' => 3, 'completiondelay' => DAYSECS * 3]);
         $this->assertSame(false, $top->is_problem_detected());
         $this->assertCount(2, $top->get_children());
         $this->assertSame([], $top->get_orphaned_sets());
@@ -121,19 +124,22 @@ final class content_test extends \advanced_testcase {
         $this->assertSame([], $setitem2->get_children());
         $this->assertSame(3, $setitem2->get_points());
         $this->assertSame(null, $setitem2->get_minpoints());
+        $this->assertSame(DAYSECS * 3, $setitem2->get_completiondelay());
 
-        $top->append_course($setitem2, $course2->id, ['points' => 7]);
-        $top->append_course($setitem2, $course3->id, ['points' => 0]);
+        $top->append_course($setitem2, $course2->id, ['points' => 7, 'completiondelay' => 0]);
+        $top->append_course($setitem2, $course3->id, ['points' => 0, 'completiondelay' => HOURSECS * 7]);
         $this->assertCount(2, $setitem2->get_children());
         $this->assertSame(2, $setitem2->get_minprerequisites());
         /** @var course $courseitem2 */
         $courseitem2 = $setitem2->get_children()[0];
         $this->assertSame(null, $courseitem2->get_previous());
         $this->assertSame(7, $courseitem2->get_points());
+        $this->assertSame(0, $courseitem2->get_completiondelay());
         /** @var course $courseitem3 */
         $courseitem3 = $setitem2->get_children()[1];
         $this->assertSame($courseitem2, $courseitem3->get_previous());
-        $this->assertSame(7, $courseitem2->get_points());
+        $this->assertSame(0, $courseitem3->get_points());
+        $this->assertSame(HOURSECS * 7, $courseitem3->get_completiondelay());
 
         $top = top::load($program1->id);
         $this->assertSame(false, $top->is_problem_detected());
@@ -300,7 +306,7 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(null, $courseitem2->get_previous());
         $this->assertSame(null, $courseitem3->get_previous());
 
-        $top->update_set($setitem2, ['sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 7, 'points' => 11]);
+        $top->update_set($setitem2, ['sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'minpoints' => 7, 'points' => 11, 'completiondelay' => HOURSECS * 3]);
         $this->assertFalse(top::load($program1->id)->is_problem_detected());
         $this->assertSame((int)$program1->id, $setitem2->get_programid());
         $this->assertSame('Very nice set', $setitem2->get_fullname());
@@ -309,6 +315,7 @@ final class content_test extends \advanced_testcase {
         $this->assertSame('Minimum 7 points', $setitem2->get_sequencetype_info());
         $this->assertSame(null, $setitem2->get_minprerequisites());
         $this->assertSame(11, $setitem2->get_points());
+        $this->assertSame(HOURSECS * 3, $setitem2->get_completiondelay());
         $this->assertSame(7, $setitem2->get_minpoints());
         $this->assertCount(2, $setitem2->get_children());
 
@@ -321,6 +328,7 @@ final class content_test extends \advanced_testcase {
         $this->assertSame('Minimum 7 points', $setitem2->get_sequencetype_info());
         $this->assertSame(null, $setitem2->get_minprerequisites());
         $this->assertSame(88, $setitem2->get_points());
+        $this->assertSame(HOURSECS * 3, $setitem2->get_completiondelay());
         $this->assertSame(7, $setitem2->get_minpoints());
         $this->assertCount(2, $setitem2->get_children());
     }
@@ -352,15 +360,23 @@ final class content_test extends \advanced_testcase {
         $this->assertSame(false, $courseitem1->is_problem_detected());
         $this->assertSame(1, $courseitem1->get_points());
 
-        $courseitem1 = $top->update_course($courseitem1, ['points' => 23]);
+        $courseitem1 = $top->update_course($courseitem1, ['points' => 23, 'completiondelay' => HOURSECS * 3]);
         $this->assertSame($course1->fullname, $courseitem1->get_fullname());
         $this->assertSame(false, $courseitem1->is_problem_detected());
         $this->assertSame(23, $courseitem1->get_points());
+        $this->assertSame(HOURSECS * 3, $courseitem1->get_completiondelay());
 
-        $courseitem1 = $top->update_course($courseitem1, ['points' => 0]);
+        $courseitem1 = $top->update_course($courseitem1, []);
+        $this->assertSame($course1->fullname, $courseitem1->get_fullname());
+        $this->assertSame(false, $courseitem1->is_problem_detected());
+        $this->assertSame(23, $courseitem1->get_points());
+        $this->assertSame(HOURSECS * 3, $courseitem1->get_completiondelay());
+
+        $courseitem1 = $top->update_course($courseitem1, ['points' => 0, 'completiondelay' => 0]);
         $this->assertSame($course1->fullname, $courseitem1->get_fullname());
         $this->assertSame(false, $courseitem1->is_problem_detected());
         $this->assertSame(0, $courseitem1->get_points());
+        $this->assertSame(0, $courseitem1->get_completiondelay());
     }
 
     public function test_move_item() {
@@ -569,6 +585,7 @@ final class content_test extends \advanced_testcase {
         self::assertSame($source->get_fullname(), $target->get_fullname());
         self::assertSame(count($source->get_children()), count($target->get_children()));
         self::assertSame($source->get_points(), $target->get_points());
+        self::assertSame($source->get_completiondelay(), $target->get_completiondelay());
 
         if ($source instanceof course) {
             self::assertSame($source->get_courseid(), $target->get_courseid());
@@ -603,8 +620,8 @@ final class content_test extends \advanced_testcase {
         $item1x1 = $top1->append_set($top1, ['fullname' => 'Nice set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 1]);
         $item1x1x0 = $top1->append_set($item1x1, ['fullname' => 'Other set', 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
         $item1x1x1 = $top1->append_course($item1x1, $course2->id);
-        $item1x1x2 = $top1->append_set($item1x1, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'points' => 2, 'minpoints' => 4]);
-        $item1x1x2x0 = $top1->append_course($item1x1x2, $course3->id, ['points' => 3]);
+        $item1x1x2 = $top1->append_set($item1x1, ['fullname' => 'Third set', 'sequencetype' => set::SEQUENCE_TYPE_MINPOINTS, 'points' => 2, 'minpoints' => 4, 'completiondelay' => DAYSECS]);
+        $item1x1x2x0 = $top1->append_course($item1x1x2, $course3->id, ['points' => 3, 'completiondelay' => DAYSECS * 2]);
         $item1x1x2x1 = $top1->append_course($item1x1x2, $course4->id);
         $item1x1x2x3 = $top1->append_course($item1x1x2, $course5->id);
 
@@ -612,7 +629,7 @@ final class content_test extends \advanced_testcase {
         $top2->update_set($top2, ['fullname' => $top2->get_fullname(), 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
 
         $top3 = top::load($program3->id);
-        $top3->update_set($top3, ['fullname' => $top3->get_fullname(), 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER]);
+        $top3->update_set($top3, ['fullname' => $top3->get_fullname(), 'sequencetype' => set::SEQUENCE_TYPE_ALLINORDER, 'completiondelay' => HOURSECS]);
         $item3x0 = $top3->append_set($top3, ['fullname' => 'Repeated set', 'sequencetype' => set::SEQUENCE_TYPE_ATLEAST, 'minprerequisites' => 1]);
         $item3x0x0 = $top3->append_course($item3x0, $course1->id);
         $item3x0x1 = $top3->append_course($item3x0, $course2->id);

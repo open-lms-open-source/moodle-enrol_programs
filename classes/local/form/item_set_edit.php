@@ -75,6 +75,10 @@ final class item_set_edit extends \local_openlms\dialog_form {
         }
         $mform->setDefault('minpoints', $minpoints);
 
+        $mform->addElement('duration', 'completiondelay', get_string('completiondelay', 'enrol_programs'),
+            ['optional' => true, 'defaultunit' => DAYSECS]);
+        $mform->setDefault('completiondelay', $set->get_completiondelay());
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->setDefault('id', $set->get_id());

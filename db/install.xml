@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/programs/db" VERSION="20230809" COMMENT="XMLDB file for Open LMS enrol/programs"
+<XMLDB PATH="enrol/programs/db" VERSION="20230811" COMMENT="XMLDB file for Open LMS enrol/programs"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -43,6 +43,7 @@
         <FIELD NAME="minprerequisites" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Number of required prerequisite item completions needed for this item completion - derived from sequencejson, 1 for empty set means cannot be completed, 1 if courseid set"/>
         <FIELD NAME="points" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Point-based value for item/set completion"/>
         <FIELD NAME="minpoints" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Point-based alternative to minprerequisites"/>
+        <FIELD NAME="completiondelay" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Optional completion delay"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -196,6 +197,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="itemid-allocationid" UNIQUE="true" FIELDS="itemid, allocationid" COMMENT="Only one completion per item and user"/>
+        <INDEX NAME="timecompleted" UNIQUE="false" FIELDS="timecompleted"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="enrol_programs_evidences" COMMENT="Alternative evidence for completion of a program item">

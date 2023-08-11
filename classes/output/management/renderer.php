@@ -253,6 +253,13 @@ class renderer extends \plugin_renderer_base {
                 $completion = $item->get_sequencetype_info();
             }
 
+            if ($completiondelay = $item->get_completiondelay()) {
+                if ($completion !== '') {
+                    $completion .= '<br />';
+                }
+                $completion .= '<small>' . get_string('completiondelay', 'enrol_programs') . ': ' . util::format_duration($completiondelay) . '</small>';
+            }
+
             if ($movetargetsfor == $item->get_id()) {
                 $showtargets = false;
             }

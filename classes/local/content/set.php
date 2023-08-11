@@ -192,6 +192,8 @@ class set extends item {
             $item->minpoints = null;
         }
 
+        $item->completiondelay = $record->completiondelay;
+
         if ($item->minprerequisites != $record->minprerequisites) {
             debugging('Invalid minimum prerequisites in itemid: ' . $item->id, DEBUG_DEVELOPER);
             $item->problemdetected = true;
@@ -318,6 +320,7 @@ class set extends item {
             'minprerequisites' => isset($this->minprerequisites) ? (string)$this->minprerequisites : null,
             'points' => (string)$this->points,
             'minpoints' => isset($this->minpoints) ? (string)$this->minpoints : null,
+            'completiondelay' => $this->completiondelay,
         ];
     }
 

@@ -203,6 +203,11 @@ final class top extends set {
             $points = '1';
         }
 
+        $completiondelay = $data['completiondelay'] ?? 0;
+        if ($completiondelay < 0) {
+            throw new \invalid_parameter_exception('Completion delay cannot be negative');
+        }
+
         $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
         $record = [
@@ -216,6 +221,7 @@ final class top extends set {
             'minprerequisites' => null,
             'points' => $points,
             'minpoints' => null,
+            'completiondelay' => (string)$completiondelay,
         ];
         $fakerecords = [];
         $fakeprerequisites = [];
@@ -298,6 +304,11 @@ final class top extends set {
             'type' => $sequencetype,
         ];
 
+        $completiondelay = $data['completiondelay'] ?? 0;
+        if ($completiondelay < 0) {
+            throw new \invalid_parameter_exception('Completion delay cannot be negative');
+        }
+
         $record = [
             'id' => null,
             'programid' => (string)$this->programid,
@@ -309,6 +320,7 @@ final class top extends set {
             'minprerequisites' => $minprerequisites,
             'points' => $points,
             'minpoints' => $minpoints,
+            'completiondelay' => $completiondelay,
         ];
 
         $fakerecords = [];
@@ -396,6 +408,13 @@ final class top extends set {
             $set->points = (string)(int)$data['points'];
         }
 
+        if (array_key_exists('completiondelay', $data)) {
+            if ($data['completiondelay'] < 0) {
+                throw new \invalid_parameter_exception('Completion delay cannot be negative');
+            }
+            $set->completiondelay = (int)$data['completiondelay'];
+        }
+
         $trans = $DB->start_delegated_transaction();
         $DB->update_record('enrol_programs_items', (object)$set->get_record());
 
@@ -434,6 +453,13 @@ final class top extends set {
         }
 
         $course->points = (string)(int)$data['points'];
+
+        if (array_key_exists('completiondelay', $data)) {
+            if ($data['completiondelay'] < 0) {
+                throw new \invalid_parameter_exception('Completion delay cannot be negative');
+            }
+            $course->completiondelay = (int)$data['completiondelay'];
+        }
 
         $trans = $DB->start_delegated_transaction();
         $DB->update_record('enrol_programs_items', (object)$course->get_record());
@@ -650,19 +676,24 @@ final class top extends set {
                 'sequencetype' => $topfrom->get_sequencetype(),
                 'minprerequisites' => $topfrom->get_minprerequisites(),
                 'minpoints' => $topfrom->get_minpoints(),
-                'points' => $topfrom->get_points()
+                'points' => $topfrom->get_points(),
+                'completiondelay' => $topfrom->get_completiondelay(),
             ]);
         }
         $copyfunction = function (item $item, set $newparent, top $top) use (&$copyfunction) {
             if ($item instanceof course) {
-                $top->append_course($newparent, $item->get_courseid(), ['points' => $item->get_points()]);
+                $top->append_course($newparent, $item->get_courseid(), [
+                    'points' => $item->get_points(),
+                    'completiondelay' => $item->get_completiondelay(),
+                ]);
             } else if ($item instanceof set) {
                 $newset = $top->append_set($newparent, [
                     'fullname' => $item->get_fullname(),
                     'sequencetype' => $item->get_sequencetype(),
                     'minprerequisites' => $item->get_minprerequisites(),
                     'minpoints' => $item->get_minpoints(),
-                    'points' => $item->get_points()
+                    'points' => $item->get_points(),
+                    'completiondelay' => $item->get_completiondelay(),
                 ]);
                 foreach ($item->get_children() as $child) {
                     $copyfunction($child, $newset, $top);
