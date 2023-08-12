@@ -778,10 +778,11 @@ final class allocation {
             $user = $DB->get_record('user', ['id' => $allocation->userid]);
 
             self::make_snapshot($allocation->id, 'completion');
-            allocation_calendar_event::adjust_allocation_completion_calendar_events($allocation);
+            calendar::fix_program_events($allocation);
             $event = \enrol_programs\event\program_completed::create_from_allocation($allocation, $program);
             $event->trigger();
             notification\completion::notify_now($user, $program, $source, $allocation);
+            calendar::delete_allocation_events($allocation->id);
         }
         $rs->close();
 
@@ -837,28 +838,29 @@ final class allocation {
     /**
      * Manually update user allocation data including program completion.
      *
-     * @param stdClass $allocatioon
+     * @param stdClass $allocation
      * @return stdClass
      */
-    public static function update_user(stdClass $allocatioon): stdClass {
+    public static function update_user(stdClass $allocation): stdClass {
         global $DB;
 
-        $record = $DB->get_record('enrol_programs_allocations', ['id' => $allocatioon->id], '*', MUST_EXIST);
+        $record = $DB->get_record('enrol_programs_allocations', ['id' => $allocation->id], '*', MUST_EXIST);
+        $program = $DB->get_record('enrol_programs_programs', ['id' => $record->programid], '*', MUST_EXIST);
 
         $trans = $DB->start_delegated_transaction();
 
         self::make_snapshot($record->id, 'allocation_edit_before');
 
-        $record->archived = (int)(bool)$allocatioon->archived;
-        $record->timeallocated = $allocatioon->timeallocated;
-        $record->timestart = $allocatioon->timestart;
-        $record->timedue = $allocatioon->timedue;
+        $record->archived = (int)(bool)$allocation->archived;
+        $record->timeallocated = $allocation->timeallocated;
+        $record->timestart = $allocation->timestart;
+        $record->timedue = $allocation->timedue;
         if (!$record->timedue) {
             $record->timedue = null;
         } else if ($record->timedue <= $record->timestart) {
             throw new \coding_exception('invalid due date');
         }
-        $record->timeend = $allocatioon->timeend;
+        $record->timeend = $allocation->timeend;
         if (!$record->timeend) {
             $record->timeend = null;
         } else if ($record->timeend <= $record->timestart) {
@@ -867,23 +869,24 @@ final class allocation {
         if ($record->timedue && $record->timeend && $record->timedue > $record->timeend) {
             throw new \coding_exception('invalid due date');
         }
-        $record->timecompleted = $allocatioon->timecompleted;
+        $record->timecompleted = $allocation->timecompleted;
         if (!$record->timecompleted) {
             $record->timecompleted = null;
         }
 
         $DB->update_record('enrol_programs_allocations', $record);
 
-        self::make_snapshot($record->id, 'allocation_edit');
+        $allocation = self::make_snapshot($record->id, 'allocation_edit');
 
         $trans->allow_commit();
 
-        self::fix_allocation_sources($record->programid, $record->userid);
-        self::fix_user_enrolments($record->programid, $record->userid);
+        self::fix_allocation_sources($allocation->programid, $allocation->userid);
+        self::fix_user_enrolments($allocation->programid, $allocation->userid);
+        calendar::fix_allocation_events($allocation, $program);
 
-        notification_manager::trigger_notifications($record->programid, $record->userid);
+        notification_manager::trigger_notifications($allocation->programid, $allocation->userid);
 
-        return $DB->get_record('enrol_programs_allocations', ['id' => $record->id], '*', MUST_EXIST);
+        return $allocation;
     }
 
     /**
@@ -898,6 +901,7 @@ final class allocation {
         $trans = $DB->start_delegated_transaction();
 
         $allocation = $DB->get_record('enrol_programs_allocations', ['id' => $data->allocationid], '*', MUST_EXIST);
+        $program = $DB->get_record('enrol_programs_programs', ['id' => $allocation->programid], '*', MUST_EXIST);
         $item = $DB->get_record('enrol_programs_items', ['id' => $data->itemid, 'programid' => $allocation->programid], '*', MUST_EXIST);
         $completion = $DB->get_record('enrol_programs_completions', ['allocationid' => $allocation->id, 'itemid' => $item->id]);
         $evidence = $DB->get_record('enrol_programs_evidences', ['userid' => $allocation->userid, 'itemid' => $item->id]);
@@ -947,7 +951,7 @@ final class allocation {
         $trans->allow_commit();
 
         self::fix_user_enrolments($allocation->programid, $allocation->userid);
-        allocation_calendar_event::adjust_allocation_completion_calendar_events($allocation);
+        calendar::fix_allocation_events($allocation, $program);
     }
 
     /**

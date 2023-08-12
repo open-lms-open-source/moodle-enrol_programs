@@ -285,5 +285,13 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023081100, 'enrol', 'programs');
     }
 
+    if ($oldversion < 2023081200) {
+        // Do not use calendar API here, calendar events will be fixed during next cron run.
+        $DB->delete_records('event', ['component' => 'enrol_programs']);
+
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2023081200, 'enrol', 'programs');
+    }
+
     return true;
 }

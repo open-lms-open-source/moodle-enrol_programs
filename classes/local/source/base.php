@@ -225,13 +225,14 @@ abstract class base {
         $record->id = $DB->insert_record('enrol_programs_allocations', $record);
         $allocation = $DB->get_record('enrol_programs_allocations', ['id' => $record->id], '*', MUST_EXIST);
 
-        \enrol_programs\local\allocation_calendar_event::create_allocation_calendar_events($allocation, $program);
         \enrol_programs\local\allocation::make_snapshot($allocation->id, 'allocation');
 
         $event = \enrol_programs\event\user_allocated::create_from_allocation($allocation, $program);
         $event->trigger();
 
         \enrol_programs\local\notification\allocation::notify_now($user, $program, $source, $allocation);
+
+        \enrol_programs\local\calendar::fix_allocation_events($allocation, $program);
 
         return $allocation;
     }
@@ -518,7 +519,7 @@ abstract class base {
 
         \enrol_programs\local\allocation::fix_allocation_sources($program->id, $allocation->userid);
         \enrol_programs\local\allocation::fix_user_enrolments($program->id, $allocation->userid);
-        \enrol_programs\local\allocation_calendar_event::delete_allocation_calendar_events($allocation);
+        \enrol_programs\local\calendar::delete_allocation_events($allocation->id);
 
         $event = \enrol_programs\event\user_deallocated::create_from_allocation($allocation, $program);
         $event->trigger();

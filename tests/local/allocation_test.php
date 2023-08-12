@@ -342,7 +342,7 @@ final class allocation_test extends \advanced_testcase {
         $instance1x3 = $DB->get_record('enrol', ['courseid' => $course3->id, 'enrol' => 'programs', 'customint1' => $program1->id], '*', MUST_EXIST);
         $instance2x1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'programs', 'customint1' => $program2->id], '*', MUST_EXIST);
 
-        // Method fix_user_enrolments is called during allocation, confirm the everything was added.
+        // Method fix_user_enrolments is called during allocation, confirm that everything was added.
         manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         $this->assertTrue(is_enrolled($context1, $user1, '', true));
@@ -434,7 +434,7 @@ final class allocation_test extends \advanced_testcase {
         $instance1x3 = $DB->get_record('enrol', ['courseid' => $course3->id, 'enrol' => 'programs', 'customint1' => $program1->id], '*', MUST_EXIST);
         $instance2x1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'programs', 'customint1' => $program2->id], '*', MUST_EXIST);
 
-        // Method fix_user_enrolments is called during allocation, confirm the everything was added.
+        // Method fix_user_enrolments is called during allocation, confirm that everything was added.
         manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         // Just make sure there are no errors.
@@ -482,7 +482,7 @@ final class allocation_test extends \advanced_testcase {
         $instance1x3 = $DB->get_record('enrol', ['courseid' => $course3->id, 'enrol' => 'programs', 'customint1' => $program1->id], '*', MUST_EXIST);
         $instance2x1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'programs', 'customint1' => $program2->id], '*', MUST_EXIST);
 
-        // Method fix_user_enrolments is called during allocation, confirm the everything was added.
+        // Method fix_user_enrolments is called during allocation, confirm that everything was added.
         manual::allocate_users($program1->id, $source1->id, [$user1->id, $user2->id]);
 
         // Just make sure there are no errors.

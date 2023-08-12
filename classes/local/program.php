@@ -251,6 +251,13 @@ final class program {
             $record->creategroups = (int)(bool)$data->creategroups;
         }
 
+        $invalidatecalendarevents = false;
+        if (isset($record->fullname) && $record->fullname != $oldprogram->fullname) {
+            $invalidatecalendarevents = true;
+        } else if (isset($record->description) && $record->description != $oldprogram->description) {
+            $invalidatecalendarevents = true;
+        }
+
         $DB->update_record('enrol_programs_programs', $record);
 
         if ($CFG->usetags && isset($data->tags)) {
@@ -282,6 +289,10 @@ final class program {
             }
         }
 
+        if ($invalidatecalendarevents) {
+            calendar::invalidate_program_events($program->id);
+        }
+
         $program = self::make_snapshot($program->id, 'update_general');
 
         $trans->allow_commit();
@@ -289,7 +300,7 @@ final class program {
         allocation::fix_allocation_sources($program->id, null);
         allocation::fix_enrol_instances($program->id);
         allocation::fix_user_enrolments($program->id, null);
-        allocation_calendar_event::fix_allocation_calendar_events($program);
+        calendar::fix_program_events($program);
 
         $event = \enrol_programs\event\program_updated::create_from_program($program);
         $event->trigger();
@@ -441,7 +452,7 @@ final class program {
         allocation::fix_user_enrolments($program->id, null);
 
         if ($updated) {
-            allocation_calendar_event::fix_allocation_calendar_events($program);
+            calendar::fix_program_events($program);
             $event = \enrol_programs\event\program_updated::create_from_program($program);
             $event->trigger();
         }
@@ -526,7 +537,7 @@ final class program {
         allocation::fix_user_enrolments($targetprogram->id, null);
 
         if ($updated) {
-            allocation_calendar_event::fix_allocation_calendar_events($targetprogram);
+            calendar::fix_program_events($targetprogram);
             $event = \enrol_programs\event\program_updated::create_from_program($targetprogram);
             $event->trigger();
         }
@@ -659,7 +670,7 @@ final class program {
         allocation::fix_allocation_sources($program->id, null);
         allocation::fix_enrol_instances($program->id);
         allocation::fix_user_enrolments($program->id, null);
-        allocation_calendar_event::fix_allocation_calendar_events($program);
+        calendar::fix_program_events($program);
 
         $event = \enrol_programs\event\program_updated::create_from_program($program);
         $event->trigger();
@@ -735,7 +746,7 @@ final class program {
 
         $trans->allow_commit();
 
-        allocation_calendar_event::delete_program_calendar_events($program->id);
+        calendar::delete_program_events($program->id);
 
         $event = \enrol_programs\event\program_deleted::create_from_program($program);
         $event->trigger();

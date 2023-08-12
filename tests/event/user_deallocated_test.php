@@ -63,9 +63,9 @@ final class user_deallocated_test extends \advanced_testcase {
         $sink->close();
 
         $this->assertCount(2, $events);
-        $event = $events[1];
-        $this->assertInstanceOf('enrol_programs\event\user_deallocated', $event);
+        $this->assertInstanceOf('enrol_programs\event\user_deallocated', $events[1]);
         $this->assertInstanceOf('core\event\calendar_event_deleted', $events[0]);
+        $event = $events[1];
         $this->assertEquals($syscontext->id, $event->contextid);
         $this->assertSame($allocation->id, $event->objectid);
         $this->assertSame($admin->id, $event->userid);
@@ -77,8 +77,5 @@ final class user_deallocated_test extends \advanced_testcase {
         $description = $event->get_description();
         $programurl = new \moodle_url('/enrol/programs/management/program.php', ['id' => $program->id]);
         $this->assertSame($programurl->out(false), $event->get_url()->out(false));
-
-        $allocationcalendarevents = $DB->get_records('event', ['instance' => $allocation->id, 'component' => 'enrol_programs', 'userid' => $user->id]);
-        $this->assertCount(0, $allocationcalendarevents);
     }
 }

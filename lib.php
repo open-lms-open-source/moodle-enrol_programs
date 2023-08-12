@@ -169,12 +169,9 @@ function enrol_programs_pre_course_category_delete(\stdClass $category) {
  * @return \core_calendar\local\event\entities\action_interface|null
  */
 function enrol_programs_core_calendar_provide_event_action(calendar_event $event,
-        \core_calendar\action_factory $factory, $userid = 0) {
+        \core_calendar\action_factory $factory, int $userid = 0) {
 
-    global $USER, $DB;
-    if (empty($userid)) {
-        $userid = $USER->id;
-    }
+    global $DB;
 
     // The event object (core_calendar\local\event\entities\event) passed does not include an instance property so we need to pull the DB record.
     $event = $DB->get_record('event', ['id' => $event->id], '*', MUST_EXIST);
@@ -182,7 +179,7 @@ function enrol_programs_core_calendar_provide_event_action(calendar_event $event
 
     return $factory->create_instance(
         get_string('view'),
-        new \moodle_url('/enrol/programs/view.php', ['id' => $allocation->programid]),
+        new \moodle_url('/enrol/programs/my/program.php', ['id' => $allocation->programid]),
         1,
         true
     );

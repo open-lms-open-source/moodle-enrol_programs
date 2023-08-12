@@ -57,7 +57,6 @@ final class program_completed_test extends \advanced_testcase {
         $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $user->id]);
         $allocation->timecompleted = (string)time();
         $DB->update_record('enrol_programs_allocations', $allocation);
-        \enrol_programs\local\allocation_calendar_event::adjust_allocation_completion_calendar_events($allocation);
 
         $event = \enrol_programs\event\program_completed::create_from_allocation($allocation, $program);
         $event->trigger();
@@ -72,11 +71,5 @@ final class program_completed_test extends \advanced_testcase {
         $description = $event->get_description();
         $programurl = new \moodle_url('/enrol/programs/management/user_allocation.php', ['id' => $allocation->id]);
         $this->assertSame($programurl->out(false), $event->get_url()->out(false));
-
-        $allocationcalendarevents = $DB->get_records('event', ['instance' => $allocation->id, 'component' => 'enrol_programs', 'userid' => $user->id]);
-        $allocationeventtypes = ['programstart', 'programend'];
-        foreach ($allocationcalendarevents as $calendarevent) {
-            $this->assertContains($calendarevent->eventtype, $allocationeventtypes);
-        }
     }
 }
