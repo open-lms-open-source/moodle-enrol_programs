@@ -1730,8 +1730,7 @@ final class allocation_test extends \advanced_testcase {
         $this->assertSame($s1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set1->get_id(), 'allocationid' => $allocation1->id]));
         $this->assertSame($c1completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x1->get_id(), 'allocationid' => $allocation1->id]));
         $this->assertSame($c2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item1x2->get_id(), 'allocationid' => $allocation1->id]));
-        $s2completion = $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]);
-        $this->assertTimeCurrent($s2completion);
+        $this->assertSame($s2completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $set2->get_id(), 'allocationid' => $allocation1->id]));
         $this->assertSame($c3completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x1->get_id(), 'allocationid' => $allocation1->id]));
         $this->assertSame($c4completion, $DB->get_field('enrol_programs_completions', 'timecompleted', ['itemid' => $item2x2->get_id(), 'allocationid' => $allocation1->id]));
         $this->assertTrue(is_enrolled($context1, $user1, '', true));
