@@ -159,7 +159,9 @@ final class certify_test extends \advanced_testcase {
         $this->getDataGenerator()->create_module('chat', $params, []);
         $this->getDataGenerator()->create_module('choice', $params, []);
         $this->getDataGenerator()->create_module('data', $params, []);
-        $this->getDataGenerator()->create_module('facetoface', $params, []);
+        if (get_config('mod_facetoface', 'version')) {
+            $this->getDataGenerator()->create_module('facetoface', $params, []);
+        }
         $this->getDataGenerator()->create_module('feedback', $params, []);
         $this->getDataGenerator()->create_module('forum', $params, []);
         $this->getDataGenerator()->create_module('glossary', $params, []);
