@@ -75,12 +75,13 @@ final class form_program_allocation_import_fromprogram extends \local_openlms\ex
         list($searchsql, $params) = \enrol_programs\local\management::get_program_search_query(null, $query, 'p');
         $params['programid'] = $programid;
 
-        $targetprogramtenantid = $DB->get_field('context', 'tenantid', ['id' => $context->id]);
-        if ($targetprogramtenantid) {
-            $tenantselect = "AND (c.tenantid = :tenantid OR c.tenantid IS NULL)";
-            $params['tenantid'] = $targetprogramtenantid;
-        } else {
-            $tenantselect = '';
+        $tenantselect = '';
+        if (\enrol_programs\local\tenant::is_available()) {
+            $targetprogramtenantid = $DB->get_field('context', 'tenantid', ['id' => $context->id]);
+            if ($targetprogramtenantid) {
+                $tenantselect = "AND (c.tenantid = :tenantid OR c.tenantid IS NULL)";
+                $params['tenantid'] = $targetprogramtenantid;
+            }
         }
 
         $sql = "SELECT p.id, p.fullname, p.contextid

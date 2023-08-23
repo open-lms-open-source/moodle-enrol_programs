@@ -137,7 +137,7 @@ final class util {
             return get_string('error');
         }
         if (!$duration) {
-            return get_string('notset', 'tool_certify');
+            return get_string('notset', 'enrol_programs');
         }
         $days = intval($duration / DAYSECS);
         $duration = $duration - $days * DAYSECS;
