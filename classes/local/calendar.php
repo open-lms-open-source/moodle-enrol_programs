@@ -181,6 +181,7 @@ final class calendar {
              LEFT JOIN {enrol_programs_allocations} pa ON pa.id = e.instance AND e.component = 'enrol_programs'
              LEFT JOIN {enrol_programs_programs} p ON p.id = pa.programid
                  WHERE (pa.id IS NULL OR pa.archived = 1 OR p.archived = 1 OR pa.timecompleted IS NOT NULL)
+                   AND e.component = 'enrol_programs'
                        $programselect
              ORDER BY e.id ASC";
         $rs = $DB->get_recordset_sql($sql, $params);

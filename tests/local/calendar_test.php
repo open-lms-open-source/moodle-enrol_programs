@@ -1014,4 +1014,40 @@ final class calendar_test extends \advanced_testcase {
             ['component' => 'enrol_programs', 'instance' => $allocation1x1->id, 'eventtype' => calendar::EVENTTYPE_START]);
         $this->assertFalse($event);
     }
+
+    /**
+     * Tests that manual events are not deleted by fixing program events
+     *
+     * @see https://github.com/open-lms-open-source/moodle-enrol_programs/issues/11 Issue
+     */
+    public function test_manual_calendar_events_not_deleted_by_fix_program_events() {
+        global $DB, $USER;
+        $this->setAdminUser();
+
+        $event = new \stdClass();
+        $event->userid = $USER->id;
+        $event->timestart = 0;
+        $event->name = 'test';
+
+        // Manually created events have modulename 0 and component as null.
+        $event->modulename = 0;
+        $event->component = null;
+
+        \calendar_event::create($event);
+
+        $events = $DB->get_records('event');
+        $this->assertCount(1, $events);
+        $event = current($events);
+        $this->assertNull($event->component);
+        $this->assertEquals(0, $event->modulename);
+
+        // Run fix events, as if cron would run it.
+        calendar::fix_program_events(null);
+
+        // Ensure calendar event that was created is left untouched.
+        $events = $DB->get_records('event');
+        $eventids = array_column($events, 'id');
+        $this->assertTrue(in_array($event->id, $eventids));
+    }
 }
+
