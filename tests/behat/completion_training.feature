@@ -22,9 +22,10 @@ Feature: Training program completion by students tests
       | Course 3 | C3        | topics | CAT3     | 1                | 1                        | 16                    | 2                      |
       | Course 4 | C4        | topics | CAT1     | 1                | 1                        |                       | 1                      |
     And the following "customfield_training > frameworks" exist:
-      | name        | public | requiredtraining | restrictedcompletion | fields    |
-      | Framework 1 | 1      | 5                | 0                    | training1 |
-      | Framework 2 | 1      | 5                | 1                    | training2 |
+      | name        | public | requiredtraining | restrictedcompletion | fields    | restrictedcategory | category |
+      | Framework 1 | 1      | 5                | 0                    | training1 | 0                  |          |
+      | Framework 2 | 1      | 5                | 1                    | training2 | 0                  |          |
+      | Framework 3 | 1      | 5                | 0                    | training1 | 1                  | Cat 2    |
     And the following "activity" exists:
       | activity       | page                     |
       | course         | C1                       |
@@ -90,10 +91,13 @@ Feature: Training program completion by students tests
       | Program 000 | First set  | Framework 1 |            |                  |                  |
       | Program 001 |            |             | First set  | All in any order |                  |
       | Program 001 | First set  | Framework 2 |            |                  |                  |
+      | Program 002 |            |             | First set  | All in order     |                  |
+      | Program 002 | First set  | Framework 3 |            |                  |                  |
     And the following "enrol_programs > program_allocations" exist:
       | program     | user     |
       | Program 000 | student1 |
       | Program 000 | student3 |
+      | Program 002 | student1 |
     And the following "course enrolments" exist:
       | user     | course | role    |
       | student1 | C1     | student |
@@ -207,3 +211,36 @@ Feature: Training program completion by students tests
     And I follow "Program 001"
     Then I should see "Completed" in the "Program status:" definition list item
     And I should see "Training progress: 6/5"
+
+  @javascript
+  Scenario: Student may complete a training program with category restrictions
+    Given I log in as "student1"
+
+    When I am on My programs page
+    And I follow "Program 002"
+    Then I should see "Open" in the "Program status:" definition list item
+    And I should see "Training progress: 0/5"
+
+    When I am on "Course 1" course homepage
+    And I follow "Sample page"
+    # The cron job has to be executed twice with a pause.
+    And I run the "core\task\completion_regular_task" task
+    And I wait "1" seconds
+    And I run the "core\task\completion_regular_task" task
+    And I am on My programs page
+    And I follow "Program 002"
+    Then I should see "Open" in the "Program status:" definition list item
+    And I should see "Training progress: 0/5"
+
+    And I am on My programs page
+    And I am on "Course 2" course homepage
+    And I follow "Sample page"
+    # The cron job has to be executed twice with a pause.
+    And I run the "core\task\completion_regular_task" task
+    And I wait "1" seconds
+    And I run the "core\task\completion_regular_task" task
+
+    And I am on My programs page
+    And I follow "Program 002"
+    Then I should see "Completed" in the "Program status:" definition list item
+    And I should see "Training progress: 8/5"

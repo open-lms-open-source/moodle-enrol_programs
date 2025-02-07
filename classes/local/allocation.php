@@ -566,6 +566,8 @@ final class allocation {
             $params['now3'] = $now;
             $params['now4'] = $now;
 
+            $childpath = $DB->sql_concat('tfrctx.path', "'/%'");
+
             $sql = "INSERT INTO {enrol_programs_completions} (itemid, allocationid, timecompleted)
 
                     SELECT pi.id AS itemid, pa.id AS allocationid, (:now3 + pi.completiondelay) AS timecompleted
@@ -573,17 +575,22 @@ final class allocation {
                       JOIN {enrol_programs_programs} p ON p.id = pa.programid
                       JOIN {enrol_programs_items} pi ON pi.programid = pa.programid
                       JOIN {customfield_training_frameworks} tfr ON tfr.id = pi.frameworkid
+                      JOIN {context} tfrctx ON tfrctx.id = tfr.contextid 
                  LEFT JOIN {enrol_programs_completions} pc ON pc.allocationid = pa.id AND pc.itemid = pi.id
                      WHERE pc.id IS NULL
                            AND EXISTS (
 
                                SELECT SUM(cd.intvalue)
                                  FROM {customfield_training_completions} ctc
+                                 JOIN {context} ctx ON ctx.id = ctc.contextid
                                  JOIN {customfield_field} cf ON cf.id = ctc.fieldid
                                  JOIN {customfield_data} cd ON cd.fieldid = cf.id AND cd.instanceid = ctc.instanceid
                                  JOIN {customfield_training_fields} tf ON tf.fieldid = cf.id
                                 WHERE tf.frameworkid = tfr.id AND ctc.userid = pa.userid AND cd.intvalue IS NOT NULL
                                       AND (tfr.restrictedcompletion = 0 OR ctc.timecompleted >= pa.timestart)
+                                      AND (tfr.restrictedcategory = 0
+                                           OR tfr.contextid = ctc.contextid
+                                           OR ctx.path LIKE $childpath)
                                HAVING SUM(cd.intvalue) >= tfr.requiredtraining
 
                            )

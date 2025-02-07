@@ -59,14 +59,20 @@ final class training extends item {
      */
     public function get_completed_training(stdClass $allocation): int {
         global $DB;
+        $childpath = $DB->sql_concat('tfrctx.path', "'/%'");
         $sql = "SELECT SUM(cd.intvalue) AS completed
                   FROM {customfield_training_completions} ctc
                   JOIN {customfield_field} cf ON cf.id = ctc.fieldid
                   JOIN {customfield_data} cd ON cd.fieldid = cf.id AND cd.instanceid = ctc.instanceid
                   JOIN {customfield_training_fields} tf ON tf.fieldid = cf.id
                   JOIN {customfield_training_frameworks} tfr ON tfr.id = tf.frameworkid
+                  JOIN {context} tfrctx ON tfrctx.id = tfr.contextid
+                  JOIN {context} ctx ON ctx.id = ctc.contextid
                  WHERE tfr.id = :frameworkid AND ctc.userid = :userid AND cd.intvalue IS NOT NULL
-                       AND (tfr.restrictedcompletion = 0 OR ctc.timecompleted >= :timestart)";
+                       AND (tfr.restrictedcompletion = 0 OR ctc.timecompleted >= :timestart)
+                       AND (tfr.restrictedcategory = 0
+                            OR tfr.contextid = ctc.contextid
+                            OR ctx.path LIKE $childpath)";
         $params = [
             'frameworkid' => $this->frameworkid,
             'userid' => $allocation->userid,
