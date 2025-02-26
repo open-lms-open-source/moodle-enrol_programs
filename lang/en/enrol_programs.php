@@ -56,6 +56,8 @@ $string['cohorts_help'] = 'Non-public programs can be made visible to specified 
 
 Visibility status does not affect already allocated programs.';
 $string['columnusedalready'] = 'Column is used already';
+$string['completepercent'] = '{$a}% complete';
+$string['completion'] = 'Completion';
 $string['completiondate'] = 'Completion date';
 $string['completiondelay'] = 'Completion delay';
 $string['completionoverride'] = 'Override completion';
@@ -133,6 +135,8 @@ $string['item'] = 'Item';
 $string['itemcompletion'] = 'Program item completion';
 $string['itempoints'] = 'Points';
 $string['itemrecalculate'] = 'Recalculate item completion';
+$string['layoutgrid'] = 'Grid layout';
+$string['layouttable'] = 'Table layout';
 $string['management'] = 'Program management';
 $string['messageprovider:allocation_notification'] = 'Program allocation notification';
 $string['messageprovider:approval_request_notification'] = 'Program approval request notification';
@@ -334,6 +338,8 @@ $string['programs'] = 'Programs';
 $string['programsactive'] = 'Active';
 $string['programsarchived'] = 'Archived';
 $string['programsarchived_help'] = 'Archived programs are hidden from users and their progress is locked.';
+$string['programslayout'] = 'Programs layout';
+$string['programslayout_desc'] = 'Controls the programs layout - table or grid view for the block and the my/programs page.';
 $string['programstart'] = 'Program start';
 $string['programstart_help'] = 'Users cannot enter program courses before program start.';
 $string['programstart_allocation'] = 'Start immediately after allocation';

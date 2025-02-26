@@ -33,3 +33,22 @@
     height: 2rem;
     border: 2px dashed #343a40;
 }
+
+#page-enrol-programs-my-program {
+    .programimage img {
+        max-height: 300px;
+    }
+
+    .course-card.disabled img {
+        filter: grayscale(100%);
+    }
+
+    .programsnested-set {
+        margin-left: 20px;
+    }
+
+    .sequence-badge {
+        top: 10px;
+        right: 10px;
+    }
+}

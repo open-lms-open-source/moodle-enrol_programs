@@ -1,0 +1,36 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+<div class="programcontent mt-5">
+    <h3>{{#str}}tabcontent, enrol_programs{{/str}}</h3>
+    <div class="table-responsive">
+        <table class="admintable generaltable" id="program_content">
+            <thead>
+            <tr>
+                <th class="header c0" style="" scope="col">{{#str}}item, enrol_programs{{/str}}</th>
+                <th class="header c1" style="" scope="col">{{#str}}itempoints, enrol_programs{{/str}}</th>
+                <th class="header c2" style="" scope="col">{{#str}}sequencetype, enrol_programs{{/str}}</th>
+                <th class="header c3 lastcol" style="" scope="col">{{#str}}completiondate, enrol_programs{{/str}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#.}}
+                {{> enrol_programs/tablelayoutrow}}
+            {{/.}}
+            </tbody>
+        </table>
+    </div>
+</div>>

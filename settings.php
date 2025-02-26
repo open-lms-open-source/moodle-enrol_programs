@@ -64,6 +64,14 @@ if ($ADMIN->fulltree) {
 
         unset($options);
         unset($student);
+
+        $settings->add(new admin_setting_configselect('enrol_programs/programslayout',
+            new lang_string('programslayout', 'enrol_programs'),
+            new lang_string('programslayout_desc', 'enrol_programs'),
+            'table', [
+                'table' => get_string('layouttable', 'enrol_programs'),
+                'grid' => get_string('layoutgrid', 'enrol_programs')
+            ]));
     }
 
     if (!during_initial_install() && get_config('profilefield_relateduser', 'version')) {
