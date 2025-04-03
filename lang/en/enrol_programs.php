@@ -339,8 +339,14 @@ $string['programs'] = 'Programs';
 $string['programsactive'] = 'Active';
 $string['programsarchived'] = 'Archived';
 $string['programsarchived_help'] = 'Archived programs are hidden from users and their progress is locked.';
-$string['programslayout'] = 'Programs layout';
-$string['programslayout_desc'] = 'Controls the programs layout - table or grid view for the block and the my/programs page.';
+$string['programslayout'] = 'Programs detailed page layout';
+$string['programslayout_desc'] = 'Controls the programs layout - table or grid view for the my/programs page.';
+$string['programslayoutallowuserswitch'] = 'Allow users to switch program layout';
+$string['programslayoutallowuserswitch_desc'] = 'Allow users to switch program layout';
+$string['programslayout_desc'] = 'Controls the programs layout - table or grid view for the my/programs page.';
+$string['programsblocklayout'] = 'My programs block layout';
+$string['programsblocklayout_desc'] = 'Controls the programs layout - table or grid view for the myprograms block.';
+
 $string['programstart'] = 'Program start';
 $string['programstart_help'] = 'Users cannot enter program courses before program start.';
 $string['programstart_allocation'] = 'Start immediately after allocation';

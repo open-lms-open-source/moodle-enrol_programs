@@ -23,6 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('ENROL_PROGRAMS_VIEW_GRID', 'grid');
+define('ENROL_PROGRAMS_VIEW_TABLE', 'table');
+
+
 /**
  * Program enrolment plugin class.
  *
@@ -227,4 +231,28 @@ function enrol_programs_get_fontawesome_icon_map() {
         'enrol_programs:requestapprove' => 'fa-check-square-o',
         'enrol_programs:requestreject' => 'fa-times-rectangle-o',
     ];
+}
+
+function enrol_programs_user_preferences(): array {
+    $preferences['enrol_programs_block_user_view_preference'] = array(
+        'null' => NULL_NOT_ALLOWED,
+        'default' => ENROL_PROGRAMS_VIEW_TABLE,
+        'type' => PARAM_ALPHA,
+        'choices' => array(
+            ENROL_PROGRAMS_VIEW_GRID,
+            ENROL_PROGRAMS_VIEW_TABLE
+        ),
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    );
+    $preferences['enrol_programs_detailpage_user_view_preference'] = array(
+        'null' => NULL_NOT_ALLOWED,
+        'default' => ENROL_PROGRAMS_VIEW_TABLE,
+        'type' => PARAM_ALPHA,
+        'choices' => array(
+            ENROL_PROGRAMS_VIEW_GRID,
+            ENROL_PROGRAMS_VIEW_TABLE
+        ),
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    );
+    return $preferences;
 }

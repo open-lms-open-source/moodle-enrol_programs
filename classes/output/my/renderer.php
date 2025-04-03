@@ -83,11 +83,23 @@ class renderer extends \plugin_renderer_base {
         $data['programicon'] = $this->output->pix_icon('program', '', 'enrol_programs');
         $data['programid'] = $program->id;
         $layoutconfig = get_config('enrol_programs', 'programslayout');
-        if ($layoutconfig == 'table') {
-            return $OUTPUT->render_from_template('enrol_programs/programinfotablelayout', $data);
+        $allowuserlayoutchange = get_config('enrol_programs', 'programslayoutallowuserswitch');
+        if ($allowuserlayoutchange) {
+            $userpref = get_user_preferences('enrol_programs_detailpage_user_view_preference') ?? $layoutconfig;
         } else {
-            return $OUTPUT->render_from_template('enrol_programs/programinfo', $data);
+            $userpref = $layoutconfig;
         }
+        $data['viewtable'] = $data['viewgrid'] = false;
+
+        if ($userpref == 'table') {
+            $data['viewtable'] = true;
+        } else {
+            $data['viewgrid'] = true;
+        }
+        $data['isprogramdetailpage'] = true;
+        $data['allowuserlayoutchange'] = $allowuserlayoutchange;
+
+        return $OUTPUT->render_from_template('enrol_programs/programinfocontainer', $data);
     }
 
     public function render_user_progress(stdClass $program, stdClass $allocation): string {
@@ -202,11 +214,21 @@ class renderer extends \plugin_renderer_base {
         };
         $programitemlist = $programtree($top, 0);
         $layoutconfig = get_config('enrol_programs', 'programslayout');
-        if ($layoutconfig == 'table') {
-            return $OUTPUT->render_from_template('enrol_programs/programcontenttablelayout', $programitemlist);
+        $allowuserlayoutchange = get_config('enrol_programs', 'programslayoutallowuserswitch');
+        if ($allowuserlayoutchange) {
+            $userpref = get_user_preferences('enrol_programs_detailpage_user_view_preference') ?? $layoutconfig;
         } else {
-            return $OUTPUT->render_from_template('enrol_programs/programcontent', $programitemlist);
+            $userpref = $layoutconfig;
         }
+        $programitemlist['viewtable'] = $programitemlist['viewgrid'] = false;
+
+        if ($userpref == 'table') {
+            $programitemlist['viewtable'] = true;
+        } else {
+            $programitemlist['viewgrid'] = true;
+        }
+
+        return $OUTPUT->render_from_template('enrol_programs/programcontentcontainer', $programitemlist);
     }
 
     /**
@@ -215,7 +237,8 @@ class renderer extends \plugin_renderer_base {
      * @return string
      */
     public function render_block_content(): string {
-        global $DB, $OUTPUT, $CFG;
+        global $DB, $OUTPUT, $CFG, $PAGE;
+        $PAGE->requires->js_call_amd('enrol_programs/selector', 'init');
 
         $allocations = allocation::get_my_allocations();
         if (!$allocations) {
@@ -226,6 +249,7 @@ class renderer extends \plugin_renderer_base {
         $strnotset = get_string('notset', 'enrol_programs');
         $dateformat = get_string('strftimedatetimeshort');
         $data = [];
+
         foreach ($allocations as $allocation) {
             $row = [];
             $row['programicon'] = $programicon;
@@ -255,12 +279,21 @@ class renderer extends \plugin_renderer_base {
 
             $data[] = $row;
         }
-        $layoutconfig = get_config('enrol_programs', 'programslayout');
-        if ($layoutconfig == 'table') {
-            return $OUTPUT->render_from_template('enrol_programs/block_myprograms_table', ['programs' => $data]);
+        $layoutconfig = get_config('enrol_programs', 'programsblocklayout');
+        $allowuserlayoutchange = get_config('enrol_programs', 'programslayoutallowuserswitch');
+        if ($allowuserlayoutchange) {
+            $userpref = get_user_preferences('enrol_programs_block_user_view_preference') ?? $layoutconfig;
         } else {
-            return $OUTPUT->render_from_template('enrol_programs/block_myprograms_grid', ['programs' => $data]);
+            $userpref = $layoutconfig;
         }
+        $viewtable = $viewgrid = false;
+        if ($userpref == 'table') {
+            $viewtable = true;
+        } else {
+            $viewgrid = true;
+        }
+        return $OUTPUT->render_from_template('enrol_programs/block_myprograms_overview',
+            ['programs' => $data, 'viewtable' => $viewtable, 'viewgrid' => $viewgrid, 'allowuserlayoutchange' => $allowuserlayoutchange]);
 
     }
 

@@ -65,6 +65,14 @@ if ($ADMIN->fulltree) {
         unset($options);
         unset($student);
 
+        $settings->add(new admin_setting_configselect('enrol_programs/programsblocklayout',
+            new lang_string('programsblocklayout', 'enrol_programs'),
+            new lang_string('programsblocklayout_desc', 'enrol_programs'),
+            'table', [
+                'table' => get_string('layouttable', 'enrol_programs'),
+                'grid' => get_string('layoutgrid', 'enrol_programs')
+            ]));
+
         $settings->add(new admin_setting_configselect('enrol_programs/programslayout',
             new lang_string('programslayout', 'enrol_programs'),
             new lang_string('programslayout_desc', 'enrol_programs'),
@@ -72,6 +80,10 @@ if ($ADMIN->fulltree) {
                 'table' => get_string('layouttable', 'enrol_programs'),
                 'grid' => get_string('layoutgrid', 'enrol_programs')
             ]));
+
+        $settings->add(new admin_setting_configcheckbox('enrol_programs/programslayoutallowuserswitch',
+            new lang_string('programslayoutallowuserswitch', 'enrol_programs'),
+            new lang_string('programslayoutallowuserswitch_desc', 'enrol_programs'), 1));
     }
 
     if (!during_initial_install() && get_config('profilefield_relateduser', 'version')) {

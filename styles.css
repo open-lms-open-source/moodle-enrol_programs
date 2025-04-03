@@ -52,3 +52,9 @@
         right: 10px;
     }
 }
+
+.program-card-layout-selector-content {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+}

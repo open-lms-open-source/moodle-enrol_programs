@@ -108,4 +108,25 @@ $functions = [
         'description' => 'Removes a cohort from the list of synchronised cohorts of one program.',
         'type' => 'write',
     ],
+    'enrol_programs_get_my_programsoverview' => [
+        'classname' => enrol_programs\external\get_my_programsoverview::class,
+        'description' => 'Gets list of programs that the user has been allocated to.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
+    'enrol_programs_get_my_programdetails' => [
+        'classname' => enrol_programs\external\get_my_programdetails::class,
+        'description' => 'Details about a program for a user.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
+    'enrol_programs_get_my_programuserprogress' => [
+        'classname' => enrol_programs\external\get_my_programuserprogress::class,
+        'description' => 'Details about a programs user progress.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
 ];

@@ -14,27 +14,11 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
-{{#.}}
-    {{#isset}}
-        <div class="d-flex align-items-center">
-            <h3 class="mb-0">{{fullname}}</h3>
-            <div class="badge bg-primary ms-2">{{completiontype}}</div>
-        </div>
-    {{/isset}}
-
-    <div class="row">
-        {{#children}}
-            {{^isset}}
-                {{> enrol_programs/itemcard }}
-            {{/isset}}
-        {{/children}}
-    </div>
-
-    {{#children}}
-        {{#isset}}
-            <div class="programsnested-set">
-                {{> enrol_programs/programcontent }}
-            </div>
-        {{/isset}}
-    {{/children}}
-{{/.}}
+<div id="programcontentcontainer">
+    {{#viewgrid}}
+        {{> enrol_programs/programcontentgrid}}
+    {{/viewgrid}}
+    {{#viewtable}}
+        {{> enrol_programs/programcontenttable}}
+    {{/viewtable}}
+</div>
