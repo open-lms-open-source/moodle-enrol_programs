@@ -27,6 +27,9 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['addprogram'] = 'Add program';
 $string['addset'] = 'Add new set';
+$string['addcondition'] = 'Add condition';
+$string['addgroup'] = 'Add group';
+$string['deletecondition'] = 'Delete condition';
 $string['allocationend'] = 'Allocation end';
 $string['allocationend_help'] = 'Allocation end date meaning depends on enabled allocation sources. Usually new allocation are not possible after this date if specified.';
 $string['allocation'] = 'Allocation';
@@ -40,6 +43,8 @@ $string['allprograms'] = 'All programs';
 $string['appenditem'] = 'Append item';
 $string['appendinto'] = 'Append into item';
 $string['archived'] = 'Archived';
+$string['attrsyntax'] = 'User profile fields rules';
+$string['attrsyntax_help'] = '<p>These rules can only use custom user profile fields.</p>';
 $string['benefitname'] = '{$a}: Program allocation';
 $string['calendarprogramend'] = '{$a} ends';
 $string['calendarprogramdue'] = '{$a} is due';
@@ -103,6 +108,7 @@ $string['invalidcompletiondate'] = 'Invalid program completion date';
 $string['item'] = 'Item';
 $string['itemcompletion'] = 'Program item completion';
 $string['itempoints'] = 'Points';
+$string['listitem_description'] = 'The "equals" operator checks for strict equality. The "listitem" operator allows to check if a value is in a list of values. The list of values is a semicolon separated list of values. The listitem operator is case sensitive.';
 $string['management'] = 'Program management';
 $string['messageprovider:allocation_notification'] = 'Program allocation notification';
 $string['messageprovider:approval_request_notification'] = 'Program approval request notification';
@@ -121,6 +127,8 @@ $string['moveafter'] = 'Move "{$a->item}" after "{$a->target}"';
 $string['movebefore'] = 'Move "{$a->item}" before "{$a->target}"';
 $string['moveinto'] = 'Move "{$a->item}" into "{$a->target}"';
 $string['myprograms'] = 'My programs';
+$string['no_custom_field'] = 'There seems to be no custom field. Head to <a href="{$a}" target="_blank">user settings</a> to add one.';
+$string['no_profile_field_selected'] = 'No profile field has been selected in the enrol_attributes plugin settings.';
 $string['notification_allocation'] = 'User allocated';
 $string['notification_allocation_subject'] = 'Program allocation notification';
 $string['notification_allocation_body'] = 'Hello {$a->user_fullname},
@@ -234,6 +242,10 @@ $string['privacy:metadata:field:evidencesjson'] = 'Information about completion 
 $string['privacy:metadata:table:enrol_programs_src_commholds'] = 'Commerce allocation reservations';
 $string['privacy:metadata:field:quantity'] = 'Quantity';
 
+$string['profilefields'] = 'Profile fields to be used in the selector';
+$string['profilefields_desc'] =
+        'Which user profile fields can be used when configuring an enrolment instance?<br><br>
+        <div class="alert alert-warning alert-block fade in" role="alert" data-aria-autofocus="true">If you don\'t select any attribute here, this makes the plugin moot and hence disables its use in courses.</div><br>The feature below may however still be used in this case.';
 $string['program'] = 'Program';
 $string['programautofix'] = 'Auto repair program';
 $string['programdue'] = 'Program due';
@@ -353,6 +365,9 @@ $string['source_manual_usermapping'] = 'User mapping via';
 $string['source_manual_userupload_allocated'] = 'Allocated to \'{$a}\'';
 $string['source_manual_userupload_alreadyallocated'] = 'Already allocated to \'{$a}\'';
 $string['source_manual_userupload_invalidprogram'] = 'Cannot allocate to \'{$a}\'';
+$string['source_profile'] = 'Automatic allocation by user profile';
+$string['source_profile_allownew'] = 'Allow allocation by user profile';
+$string['source_profile_allownew_desc'] = 'Allow adding new _auto allocation by user profile_ sources to programs';
 $string['source_selfallocation'] = 'Self allocation';
 $string['source_selfallocation_allocate'] = 'Sign up';
 $string['source_selfallocation_allownew'] = 'Allow self allocation';

@@ -19,6 +19,7 @@ namespace enrol_programs\local;
 use enrol_programs\local\source\approval;
 use enrol_programs\local\source\base;
 use enrol_programs\local\source\cohort;
+use enrol_programs\local\source\profile;
 use enrol_programs\local\source\ecommerce;
 use enrol_programs\local\source\manual;
 use enrol_programs\local\source\selfallocation;
@@ -51,6 +52,7 @@ final class allocation {
             selfallocation::get_type() => selfallocation::class,
             approval::get_type() => approval::class,
             cohort::get_type() => cohort::class,
+            profile::get_type() => profile::class,
         ];
 
         if (ecommerce::is_commerce_enabled()) {
