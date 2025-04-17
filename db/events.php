@@ -39,6 +39,14 @@ $observers = [
         'callback'    => \enrol_programs\local\event_observer::class . '::course_category_deleted',
     ],
     [
+        'eventname'   => \core\event\user_created::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::user_created',
+    ],
+    [
+        'eventname'   => \core\event\user_updated::class,
+        'callback'    => \enrol_programs\local\event_observer::class . '::user_updated',
+    ],
+    [
         'eventname'   => \core\event\user_deleted::class,
         'callback'    => \enrol_programs\local\event_observer::class . '::user_deleted',
     ],

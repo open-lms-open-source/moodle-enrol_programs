@@ -67,9 +67,26 @@ class event_observer {
         }
     }
 
+    // When new user profile is created.
+    public static function user_created(\core\event\user_created $event) {
+        $updated = \enrol_programs\local\source\profile::fix_allocations(null, $event->relateduserid);
+        if ($updated) {
+            allocation::fix_user_enrolments(null, $event->relateduserid);
+        }
+    }
+    
+    // When user profile is updated.
+    public static function user_updated(\core\event\user_updated $event) {
+        $updated = \enrol_programs\local\source\profile::fix_allocations(null, $event->relateduserid);
+        if ($updated) {
+            allocation::fix_user_enrolments(null, $event->relateduserid);
+        }
+    }
+
     public static function user_deleted(\core\event\user_deleted $event) {
         allocation::deleted_user_cleanup($event->objectid);
     }
+
 
     public static function cohort_member_added(\core\event\cohort_member_added $event) {
         $updated = \enrol_programs\local\source\cohort::fix_allocations(null, $event->relateduserid);

@@ -79,6 +79,35 @@ if ($ADMIN->fulltree) {
             new lang_string('source_ecommerce_allownew', 'enrol_programs'),
             new lang_string('source_ecommerce_allownew_desc', 'enrol_programs'), 0));
     }
+     // allocation by user profile fields
+     $settings->add(new admin_setting_configcheckbox('enrol_programs/source_profile_allownew',
+        new lang_string('source_profile_allownew', 'enrol_programs'),
+        new lang_string('source_profile_allownew_desc', 'enrol_programs'), 1));
+     // Fields to use in the selector
+     
+     $customfieldsrecs = \availability_profile\condition::get_custom_profile_fields(); // array of stdclass objects
+     
+     $customfields = array_map(function($rec){return(format_string($rec->name)?? 
+            format_string($rec->shortname));}, $customfieldsrecs);
+     $standardfields = \availability_profile\condition::get_standard_profile_fields();
+     
+     $allprofilefields = array_merge($standardfields, $customfields);
+     
+     $epfields = explode(',', get_config('enrol_programs', 'profilefields')) ?? [];
+     $epfields = array_combine($epfields, $epfields);
+     $profilefieldselected = array_intersect_key($epfields, $allprofilefields) ? true : false;
+    
+     if (!$profilefieldselected && !(defined('PHPUNIT_TEST') && PHPUNIT_TEST) && enrol_is_enabled('programs')) {
+        \core\notification::warning(
+            get_string('no_profile_field_selected', 'enrol_programs', $CFG->wwwroot . '/user/profile/index.php')
+        );
+    }
+    
+    asort($allprofilefields);
+    $settings->add(new admin_setting_configmultiselect('enrol_programs/profilefields',
+            get_string('profilefields', 'enrol_programs'), get_string('profilefields_desc', 'enrol_programs'),
+            [], $allprofilefields));
+    
 }
 unset($programsenabled);
 

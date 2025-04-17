@@ -1,0 +1,178 @@
+/* Css for Shibboleth Rules Editor */
+
+.enrol-programs-boolean-editor {
+    width: 600px;
+}
+
+.enrol-programs-boolean-editor ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+.enrol-programs-boolean-editor li {
+    position: relative;
+    margin-bottom: 45px;
+    white-space: nowrap;
+}
+
+.enrol-programs-boolean-editor li.rule {
+    background-color: #eee;
+}
+
+.enrol-programs-boolean-editor li .sre-condition-rule-operator {
+    left: 0;
+    top: -33px;
+    position: absolute;
+}
+
+.enrol-programs-boolean-editor li .sre-condition-box {
+    padding: 10px;
+    border: solid 1px #666;
+    overflow: hidden;
+}
+
+.enrol-programs-boolean-editor li:hover > .sre-condition-box {
+    border-width: 2px;
+    padding: 9px;
+}
+
+.enrol-programs-boolean-editor li.group > .sre-condition-box {
+    border-style: dashed;
+}
+
+/*
+.enrol-attributes-boolean-editor li .button-pannel {
+    position: absolute;
+    right: 5px;
+    bottom: -15px;
+    padding: 2px;
+    line-height: 0;
+    border: 1px dotted #666;
+    background: #E2E2E2;
+    z-index: 100;
+}
+.enrol-attributes-boolean-editor li:hover > .button-pannel {
+    border-style: solid;
+}
+*/
+
+.enrol-programs-boolean-editor li .button-pannel {
+    position: absolute;
+    right: 5px;
+    bottom: -12px;
+    padding: 1px 5px;
+    height: 10px;
+    line-height: 0;
+    border: 1px solid #666;
+    border-width: 0 1px 1px;
+    background: #eee;
+}
+
+.enrol-programs-boolean-editor li.group > .button-pannel {
+    border-style: dashed;
+    background-color: #fff;
+}
+
+.enrol-programs-boolean-editor li:hover > .button-pannel {
+    border-width: 0 2px 2px;
+    padding: 1px 4px;
+}
+
+.enrol-programs-boolean-editor .button-pannel button {
+    float: left;
+    margin-top: -10px;
+}
+
+.enrol-programs-boolean-editor li:hover > .button-pannel button {
+    margin-top: -9px;
+}
+
+.enrol-programs-boolean-editor .button-pannel button {
+    border: 1px solid #999;
+    background: #ccc;
+    margin-right: 3px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.enrol-programs-boolean-editor .button-pannel button:hover {
+    border-color: #bbb #999 #666;
+}
+
+.enrol-programs-boolean-editor .button-pannel button:active {
+    border-color: #c00;
+}
+
+.enrol-programs-boolean-editor .button-pannel button:last-child {
+    margin-right: 0;
+}
+
+.enrol-programs-boolean-editor .button-pannel button span {
+    display: none;
+}
+
+.enrol-programs-boolean-editor .button-pannel .button-add-cond {
+    /*background-image: url([[pix:enrol_programs|add]]);*/
+    background-image: url(pix/add.png);
+}
+
+.enrol-programs-boolean-editor .button-pannel .button-add-group {
+    /*background-image: url([[pix:enrol_programs|group_add]]);*/
+    background-image: url(pix/group_add.png);
+}
+
+.enrol-programs-boolean-editor .button-pannel .button-del-cond {
+    /* background-image: url([[pix:enrol_programs|delete]]);*/
+    background-image: url(pix/delete.png);
+}
+
+#shib-expression .expr {
+    margin-left: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 16px;
+    width: 600px;
+    background-color: #eee;
+}
+
+#shib-expression .expr span {
+    margin-right: 2px;
+}
+
+#shib-expression .expr .cond-op {
+    color: #c00;
+}
+
+#shib-expression .expr .group-op {
+    color: #666;
+    font-size: 12px;
+}
+
+#shib-expression .expr .group-group {
+    font-size: 16px;
+    color: #666;
+}
+
+#shib-expression .expr .comp-param {
+    color: blue;
+}
+
+#shib-expression .expr .comp-op {
+    color: #0a0;
+}
+
+#shib-expression .expr .comp-val {
+    color: purple;
+}
+
+.enrol-programs-boolean-editor .button-pannel button {
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+}
+
+span.comp-op {
+    padding: 0 10px;
+}
+
