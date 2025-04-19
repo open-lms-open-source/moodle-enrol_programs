@@ -84,13 +84,6 @@
     }
 }
 
-.contentbox,
-.programsnested-set {
-    .badge {
-        color: white;
-    }
-}
-
 .program-card-layout-selector-content {
     display: flex;
     justify-content: flex-end;

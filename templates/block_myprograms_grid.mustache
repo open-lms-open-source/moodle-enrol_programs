@@ -14,18 +14,22 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
-<div class="dashboard-card-deck d-flex flex-wrap gap-3">
+<div class="card-grid mx-0 row row-cols-1 row-cols-sm-2 row-cols-lg-3">
     {{#programs}}
-        <div class="dashboard-card course-card card shadow-sm rounded border me-3 w-25" >
-            <img class="card-img-top programthumbnail" src="{{thumbnail}}" alt="{{fullname}}">
-            <div class="card-body">
-                <h5 class="card-title text-center">{{{fullname}}}</h5>
-                <p class="card-text">{{{status}}}</p>
-                <ul class="list-unstyled">
-                    {{#programstart}}<li><strong>Start:</strong> {{programstart}}</li>{{/programstart}}
-                    {{#programdue}}<li><strong>Due:</strong> {{programdue}}</li>{{/programdue}}
-                    {{#programend}}<li><strong>End:</strong> {{programend}}</li>{{/programend}}
-                </ul>
+        <div class="col d-flex pb-3 px-1">
+            <div class="dashboard-card course-card card h-100 d-flex flex-column">
+                <img class="card-img-top programthumbnail" src="{{thumbnail}}" alt="{{fullname}}">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title text-center text-truncate" title="{{fullname}}">{{{fullname}}}</h5>
+                        <p class="card-text">{{{status}}}</p>
+                    </div>
+                    <ul class="list-unstyled mt-2">
+                        {{#programstart}}<li><strong>Start:</strong> {{programstart}}</li>{{/programstart}}
+                        {{#programdue}}<li><strong>Due:</strong> {{programdue}}</li>{{/programdue}}
+                        {{#programend}}<li><strong>End:</strong> {{programend}}</li>{{/programend}}
+                    </ul>
+                </div>
             </div>
         </div>
     {{/programs}}

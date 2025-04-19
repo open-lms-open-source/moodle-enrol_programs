@@ -39,7 +39,9 @@ final class get_my_programsoverview extends external_api {
      * @return external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
-        return new external_function_parameters([]);
+        return new external_function_parameters([
+            'currentpage' => new external_value(PARAM_INT, 'current page'),
+        ]);
     }
 
     /**
@@ -47,18 +49,22 @@ final class get_my_programsoverview extends external_api {
      *
      * @return array
      */
-    public static function execute(): array {
+    public static function execute($currentpage): array {
         global $DB, $OUTPUT, $CFG, $PAGE, $OUTPUT;
 
         require_login();
         $context = \context_system::instance();
+        $params = self::validate_parameters(self::execute_parameters(),
+            ['currentpage' => $currentpage]);
+        $currentpage = (int)$params['currentpage'];
+        $count = allocation::PROGRAMCOUNTPERPAGE;
+        $from = ($currentpage - 1) * $count;
         $PAGE->set_context($context);
-
-        $allocations = allocation::get_my_allocations();
+        $allocations = allocation::get_my_allocations(null, true, $from, $count);
 
         $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
         $strnotset = get_string('notset', 'enrol_programs');
-        $dateformat = get_string('strftimedatetimeshort');
+        $dateformat = get_string('strftimedatefullshort');
         $data = [];
 
         foreach ($allocations as $allocation) {
@@ -75,7 +81,7 @@ final class get_my_programsoverview extends external_api {
                 $row['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
             }
 
-            $fullname = format_string($program->fullname);
+            $fullname = shorten_text(format_string($program->fullname));
             $detailurl = new \moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $fullname = \html_writer::link($detailurl, $fullname);
             $row['fullname'] = $fullname;

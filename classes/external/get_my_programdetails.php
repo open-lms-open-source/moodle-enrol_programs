@@ -94,7 +94,7 @@ final class get_my_programdetails extends external_api {
         $data['customfields'] = $customfieldoutput->render_customfields($program->id);
 
         $context = \context::instance_by_id($program->contextid);
-        $data['fullname'] = format_string($program->fullname);
+        $data['fullname'] = shorten_text(format_string($program->fullname));
 
         $description = \file_rewrite_pluginfile_urls($program->description, 'pluginfile.php', $context->id, 'enrol_programs', 'description', $program->id);
         $data['description'] = format_text($description, $program->descriptionformat, ['context' => $context]);

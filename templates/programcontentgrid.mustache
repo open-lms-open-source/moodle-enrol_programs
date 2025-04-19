@@ -18,15 +18,15 @@
     {{^isset}}
         <div class="contentbox d-flex align-items-center mb-3">
             <h3>{{#str}}tabcontent, enrol_programs{{/str}}</h3>
-            <div class="badge bg-primary ms-2">{{completiontype}}</div>
+            <div class="badge badge-primary ms-2">{{completiontype}}</div>
         </div>
     {{/isset}}
     {{#isset}}
         <div class="d-flex align-items-center mb-3">
             <h3>{{fullname}}</h3>
-            <div class="badge bg-primary ms-2">{{completiontype}}</div>
+            <div class="badge badge-primary ms-2">{{completiontype}}</div>
             {{#completiondelaytext}}
-                <div class="badge bg-primary ms-2">{{#str}}completiondelay, enrol_programs{{/str}}: {{completiondelaytext}}</div>
+                <div class="badge badge-primary ms-2">{{#str}}completiondelay, enrol_programs{{/str}}: {{completiondelaytext}}</div>
             {{/completiondelaytext}}
         </div>
     {{/isset}}

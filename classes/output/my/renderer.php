@@ -64,7 +64,7 @@ class renderer extends \plugin_renderer_base {
         $data['customfields'] = $customfieldoutput->render_customfields($program->id);
         
         $context = \context::instance_by_id($program->contextid);
-        $data['fullname'] = format_string($program->fullname);
+        $data['fullname'] = shorten_text(format_string($program->fullname));
 
         $description = file_rewrite_pluginfile_urls($program->description, 'pluginfile.php', $context->id, 'enrol_programs', 'description', $program->id);
         $data['description'] = format_text($description, $program->descriptionformat, ['context' => $context]);
@@ -248,16 +248,18 @@ class renderer extends \plugin_renderer_base {
      */
     public function render_block_content(): string {
         global $DB, $OUTPUT, $CFG, $PAGE;
-        $PAGE->requires->js_call_amd('enrol_programs/selector', 'init');
+        $totalpages = ceil(count(allocation::get_my_allocations())/allocation::PROGRAMCOUNTPERPAGE);
 
-        $allocations = allocation::get_my_allocations();
+        $PAGE->requires->js_call_amd('enrol_programs/selector', 'init', [['totalpages' => $totalpages]]);
+
+        $allocations = allocation::get_my_allocations(null, true, 0, allocation::PROGRAMCOUNTPERPAGE);
         if (!$allocations) {
             return '<em>' . get_string('errornomyprograms', 'enrol_programs') . '</em>';
         }
 
         $programicon = $this->output->pix_icon('program', '', 'enrol_programs');
         $strnotset = get_string('notset', 'enrol_programs');
-        $dateformat = get_string('strftimedatetimeshort');
+        $dateformat = get_string('strftimedatefullshort');
         $data = [];
 
         foreach ($allocations as $allocation) {
@@ -274,7 +276,7 @@ class renderer extends \plugin_renderer_base {
                 $row['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
             }
 
-            $fullname = format_string($program->fullname);
+            $fullname = shorten_text(format_string($program->fullname));
             $detailurl = new moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $fullname = \html_writer::link($detailurl, $fullname);
             $row['fullname'] = $fullname;
@@ -313,9 +315,11 @@ class renderer extends \plugin_renderer_base {
      * @return string
      */
     public function render_block_footer(): string {
+        global $OUTPUT;
         $url = \enrol_programs\local\catalogue::get_catalogue_url();
+
         if ($url) {
-            return '<div class="float-end">' . \html_writer::link($url, get_string('catalogue', 'enrol_programs')) . '</div>';
+            return '<div class="float-end">'. \html_writer::link($url, get_string('catalogue', 'enrol_programs')) . '</div>';
         }
         return '';
     }
