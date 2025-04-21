@@ -83,6 +83,7 @@ $string['errorcoursemissing'] = 'Course is missing';
 $string['errorcoursesmissing'] = 'Missing courses: {$a}';
 $string['errorinvalidoverridedates'] = 'Invalid date overrides';
 $string['errordifferenttenant'] = 'Program from another tenant cannot be accessed';
+$string['errorduplicateprogramid'] = 'Program ID number is already used for another program, please use a unique program ID number.';
 $string['errornoallocations'] = 'No user allocations found';
 $string['errornoallocation'] = 'Program is not allocated';
 $string['errornomyprograms'] = 'You are not allocated to any programs.';

@@ -89,7 +89,7 @@ final class program_add extends \local_openlms\dialog_form {
             $errors['idnumber'] = get_string('error');
         } else {
             if ($DB->record_exists('enrol_programs_programs', array('idnumber' => $data['idnumber']))) {
-                $errors['idnumber'] = get_string('error');
+                $errors['idnumber'] = get_string('errorduplicateprogramid', 'enrol_programs');
             }
         }
 
