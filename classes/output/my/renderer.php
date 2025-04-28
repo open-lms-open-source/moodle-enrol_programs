@@ -46,6 +46,7 @@ class renderer extends \plugin_renderer_base {
         $sourceclass = $sourceclasses[$source->type];
         $data = [];
         $allocationresult = '';
+        $completiondelaytext = '';
         $data['completionstatus'] = allocation::get_completion_status_html($program, $allocation);
         $data['allocationsource'] = $sourceclass::render_allocation_source($program, $source, $allocation);
         $data['allocationdate'] =  userdate($allocation->timeallocated);
@@ -55,6 +56,10 @@ class renderer extends \plugin_renderer_base {
         $data['completiondate'] = (isset($allocation->timecompleted) ? userdate($allocation->timecompleted) : $strnotset);
         $top = program::load_content($program->id);
         $data['sequencetype'] = $top->get_sequencetype_info();
+        if ($completiondelay = $top->get_completiondelay()) {
+            $completiondelaytext = util::format_duration($completiondelay);
+        }
+        $data['completiondelaytext'] = $completiondelaytext;
         $customfieldoutput = $PAGE->get_renderer('enrol_programs', 'customfield');
         $data['customfields'] = $customfieldoutput->render_customfields($program->id);
         
@@ -113,7 +118,7 @@ class renderer extends \plugin_renderer_base {
             $image = '';
             $disabled = false;
             $completionperct = 0;
-            $completiondelaytext = get_string('notset', 'enrol_programs');
+            $completiondelaytext = '';
             $fullname = $item->get_fullname();
             foreach ($item->get_children() as $child) {
                 if ($child instanceof set) {
@@ -136,7 +141,12 @@ class renderer extends \plugin_renderer_base {
                 $completiontype = '';
             }
             if ($completiondelay = $item->get_completiondelay()) {
-                $completiondelaytext = '<small>' . get_string('completiondelay', 'enrol_programs') . ': ' . util::format_duration($completiondelay) . '</small>';
+                $layoutconfig = get_config('enrol_programs', 'programslayout');
+                if ($layoutconfig == 'table') {
+                    $completiondelaytext = get_string('completiondelay', 'enrol_programs') . ': ' . util::format_duration($completiondelay);
+                } else {
+                    $completiondelaytext = util::format_duration($completiondelay);
+                }
             }
 
 
@@ -175,7 +185,7 @@ class renderer extends \plugin_renderer_base {
                 $image = $OUTPUT->get_generated_image_for_id($item->get_id());
             }
             $points = $item->get_points();
-            $completioninfo = '';
+            $completioninfo = get_string('notset', 'enrol_programs');
             $completion = $DB->get_record('enrol_programs_completions', ['itemid' => $item->get_id(), 'allocationid' => $allocation->id]);
             if ($completion) {
                 $completioninfo = userdate($completion->timecompleted, get_string('strftimedatetimeshort'));
@@ -204,7 +214,7 @@ class renderer extends \plugin_renderer_base {
                 'parent' => isset($parent) ? $parent->get_fullname() : '',
                 'sequence' => $sequence,
                 'sequencerequired' => $sequencerequired,
-                'completionperct' => $completionperct ?? 0,
+                'completionperct' => $completionperct ? round($completionperct,2) : 0,
                 'detailurl' => $detailurl ?? null,
                 'simplename' => $item->get_fullname(),
                 'padding' => $padding,

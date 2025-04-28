@@ -36,6 +36,9 @@
                 </dt>
                 <dd class="col-6">
                     {{completiondelaytext}}
+                    {{^completiondelaytext}}
+                        {{#str}}notset, enrol_programs{{/str}}
+                    {{/completiondelaytext}}
                 </dd>
                 {{#completioninfo}}
                     <dt class="col-6">

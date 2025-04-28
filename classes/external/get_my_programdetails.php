@@ -23,6 +23,7 @@ use core_external\external_value;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use enrol_programs\local\program;
+use enrol_programs\local\util;
 
 /**
  * Provides list of details of a particular program and allocation details that the user has been allocated to.
@@ -75,6 +76,7 @@ final class get_my_programdetails extends external_api {
         $sourceclass = $sourceclasses[$source->type];
         $data = [];
         $allocationresult = '';
+        $completiondelaytext = '';
         $data['completionstatus'] = allocation::get_completion_status_html($program, $allocation);
         $data['allocationsource'] = $sourceclass::render_allocation_source($program, $source, $allocation);
         $data['allocationdate'] =  userdate($allocation->timeallocated);
@@ -84,6 +86,10 @@ final class get_my_programdetails extends external_api {
         $data['completiondate'] = (isset($allocation->timecompleted) ? userdate($allocation->timecompleted) : $strnotset);
         $top = program::load_content($program->id);
         $data['sequencetype'] = $top->get_sequencetype_info();
+        if ($completiondelay = $top->get_completiondelay()) {
+            $completiondelaytext = util::format_duration($completiondelay);
+        }
+        $data['completiondelaytext'] = $completiondelaytext;
         $customfieldoutput = $PAGE->get_renderer('enrol_programs', 'customfield');
         $data['customfields'] = $customfieldoutput->render_customfields($program->id);
 

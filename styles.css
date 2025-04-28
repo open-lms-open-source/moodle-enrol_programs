@@ -57,6 +57,18 @@
         top: 10px;
         right: 10px;
     }
+    .course-card {
+        height: 30em;
+        @media (max-width: 1200px) {
+            height: 36em;
+        }
+        @media (max-width: 767px) {
+            height: 30em;
+        }
+        .card-img-top {
+            height: 12rem;
+        }
+    }
 }
 
 .contentbox,

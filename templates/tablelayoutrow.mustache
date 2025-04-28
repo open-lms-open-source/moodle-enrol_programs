@@ -17,7 +17,13 @@
 <tr>
     <td>{{{padding}}}{{{icon}}}{{{fullname}}}</td>
     <td>{{points}}</td>
-    <td>{{completiontype}}</td>
+    <td>
+        {{completiontype}}
+        {{#completiontype}}
+            <br>
+        {{/completiontype}}
+        {{{completiondelaytext}}}
+    </td>
     <td>{{completioninfo}}</td>
 </tr>
 {{#children}}
