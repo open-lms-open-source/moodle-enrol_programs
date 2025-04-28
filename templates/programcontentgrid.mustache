@@ -15,9 +15,15 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{#.}}
+    {{^isset}}
+        <div class="contentbox d-flex align-items-center mb-3">
+            <h3>{{#str}}tabcontent, enrol_programs{{/str}}</h3>
+            <div class="badge bg-primary ms-2">{{completiontype}}</div>
+        </div>
+    {{/isset}}
     {{#isset}}
-        <div class="d-flex align-items-center">
-            <h3 class="mb-0">{{fullname}}</h3>
+        <div class="d-flex align-items-center mb-3">
+            <h3>{{fullname}}</h3>
             <div class="badge bg-primary ms-2">{{completiontype}}</div>
         </div>
     {{/isset}}
