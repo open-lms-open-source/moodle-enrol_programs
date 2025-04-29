@@ -21,9 +21,13 @@
             <thead>
             <tr>
                 <th class="header c0" style="" scope="col">{{#str}}item, enrol_programs{{/str}}</th>
-                <th class="header c1" style="" scope="col">{{#str}}itempoints, enrol_programs{{/str}}</th>
+                {{^non-allocated}}
+                    <th class="header c1" style="" scope="col">{{#str}}itempoints, enrol_programs{{/str}}</th>
+                {{/non-allocated}}
                 <th class="header c2" style="" scope="col">{{#str}}sequencetype, enrol_programs{{/str}}</th>
-                <th class="header c3 lastcol" style="" scope="col">{{#str}}completiondate, enrol_programs{{/str}}</th>
+                {{^non-allocated}}
+                    <th class="header c3 lastcol" style="" scope="col">{{#str}}completiondate, enrol_programs{{/str}}</th>
+                {{/non-allocated}}
             </tr>
             </thead>
             <tbody>

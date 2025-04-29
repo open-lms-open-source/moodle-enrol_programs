@@ -71,6 +71,19 @@
     }
 }
 
+#page-enrol-programs-catalogue-program {
+    .programsnested-set {
+        margin-left: 20px;
+        margin-top: 2em;
+    }
+    .course-card {
+        height: 25em;
+        .card-img-top {
+            height: 12rem;
+        }
+    }
+}
+
 .contentbox,
 .programsnested-set {
     .badge {

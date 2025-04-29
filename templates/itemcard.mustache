@@ -25,12 +25,14 @@
         <div class="card-body">
             <h5 class="card-title">{{{fullname}}}</h5>
             <dl class="row">
-                <dt class="col-6">
-                    {{#str}}itempoints, enrol_programs{{/str}}
-                </dt>
-                <dd class="col-6">
-                    {{points}}
-                </dd>
+                {{^non-allocated}}
+                    <dt class="col-6">
+                        {{#str}}itempoints, enrol_programs{{/str}}
+                    </dt>
+                    <dd class="col-6">
+                        {{points}}
+                    </dd>
+                {{/non-allocated}}
                 <dt class="col-6">
                     {{#str}}completiondelay, enrol_programs{{/str}}
                 </dt>
@@ -49,12 +51,14 @@
                     </dd>
                 {{/completioninfo}}
                 {{^istraining}}
+                {{^non-allocated}}
                     <dt class="col-6">
                         {{#str}}completion, enrol_programs{{/str}}
                     </dt>
                     <dd class="col-6">
                         {{#str}}completepercent, enrol_programs, <span>{{completionperct}}</span>{{/str}}
                     </dd>
+                {{/non-allocated}}
                 {{/istraining}}
                 {{#istraining}}
                     <dt class="col-12">

@@ -17,6 +17,8 @@
 namespace enrol_programs\output\catalogue;
 
 use enrol_programs\local\allocation;
+use enrol_programs\local\content\training;
+use core_course\external\course_summary_exporter;
 use enrol_programs\local\program;
 use enrol_programs\local\util;
 use enrol_programs\local\content\item,
@@ -35,16 +37,28 @@ use stdClass, moodle_url, tabobject;
  */
 class renderer extends \plugin_renderer_base {
     public function render_program(\stdClass $program): string {
-        global $CFG, $DB, $PAGE;
+        global $CFG, $DB, $PAGE, $OUTPUT;
 
-        $strnotset = get_string('notset', 'enrol_programs');
-
+        $result = '';
         $context = \context::instance_by_id($program->contextid);
-        $fullname = format_string($program->fullname);
-        $programicon = $this->output->pix_icon('program', '', 'enrol_programs');
+        $strnotset = get_string('notset', 'enrol_programs');
+        $completiondelaytext = '';
 
+        $data = [];
+        $data['completionstatus'] = get_string('errornoallocation', 'enrol_programs');
+        $data['programstart'] = isset($program->timeallocationstart) ? userdate($program->timeallocationstart) : $strnotset;
+        $data['programend'] =  isset($allocation->timeend) ? userdate($allocation->timeend) : $strnotset;
+        $customfieldoutput = $PAGE->get_renderer('enrol_programs', 'customfield');
+        $data['customfields'] = $customfieldoutput->render_customfields($program->id);
+        $data['fullname'] = format_string($program->fullname);
         $description = file_rewrite_pluginfile_urls($program->description, 'pluginfile.php', $context->id, 'enrol_programs', 'description', $program->id);
-        $description = format_text($description, $program->descriptionformat, ['context' => $context]);
+        $data['description'] = format_text($description, $program->descriptionformat, ['context' => $context]);
+        $top = program::load_content($program->id);
+        $data['sequencetype'] = $top->get_sequencetype_info();
+        if ($completiondelay = $top->get_completiondelay()) {
+            $completiondelaytext = util::format_duration($completiondelay);
+        }
+        $data['completiondelaytext'] = $completiondelaytext;
 
         $tagsdiv = '';
         if ($CFG->usetags) {
@@ -53,39 +67,18 @@ class renderer extends \plugin_renderer_base {
                 $tagsdiv = $this->output->tag_list($tags, '', 'program-tags');
             }
         }
-
-        $programimage = '';
+        $data['tagsdiv'] = $tagsdiv;
         $presentation = (array)json_decode($program->presentationjson);
         if (!empty($presentation['image'])) {
             $imageurl = \moodle_url::make_file_url("$CFG->wwwroot/pluginfile.php",
                 '/' . $context->id . '/enrol_programs/image/' . $program->id . '/'. $presentation['image'], false);
-            $programimage = '<div class="float-end programimage">' . \html_writer::img($imageurl, '') . '</div>';
+            $data['thumbnail'] = $imageurl;
+        } else {
+            $data['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
         }
-
-        $result = '';
-        $result .= <<<EOT
-<div class="programbox clearfix" data-programid="$program->id">
-  $programimage
-  <div class="info">
-  <div class="info">
-    <h2 class="programname">{$programicon}{$fullname}</h2>
-  </div>$tagsdiv
-  <div class="content">
-    <div class="summary">$description</div>
-  </div>
-</div>
-EOT;
-
-        $result .= '<dl class="row">';
-        $result .= '<dt class="col-3">' . get_string('programstatus', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . get_string('errornoallocation', 'enrol_programs') . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('allocationstart', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . (isset($program->timeallocationstart) ? userdate($program->timeallocationstart) : $strnotset) . '</dd>';
-        $result .= '<dt class="col-3">' . get_string('allocationend', 'enrol_programs') . ':</dt><dd class="col-9">'
-            . (isset($program->timeallocationend) ? userdate($program->timeallocationend) : $strnotset) . '</dd>';
-        $customfieldoutput = $PAGE->get_renderer('enrol_programs', 'customfield');
-        $result .= $customfieldoutput->render_customfields($program->id);
-        $result .= '</dl>';
+        $data['programicon'] = $this->output->pix_icon('program', '', 'enrol_programs');
+        $data['programid'] = $program->id;
+        $result .= $OUTPUT->render_from_template('enrol_programs/programinfogrid', $data);
 
         $actions = [];
         /** @var \enrol_programs\local\source\base[] $sourceclasses */ // Type hack.
@@ -104,36 +97,54 @@ EOT;
             $result .= '</div>';
         }
 
-        $result .= $this->output->heading(get_string('tabcontent', 'enrol_programs'), 3);
-
         $result .= $this->render_program_content($program);
 
         return $result;
     }
 
     public function render_program_content(stdClass $program): string {
-        global $DB;
-
+        global $DB, $OUTPUT;
         $top = program::load_content($program->id);
 
-        $rows = [];
-        $renderercolumns = function(item $item, $itemdepth) use (&$renderercolumns, &$rows, &$DB): void {
-            $fullname = $item->get_fullname();
-            $id = $item->get_id();
-            $padding = str_repeat('&nbsp;', $itemdepth * 6);
+        $renderercolumns = function(item $item, $itemdepth) use (&$renderercolumns, &$DB, &$OUTPUT): array {
 
+            $children = [];
+            $isset = false;
+            $istraining = false;
+            $image = '';
+            $disabled = false;
+            $completiondelaytext = '';
+            $fullname = $item->get_fullname();
+            $sequence = 1;
+            foreach ($item->get_children() as $child) {
+                if ($child instanceof set) {
+                    $sequence = 1;
+                }
+                $children[] = $renderercolumns($child, $itemdepth + 1, $item, $sequence);
+                $sequence++;
+            }
+            if (isset($parent) && $parent->get_sequencetype_info() == 'All in order') {
+                $sequencerequired = true;
+            } else {
+                $sequencerequired = false;
+            }
             $completiontype = '';
             if ($item instanceof set) {
                 $completiontype = $item->get_sequencetype_info();
             }
             if ($completiondelay = $item->get_completiondelay()) {
-                if ($completiontype !== '') {
-                    $completiontype .= '<br />';
+                $layoutconfig = get_config('enrol_programs', 'programslayout');
+                if ($layoutconfig == 'table') {
+                    $completiondelaytext = get_string('completiondelay', 'enrol_programs') . ': ' . util::format_duration($completiondelay);
+                } else {
+                    $completiondelaytext = util::format_duration($completiondelay);
                 }
-                $completiontype .= '<small>' . get_string('completiondelay', 'enrol_programs') . ': ' . util::format_duration($completiondelay) . '</small>';
             }
-
-            if ($item instanceof course) {
+            if ($item instanceof top) {
+                $sequencerequired = false;
+            } else if ($item instanceof set) {
+                $isset = true;
+            } else if ($item instanceof course) {
                 $courseid = $item->get_courseid();
                 $coursecontext = \context_course::instance($courseid, IGNORE_MISSING);
                 if ($coursecontext) {
@@ -150,35 +161,53 @@ EOT;
                         $detailurl = new \moodle_url('/course/view.php', ['id' => $courseid]);
                         $fullname = \html_writer::link($detailurl, $fullname);
                     }
+                    $image = course_summary_exporter::get_course_image(get_course($courseid));
+                    $disabled = !$canaccesscourse;
                 } else {
                     $fullname .= ' <span class="badge badge-danger">' . get_string('errorcoursemissing', 'enrol_programs') . '</span>';
                 }
-            }
+                if (!$image) {
+                    $image = $OUTPUT->get_generated_image_for_id($courseid);
+                }
 
+            } else if ($item instanceof training) {
+                $image = $OUTPUT->get_generated_image_for_id($item->get_id());
+            }
+            $padding = str_repeat('&nbsp;', $itemdepth * 6);
             if ($item instanceof top) {
-                $itemname = $this->output->pix_icon('itemtop', get_string('program', 'enrol_programs'), 'enrol_programs') . '&nbsp;' . $fullname;
+                $icon = $this->output->pix_icon('itemtop', get_string('program', 'enrol_programs'), 'enrol_programs');
             } else if ($item instanceof course) {
-                $itemname = $padding . $this->output->pix_icon('itemcourse', get_string('course'), 'enrol_programs') . $fullname;
+                $icon = $this->output->pix_icon('itemcourse', get_string('course'), 'enrol_programs');
+            } else if ($item instanceof training) {
+                $icon = $this->output->pix_icon('itemtraining', get_string('training', 'enrol_programs'), 'enrol_programs');
             } else {
-                $itemname = $padding . $this->output->pix_icon('itemset', get_string('set', 'enrol_programs'), 'enrol_programs') . $fullname;
+                $icon = $this->output->pix_icon('itemset', get_string('set', 'enrol_programs'), 'enrol_programs');
             }
-
-            $row = [$itemname, $completiontype];
-
-            $rows[] = $row;
-
-            foreach ($item->get_children() as $child) {
-                $renderercolumns($child, $itemdepth + 1);
-            }
+            $data = [
+                'fullname' => $fullname,
+                'children' => $children,
+                'isset' => $isset,
+                'image' => $image,
+                'disabled' => $disabled,
+                'completiontype' => $completiontype,
+                'istraining' => $istraining,
+                'completiondelaytext' => $completiondelaytext,
+                'parent' => isset($parent) ? $parent->get_fullname() : '',
+                'sequencerequired' => $sequencerequired,
+                'detailurl' => $detailurl ?? null,
+                'simplename' => $item->get_fullname(),
+                'padding' => $padding,
+                'icon' => $icon,
+                'non-allocated' => true,
+            ];
+            return $data;
         };
-        $renderercolumns($top, 0);
-
-        $table = new \html_table();
-        $table->head = [get_string('item', 'enrol_programs'), get_string('sequencetype', 'enrol_programs')];
-        $table->id = 'program_content';
-        $table->attributes['class'] = 'admintable generaltable';
-        $table->data = $rows;
-
-        return \html_writer::table($table);
+        $layoutconfig = get_config('enrol_programs', 'programslayout');
+        $programitemlist = $renderercolumns($top, 0);
+        if ($layoutconfig == 'table') {
+            return $OUTPUT->render_from_template('enrol_programs/programcontenttable', $programitemlist);
+        } else {
+            return $OUTPUT->render_from_template('enrol_programs/programcontentgrid', $programitemlist);
+        }
     }
 }

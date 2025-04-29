@@ -15,22 +15,38 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 <dl class="row">
-    <dt class="col-3">{{#str}} programstatus , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{completionstatus}}}</dd>
-    <dt class="col-3">{{#str}} source , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{allocationsource}}}</dd>
-    <dt class="col-3">{{#str}} allocationdate , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{allocationdate}}}</dd>
-    <dt class="col-3">{{#str}} programstart , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{programstart}}}</dd>
-    <dt class="col-3">{{#str}} programdue , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{programdue}}}</dd>
-    <dt class="col-3">{{#str}} programend , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{programend}}}</dd>
-    <dt class="col-3">{{#str}} completiondate , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{completiondate}}}</dd>
-    <dt class="col-3">{{#str}} sequencetype , enrol_programs {{/str}}:</dt>
-    <dd class="col-9">{{{sequencetype}}}</dd>
+    {{#completionstatus}}
+        <dt class="col-3">{{#str}} programstatus , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{completionstatus}}}</dd>
+    {{/completionstatus}}
+    {{#allocationsource}}
+        <dt class="col-3">{{#str}} source , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{allocationsource}}}</dd>
+    {{/allocationsource}}
+    {{#allocationdate}}
+        <dt class="col-3">{{#str}} allocationdate , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{allocationdate}}}</dd>
+    {{/allocationdate}}
+    {{#programstart}}
+        <dt class="col-3">{{#str}} programstart , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{programstart}}}</dd>
+    {{/programstart}}
+    {{#programdue}}
+        <dt class="col-3">{{#str}} programdue , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{programdue}}}</dd>
+    {{/programdue}}
+    {{#programend}}
+        <dt class="col-3">{{#str}} programend , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{programend}}}</dd>
+    {{/programend}}
+    {{#completiondate}}
+        <dt class="col-3">{{#str}} completiondate , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{completiondate}}}</dd>
+    {{/completiondate}}
+    {{#sequencetype}}
+        <dt class="col-3">{{#str}} sequencetype , enrol_programs {{/str}}:</dt>
+        <dd class="col-9">{{{sequencetype}}}</dd>
+    {{/sequencetype}}
     {{#completiondelaytext}}
         <dt class="col-3">{{#str}} completiondelay , enrol_programs {{/str}}:</dt>
         <dd class="col-9">{{{completiondelaytext}}}</dd>

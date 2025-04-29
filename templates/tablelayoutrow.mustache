@@ -16,7 +16,11 @@
 }}
 <tr>
     <td>{{{padding}}}{{{icon}}}{{{fullname}}}</td>
-    <td>{{points}}</td>
+    {{^non-allocated}}
+        <td>
+            {{points}}
+        </td>
+    {{/non-allocated}}
     <td>
         {{completiontype}}
         {{#completiontype}}
@@ -24,7 +28,11 @@
         {{/completiontype}}
         {{{completiondelaytext}}}
     </td>
-    <td>{{completioninfo}}</td>
+    {{^non-allocated}}
+        <td>
+            {{completioninfo}}
+        </td>
+    {{/non-allocated}}
 </tr>
 {{#children}}
     {{> enrol_programs/tablelayoutrow}}
