@@ -3,18 +3,21 @@
 }
 
 .programbox .programimage img {
-    max-width: 200px;
-    max-height: 100px;
-    width: auto;
-    height: auto;
+    height: 250px;
+    width: 300px;
+    border-radius: 0.5rem;
 }
 
 #page-enrol-programs-management-program .programimage img,
 #page-admin-enrol-programs-management-program .programimage img {
-    max-width: 300px;
-    max-height: 200px;
-    width: auto;
-    height: auto;
+    height: 250px;
+    width: 300px;
+    border-radius: 0.5rem;
+}
+
+#page-enrol-programs-catalogue-index .programimage img {
+    height: 150px;
+    width: 200px;
 }
 
 .programs .programbox.even {
@@ -35,9 +38,6 @@
 }
 
 #page-enrol-programs-my-program {
-    .programimage img {
-        max-height: 300px;
-    }
 
     .course-card.disabled img {
         filter: grayscale(100%);
