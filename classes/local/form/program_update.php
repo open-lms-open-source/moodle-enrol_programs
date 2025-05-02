@@ -104,7 +104,7 @@ final class program_update extends \local_openlms\dialog_form {
                 $select = 'idnumber = :idnumber AND id <> :id';
                 $params = ['idnumber' => $data['idnumber'], 'id' => $olddata->id];
                 if ($DB->record_exists_select('enrol_programs_programs', $select, $params)) {
-                    $errors['idnumber'] = get_string('error');
+                    $errors['idnumber'] = get_string('errorduplicateprogramid', 'enrol_programs');
                 }
             }
         }
