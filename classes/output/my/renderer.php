@@ -214,7 +214,7 @@ class renderer extends \plugin_renderer_base {
                 'parent' => isset($parent) ? $parent->get_fullname() : '',
                 'sequence' => $sequence,
                 'sequencerequired' => $sequencerequired,
-                'completionperct' => $completionperct ? round($completionperct,2) : 0,
+                'completionperct' => $completionperct ? round($completionperct, 2) : 0,
                 'detailurl' => $detailurl ?? null,
                 'simplename' => $item->get_fullname(),
                 'padding' => $padding,
