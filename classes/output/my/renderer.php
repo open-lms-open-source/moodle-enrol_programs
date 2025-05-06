@@ -39,7 +39,6 @@ class renderer extends \plugin_renderer_base {
 
     public function render_programinfo_and_user_allocation(stdClass $program, stdClass $source, stdClass $allocation): string {
         global $CFG, $OUTPUT, $PAGE;
-        $strnotset = get_string('notset', 'enrol_programs');
 
         $sourceclasses = allocation::get_source_classes();
         /** @var \enrol_programs\local\source\base $sourceclass */
@@ -51,9 +50,9 @@ class renderer extends \plugin_renderer_base {
         $data['allocationsource'] = $sourceclass::render_allocation_source($program, $source, $allocation);
         $data['allocationdate'] =  userdate($allocation->timeallocated);
         $data['programstart'] = userdate($allocation->timestart);
-        $data['programdue'] =  (isset($allocation->timedue) ? userdate($allocation->timedue) : $strnotset);
-        $data['programend'] =  (isset($allocation->timeend) ? userdate($allocation->timeend) : $strnotset);
-        $data['completiondate'] = (isset($allocation->timecompleted) ? userdate($allocation->timecompleted) : $strnotset);
+        $data['programdue'] =  (isset($allocation->timedue) ? userdate($allocation->timedue) : null);
+        $data['programend'] =  (isset($allocation->timeend) ? userdate($allocation->timeend) : null);
+        $data['completiondate'] = (isset($allocation->timecompleted) ? userdate($allocation->timecompleted) : null);
         $top = program::load_content($program->id);
         $data['sequencetype'] = $top->get_sequencetype_info();
         if ($completiondelay = $top->get_completiondelay()) {
@@ -258,7 +257,6 @@ class renderer extends \plugin_renderer_base {
         }
 
         $programicon = $this->output->pix_icon('program', '', 'enrol_programs');
-        $strnotset = get_string('notset', 'enrol_programs');
         $dateformat = get_string('strftimedatefullshort');
         $data = [];
 
@@ -285,9 +283,9 @@ class renderer extends \plugin_renderer_base {
 
             $row['programstart'] = userdate($allocation->timestart, $dateformat);
 
-            $row['programdue'] = (isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : $strnotset);
+            $row['programdue'] = (isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : null);
 
-            $row['programend'] = (isset($allocation->timeend) ? userdate($allocation->timeend, $dateformat) : $strnotset);
+            $row['programend'] = (isset($allocation->timeend) ? userdate($allocation->timeend, $dateformat) : null);
 
             $data[] = $row;
         }

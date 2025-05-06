@@ -63,7 +63,6 @@ final class get_my_programsoverview extends external_api {
         $allocations = allocation::get_my_allocations(null, true, $from, $count);
 
         $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
-        $strnotset = get_string('notset', 'enrol_programs');
         $dateformat = get_string('strftimedatefullshort');
         $data = [];
 
@@ -90,9 +89,9 @@ final class get_my_programsoverview extends external_api {
 
             $row['programstart'] = userdate($allocation->timestart, $dateformat);
 
-            $row['programdue'] = (isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : $strnotset);
+            $row['programdue'] = (isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : null);
 
-            $row['programend'] = (isset($allocation->timeend) ? userdate($allocation->timeend, $dateformat) : $strnotset);
+            $row['programend'] = (isset($allocation->timeend) ? userdate($allocation->timeend, $dateformat) : null);
 
             $data[] = $row;
         }
