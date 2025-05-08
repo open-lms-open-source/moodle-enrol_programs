@@ -81,7 +81,7 @@ final class get_my_programsoverview extends external_api {
                 $row['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
             }
 
-            $fullname = shorten_text(format_string($program->fullname));
+            $fullname = format_string($program->fullname);
             $detailurl = new \moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $fullname = \html_writer::link($detailurl, $fullname);
             $row['fullname'] = $fullname;

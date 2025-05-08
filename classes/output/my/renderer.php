@@ -64,7 +64,7 @@ class renderer extends \plugin_renderer_base {
         $data['customfields'] = $customfieldoutput->render_customfields($program->id);
         
         $context = \context::instance_by_id($program->contextid);
-        $data['fullname'] = shorten_text(format_string($program->fullname));
+        $data['fullname'] = format_string($program->fullname);
 
         $description = file_rewrite_pluginfile_urls($program->description, 'pluginfile.php', $context->id, 'enrol_programs', 'description', $program->id);
         $data['description'] = format_text($description, $program->descriptionformat, ['context' => $context]);
@@ -276,7 +276,7 @@ class renderer extends \plugin_renderer_base {
                 $row['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
             }
 
-            $fullname = shorten_text(format_string($program->fullname));
+            $fullname = shorten_text(format_string($program->fullname), 23, true);
             $detailurl = new moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $fullname = \html_writer::link($detailurl, $fullname);
             $row['fullname'] = $fullname;

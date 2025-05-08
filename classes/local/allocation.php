@@ -1389,7 +1389,7 @@ final class allocation {
             $sql .= " ORDER BY p.fullname ASC";
         }
         if (isset($from) && isset($count)) {
-            $sql .= " LIMIT {$from}, {$count}";
+            $sql .= " LIMIT {$count} OFFSET {$from}";
         }
 
         return $DB->get_records_sql($sql, $params);

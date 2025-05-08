@@ -129,4 +129,11 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'enrol_programs_get_userprogram_preferences' => [
+        'classname' => enrol_programs\external\get_userprogram_preferences::class,
+        'description' => 'Get user preferences for a program user interface.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
 ];

@@ -20,8 +20,17 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
 
     return {
         init: async function(options = {}) {
-            selectedView = await UserRepository.getUserPreference('enrol_programs_block_user_view_preference');
-            detailSelectedView = await UserRepository.getUserPreference('enrol_programs_detailpage_user_view_preference');
+            const preferences = await new Promise((resolve, reject) => {
+                Ajax.call([{
+                    methodname: 'enrol_programs_get_userprogram_preferences',
+                    args: {},
+                    done: resolve,
+                    fail: reject
+                }]);
+            });
+
+            selectedView = preferences.blockview;
+            detailSelectedView = preferences.detailview;
             totalPages = options.totalpages;
             updateArrowsState();
 
