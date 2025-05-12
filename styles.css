@@ -89,3 +89,97 @@
     justify-content: flex-end;
     padding: 10px;
 }
+
+#page-enrol-programs-my-index {
+    #region-main {
+        @media (min-width: 1600px) {
+            padding-right: 10rem;
+            padding-left: 10rem;
+        }
+    }
+    .my-programs-filters {
+        padding-bottom: 1em;
+        .sort-filters {
+            @media (max-width: 767px) {
+                padding-right: 10rem;
+                padding-left: 10rem;
+            }
+            .dropdown-menu {
+                .dropdown-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+                }
+                li {
+                    display: flex;
+                    .icon {
+                        margin-left: 1em;
+                    }
+                }
+            }
+
+        }
+    }
+    .programs-grid {
+        .program-card {
+            width: 100%;
+            max-width: 30em;
+            height: 36em;
+            margin-bottom: 1em;
+            justify-self: center;
+            border: 2px solid rgba(0, 0, 0, 0.125);
+            @media (max-width: 1200px) {
+                height: 42em;
+            }
+            @media (max-width: 767px) {
+                height: 36em;
+            }
+            .program-name {
+                padding: 0.75rem 1.25rem;
+                margin-bottom: 0;
+                background-color: rgba(0, 0, 0, 0.03);
+                text-align: center;
+                font-weight: bold;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .card-img-top {
+                height: 15em;
+            }
+            .program-desc {
+                max-height: 6em;
+                overflow-y: auto;
+            }
+            .program-desc p {
+                height: 4.5em;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+            }
+            .program-id {
+                position: absolute;
+                text-align: center;
+                width: 40%;
+                bottom: 25em;
+                left: 1em;
+                background-color: white;
+                color: black;
+                padding: 4px 25px;
+                font-size: 0.8rem;
+                border-radius: 10px;
+                font-weight: bold;
+                border: 1px solid;
+                @media (max-width: 1200px) {
+                    bottom: 32em;
+                }
+                @media (max-width: 767px) {
+                    bottom: 25em;
+                }
+            }
+        }
+    }
+}

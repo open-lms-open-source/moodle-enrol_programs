@@ -1,0 +1,32 @@
+<div class="my-programs-filters">
+    <div class="sort-filters mb-1 me-1 d-flex flex-wrap align-items-center">
+        <div class="dropdown">
+            <button id="sort-program-filter" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+            <span data-active-item-text>
+                {{#sortedbyname}}{{#str}} sortbyprogramname, enrol_programs {{/str}}{{/sortedbyname}}
+                {{#sortedbyid}}{{#str}} sortbyprogramid, enrol_programs {{/str}}{{/sortedbyid}}
+                {{#sortedbystart}}{{#str}} sortbyprogramstart, enrol_programs {{/str}}{{/sortedbystart}}
+                {{#sortedbydue}}{{#str}} sortbyprogramdue, enrol_programs {{/str}}{{/sortedbydue}}
+                {{#sortedbyend}}{{#str}} sortbyprogramend, enrol_programs {{/str}}{{/sortedbyend}}
+            </span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    {{{sortbyprogramname}}}
+                </li>
+                <li>
+                    {{{sortbyprogramid}}}
+                </li>
+                <li>
+                    {{{sortbyprogramstart}}}
+                </li>
+                <li>
+                    {{{sortbyprogramdue}}}
+                </li>
+                <li>
+                    {{{sortbyprogramend}}}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
