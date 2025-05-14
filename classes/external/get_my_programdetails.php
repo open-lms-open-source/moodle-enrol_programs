@@ -99,7 +99,7 @@ final class get_my_programdetails extends external_api {
 
         $tagsdiv = '';
         if ($CFG->usetags) {
-            $tags = \core_tag_tag::get_item_tags('enrol_programs', 'program', $program->id);
+            $tags = \core_tag_tag::get_item_tags('enrol_programs', 'enrol_programs_programs', $program->id);
             if ($tags) {
                 $tagsdiv = $OUTPUT->tag_list($tags, '', 'program-tags');
             }

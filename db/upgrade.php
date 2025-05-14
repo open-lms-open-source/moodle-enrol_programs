@@ -390,5 +390,17 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024071100, 'enrol', 'programs');
     }
 
+    if ($oldversion < 2025051400) {
+        $trans = $DB->start_delegated_transaction();
+        $records = $DB->get_records('tag_instance', ['component' => 'enrol_programs']);
+        foreach ($records as $record) {
+            $record->itemtype = 'enrol_programs_programs';
+            $DB->update_record('tag_instance', $record);
+        }
+        $trans->allow_commit();
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2025051400, 'enrol', 'programs');
+    }
+
     return true;
 }

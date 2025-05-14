@@ -52,6 +52,6 @@ function enrol_programs_get_tagged_programs($tag, $exclusivemode = false, $fromc
     $content = $result['content'];
     $totalpages = ceil($result['totalcount'] / $perpage);
 
-    return new core_tag\output\tagindex($tag, 'enrol_programs', 'program', $content,
+    return new core_tag\output\tagindex($tag, 'enrol_programs', 'enrol_programs_programs', $content,
         $exclusivemode, 0, 0, 1, $page, $totalpages);
 }

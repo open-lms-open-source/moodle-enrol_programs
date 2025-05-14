@@ -53,7 +53,7 @@ management::setup_program_page($currenturl, $context, $program);
 $editoroptions = program::get_description_editor_options($context->id);
 $program = file_prepare_standard_editor($program, 'description', $editoroptions,
     $context, 'enrol_programs', 'description', $program->id);
-$program->tags = core_tag_tag::get_item_tags_array('enrol_programs', 'program', $program->id);
+$program->tags = core_tag_tag::get_item_tags_array('enrol_programs', 'enrol_programs_programs', $program->id);
 
 $program->image = file_get_submitted_draft_itemid('image');
 file_prepare_draft_area($program->image, $context->id, 'enrol_programs', 'image', $program->id, ['subdirs' => 0]);

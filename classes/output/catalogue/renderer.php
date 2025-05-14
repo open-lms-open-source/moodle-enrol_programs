@@ -62,7 +62,7 @@ class renderer extends \plugin_renderer_base {
 
         $tagsdiv = '';
         if ($CFG->usetags) {
-            $tags = \core_tag_tag::get_item_tags('enrol_programs', 'program', $program->id);
+            $tags = \core_tag_tag::get_item_tags('enrol_programs', 'enrol_programs_programs', $program->id);
             if ($tags) {
                 $tagsdiv = $this->output->tag_list($tags, '', 'program-tags');
             }

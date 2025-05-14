@@ -198,7 +198,7 @@ final class program {
         $program = self::update_program_image($data);
 
         if ($CFG->usetags && isset($data->tags)) {
-            \core_tag_tag::set_item_tags('enrol_programs', 'program', $data->id, $context, $data->tags);
+            \core_tag_tag::set_item_tags('enrol_programs', 'enrol_programs_programs', $data->id, $context, $data->tags);
         }
 
         if ($editorused) {
@@ -279,7 +279,7 @@ final class program {
                 // Delete tags even if they are not enabled before move,
                 // tags API is not designed to deal with this,
                 // we cannot create instance of deleted context.
-                \core_tag_tag::set_item_tags('enrol_programs', 'program', $data->id, $oldcontext, null);
+                \core_tag_tag::set_item_tags('enrol_programs', 'enrol_programs_programs', $data->id, $oldcontext, null);
             }
             $record->contextid = $context->id;
         } else {
@@ -330,7 +330,7 @@ final class program {
         $DB->update_record('enrol_programs_programs', $record);
 
         if ($CFG->usetags && isset($data->tags)) {
-            \core_tag_tag::set_item_tags('enrol_programs', 'program', $data->id, $context, $data->tags);
+            \core_tag_tag::set_item_tags('enrol_programs', 'enrol_programs_programs', $data->id, $context, $data->tags);
         }
 
         $program = self::update_program_image($data);
@@ -821,7 +821,7 @@ final class program {
         $DB->delete_records('enrol_programs_certs', ['programid' => $program->id]);
 
         // Program details last.
-        \core_tag_tag::set_item_tags('enrol_programs', 'program', $program->id, $context, null);
+        \core_tag_tag::set_item_tags('enrol_programs', 'enrol_programs_programs', $program->id, $context, null);
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'enrol_programs', 'description', $program->id);
         $fs->delete_area_files($context->id, 'enrol_programs', 'image', $program->id);

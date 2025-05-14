@@ -87,4 +87,14 @@ final class cron_test extends \advanced_testcase {
         $task->execute();
         ob_end_clean();
     }
+
+    public function test_execute_tagcrontask() {
+        $generator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $generator->create_program(['sources' => ['manual' => []], 'creategroups' => 1, 'tags' => ['Test']]);
+        $task = new \core\task\tag_cron_task();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+    }
 }

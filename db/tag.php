@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $tagareas = array(
     array(
-        'itemtype' => 'program',
+        'itemtype' => 'enrol_programs_programs',
         'component' => 'enrol_programs',
         'callback' => 'enrol_programs_get_tagged_programs',
         'callbackfile' => '/enrol/programs/locallib.php',

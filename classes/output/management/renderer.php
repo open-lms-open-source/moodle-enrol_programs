@@ -61,7 +61,7 @@ class renderer extends \plugin_renderer_base {
         $result .= '<dt class="col-3">' . get_string('creategroups', 'enrol_programs') . ':</dt><dd class="col-9">'
             . ($program->creategroups ? get_string('yes') : get_string('no')) . '</dd>';
         if ($CFG->usetags) {
-            $tags = \core_tag_tag::get_item_tags('enrol_programs', 'program', $program->id);
+            $tags = \core_tag_tag::get_item_tags('enrol_programs', 'enrol_programs_programs', $program->id);
             if ($tags) {
                 $result .= '<dt class="col-3">' . get_string('tags') . ':</dt><dd class="col-9">'
                     . $this->output->tag_list($tags, '', 'program-tags') . '</dd>';
