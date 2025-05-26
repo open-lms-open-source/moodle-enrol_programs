@@ -41,13 +41,12 @@ class renderer extends \plugin_renderer_base {
 
         $result = '';
         $context = \context::instance_by_id($program->contextid);
-        $strnotset = get_string('notset', 'enrol_programs');
         $completiondelaytext = '';
 
         $data = [];
         $data['completionstatus'] = get_string('errornoallocation', 'enrol_programs');
-        $data['programstart'] = isset($program->timeallocationstart) ? userdate($program->timeallocationstart) : $strnotset;
-        $data['programend'] =  isset($allocation->timeend) ? userdate($allocation->timeend) : $strnotset;
+        $data['programstart'] = isset($program->timeallocationstart) ? userdate($program->timeallocationstart) : null;
+        $data['programend'] =  isset($allocation->timeend) ? userdate($allocation->timeend) : null;
         $customfieldoutput = $PAGE->get_renderer('enrol_programs', 'customfield');
         $data['customfields'] = $customfieldoutput->render_customfields($program->id);
         $data['fullname'] = format_string($program->fullname);
