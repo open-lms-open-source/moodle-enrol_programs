@@ -80,10 +80,10 @@ final class get_my_programsoverview extends external_api {
                 $row['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
             }
 
-            $fullname = format_string($program->fullname);
+            $fullname = shorten_text(format_string($program->fullname), 23, true);;
+            $row['fullnameplain'] = $fullname;
             $detailurl = new \moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
-            $fullname = \html_writer::link($detailurl, $fullname);
-            $row['fullname'] = $fullname;
+            $row['fullname'] = \html_writer::link($detailurl, $fullname);
 
             $row['status'] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
 
@@ -107,6 +107,7 @@ final class get_my_programsoverview extends external_api {
     public static function execute_returns(): external_multiple_structure {
         return new external_multiple_structure(
             new external_single_structure([
+                'fullnameplain' => new external_value(PARAM_TEXT, 'Program fullname without html'),
                 'fullname' => new external_value(PARAM_CLEANHTML, 'Program fullname'),
                 'status' => new external_value(PARAM_CLEANHTML, 'Program status'),
                 'thumbnail' => new external_value(PARAM_CLEANHTML, 'Program image'),
