@@ -81,7 +81,7 @@ final class get_my_programsoverview extends external_api {
             }
 
             $fullname = shorten_text(format_string($program->fullname), 23, true);;
-            $row['fullnameplain'] = $fullname;
+            $row['fullnameplain'] = format_string($program->fullname);
             $detailurl = new \moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $row['fullname'] = \html_writer::link($detailurl, $fullname);
 

@@ -276,7 +276,7 @@ class renderer extends \plugin_renderer_base {
             }
 
             $fullname = shorten_text(format_string($program->fullname), 23, true);
-            $row['fullnameplain'] = $fullname;
+            $row['fullnameplain'] = format_string($program->fullname);
             $detailurl = new moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $fullname = \html_writer::link($detailurl, $fullname);
             $row['fullname'] = $fullname;
