@@ -83,13 +83,13 @@
         }
     }
 }
-
+/*
 .program-card-layout-selector-content {
     display: flex;
     justify-content: flex-end;
     padding: 10px;
 }
-
+*/
 #page-enrol-programs-my-index {
     #region-main {
         @media (min-width: 1600px) {
@@ -182,4 +182,19 @@
             }
         }
     }
+}
+
+.programviewtoggle-button {
+    border: 2px solid;
+    border-radius: 8px;
+    padding: 12px;
+    text-decoration: none;
+    display: inline-flex;
+    margin-bottom: 10px;
+}
+.programviewtoggle-button:not(.selected) {
+    border-color: #ccc;
+}
+.programviewtoggle-button:not(.selected) i {
+    color: #888;
 }

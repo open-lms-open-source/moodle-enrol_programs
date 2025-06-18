@@ -1,7 +1,6 @@
 define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templates, UserRepository, Ajax) {
     let currentPage = 1;
     let selectedView; // For block view
-    let detailSelectedView; // For detail page view
     let totalPages;
 
     /**
@@ -30,7 +29,6 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
             });
 
             selectedView = preferences.blockview;
-            detailSelectedView = preferences.detailview;
             totalPages = options.totalpages;
             updateArrowsState();
 
@@ -87,36 +85,45 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
      * @returns {void}
      */
     function attachDropdownListener(options = {}) {
-        const dropdown = document.getElementById('user-view-dropdown');
-        if (dropdown) {
-            dropdown.addEventListener('change', function(event) {
-                selectedView = event.target.value;
-                UserRepository.setUserPreference('enrol_programs_block_user_view_preference', selectedView)
+        const viewLayouts = document.querySelectorAll('#programview-toggle .programviewtoggle-button');
+        viewLayouts.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const selectedView = this.getAttribute('data-view');
+                viewLayouts.forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+                const pagedContentPage = document.getElementById('block_myprograms_overview');
+                Templates.render('core/loading', {}).then(function(spinnerHtml) {
+                    pagedContentPage.innerHTML = spinnerHtml;
+                    UserRepository.setUserPreference('enrol_programs_block_user_view_preference', selectedView)
                     .then(() => {
                         fetchTemplateData('block', options).then((data) => {
                             renderTemplate(selectedView, Object.values(data), 'block');
                         });
                     });
+                });
             });
-        }
+        });
 
-        const detaildropdown = document.getElementById('programdetail-user-view-dropdown');
-        if (detaildropdown) {
-            detaildropdown.addEventListener('change', function(event) {
-                detailSelectedView = event.target.value;
-                UserRepository.setUserPreference('enrol_programs_detailpage_user_view_preference', detailSelectedView)
-                    .then(() => {
-                        fetchTemplateData('details', options).then((data) => {
-                            renderTemplate(detailSelectedView, data, 'details');
-                        });
-                    })
-                    .then(() => {
-                        fetchTemplateData('progress', options).then((data) => {
-                            renderTemplate(detailSelectedView, data, 'progress');
-                        });
-                    });
+        const viewLinks = document.querySelectorAll('#programdetail-programview-toggle .programviewtoggle-button');
+        viewLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const selectedView = this.getAttribute('data-view');
+                viewLinks.forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+                Templates.render('core/loading', {}).then(function(spinnerHtml) {
+                    const pagedContentPage = document.getElementById('programcontentcontainer');
+                    pagedContentPage.innerHTML = spinnerHtml;
+                    UserRepository.setUserPreference('enrol_programs_detailpage_user_view_preference', selectedView)
+                    .then(() => fetchTemplateData('details', options))
+                    .then(data => renderTemplate(selectedView, data, 'details'))
+                    .then(() => fetchTemplateData('progress', options))
+                    .then(data => renderTemplate(selectedView, data, 'progress'));
+                });
             });
-        }
+        });
+
     }
 
     /**

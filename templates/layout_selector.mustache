@@ -1,9 +1,9 @@
-<div>
-    <div class="program-card-layout-selector-content">
-        <select {{^isprogramdetailpage}}id="user-view-dropdown"{{/isprogramdetailpage}}
-            {{#isprogramdetailpage}}id="programdetail-user-view-dropdown"{{/isprogramdetailpage}}>
-            <option {{#viewgrid}}selected="selected"{{/viewgrid}} value="grid">{{#str}}layoutgrid, enrol_programs{{/str}}</option>
-            <option {{#viewtable}}selected="selected"{{/viewtable}} value="table">{{#str}}layouttable, enrol_programs{{/str}}</option>
-        </select>
-    </div>
+<div {{^isprogramdetailpage}} id="programview-toggle"{{/isprogramdetailpage}}
+    {{#isprogramdetailpage}} id="programdetail-programview-toggle"{{/isprogramdetailpage}}>
+    <a id="table-view" class="programviewtoggle-button {{#viewtable}}selected{{/viewtable}}" data-view="table" title="{{#str}}layouttable, enrol_programs{{/str}}">
+        <i class="fa-solid fa-list fa-lg"></i>
+    </a>
+    <a id="grid-view" class="programviewtoggle-button {{#viewgrid}}selected{{/viewgrid}}" data-view="grid" title="{{#str}}layoutgrid, enrol_programs{{/str}}">
+        <i class="fa-solid fa-th fa-lg"></i>
+    </a>
 </div>
