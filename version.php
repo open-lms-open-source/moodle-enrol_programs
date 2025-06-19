@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version   = 2025051400;
 $plugin->requires  = 2024091700.00; // 4.5.0
 $plugin->component = 'enrol_programs';
-$plugin->release   = 'v4.2.0';
+$plugin->release   = 'v4.5-MP3';
 $plugin->supported = [405, 405];
 
 $plugin->dependencies = [
