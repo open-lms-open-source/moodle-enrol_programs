@@ -99,6 +99,7 @@
     }
     .my-programs-filters {
         padding-bottom: 1em;
+        gap: 1rem;
         .sort-filters {
             @media (max-width: 767px) {
                 padding-right: 10rem;
@@ -148,18 +149,6 @@
             .card-img-top {
                 height: 15em;
             }
-            .program-desc {
-                max-height: 6em;
-                overflow-y: auto;
-            }
-            .program-desc p {
-                height: 4.5em;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                display: -webkit-box;
-                -webkit-line-clamp: 3;
-                -webkit-box-orient: vertical;
-            }
             .program-id {
                 position: absolute;
                 text-align: center;
@@ -181,6 +170,20 @@
                 }
             }
         }
+    }
+
+    .program-desc {
+        max-height: 6em;
+        overflow-y: auto;
+    }
+
+    .program-desc p {
+        height: 4.5em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
     }
 }
 

@@ -84,7 +84,8 @@ final class get_my_programsoverview extends external_api {
             $row['fullnameplain'] = format_string($program->fullname);
             $detailurl = new \moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $row['fullname'] = \html_writer::link($detailurl, $fullname);
-
+            $row['idnumber'] = $program->idnumber;
+            $row['description'] = $program->description;
             $row['status'] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
 
             $row['programstart'] = userdate($allocation->timestart, $dateformat);
@@ -109,6 +110,8 @@ final class get_my_programsoverview extends external_api {
             new external_single_structure([
                 'fullnameplain' => new external_value(PARAM_TEXT, 'Program fullname without html'),
                 'fullname' => new external_value(PARAM_CLEANHTML, 'Program fullname'),
+                'idnumber' => new external_value(PARAM_TEXT, 'Program idnumber'),
+                'description' => new external_value(PARAM_RAW, 'Program description'),
                 'status' => new external_value(PARAM_CLEANHTML, 'Program status'),
                 'thumbnail' => new external_value(PARAM_CLEANHTML, 'Program image'),
                 'programstart' => new external_value(PARAM_CLEANHTML, 'Program start', VALUE_OPTIONAL),

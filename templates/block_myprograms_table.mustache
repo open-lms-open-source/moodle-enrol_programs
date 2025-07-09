@@ -15,10 +15,12 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 <div class="table-responsive">
-    <table class="admintable generaltable">
+    <table id="my_programs" class="admintable generaltable">
         <thead>
             <tr>
                 <th>{{#str}}programname, enrol_programs{{/str}}</th>
+                <th>{{#str}}programidnumber, enrol_programs{{/str}}</th>
+                {{#ismyprogramspage}}<th>{{#str}}description, moodle{{/str}}</th>{{/ismyprogramspage}}
                 <th>{{#str}}programstatus, enrol_programs{{/str}}</th>
                 <th>{{#str}}programstart, enrol_programs{{/str}}</th>
                 <th>{{#str}}programdue, enrol_programs{{/str}}</th>
@@ -29,6 +31,8 @@
             {{#programs}}
                 <tr>
                     <td>{{{fullname}}}</td>
+                    <td>{{idnumber}}</td>
+                    {{#ismyprogramspage}}<td class="program-desc">{{{description}}}</td>{{/ismyprogramspage}}
                     <td>{{{status}}}</td>
                     <td>{{programstart}}</td>
                     <td>{{programdue}}</td>

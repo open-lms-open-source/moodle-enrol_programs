@@ -81,13 +81,5 @@ echo $OUTPUT->header();
 /** @var \enrol_programs\output\my\renderer $myoutput */
 $myoutput = $PAGE->get_renderer('enrol_programs', 'my');
 
-echo $myoutput->render_my_programs_filters($sort, $dir);
-
-$layoutconfig = get_config('enrol_programs', 'programslayout');
-if ($layoutconfig == 'table') {
-    echo $myoutput->render_my_programs_table_layout($sort, $dir);
-} else {
-    echo $myoutput->render_my_programs_grid_layout($sort, $dir);
-}
-
+echo $myoutput->render_block_content(true);
 echo $OUTPUT->footer();

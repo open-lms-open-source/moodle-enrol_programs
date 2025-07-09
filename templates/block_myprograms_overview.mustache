@@ -19,18 +19,22 @@
     {{#allowuserlayoutchange}}
         {{> enrol_programs/layout_selector}}
     {{/allowuserlayoutchange}}
-        <div id="block_myprograms_overview" class="block_myprograms_overview">
-            {{#viewgrid}}
-                {{> enrol_programs/block_myprograms_grid}}
-            {{/viewgrid}}
-            {{#viewtable}}
-                {{> enrol_programs/block_myprograms_table}}
-            {{/viewtable}}
-        </div>
-        <div class="float-end">
-            <ul class="pagination mb-0">
-                <a href="#" class="programs-previous">{{#pix}} i/previous, core, {{#str}}previous{{/str}}{{/pix}}</a>
-                <a href="#" class="programs-next">{{#pix}} i/next, core, {{#str}}next{{/str}}{{/pix}}</a>
-            </ul>
-        </div><br/>
+    <input type="hidden" id="ismyprogramspage" {{#ismyprogramspage}} value="1" {{/ismyprogramspage}}/>
+
+    <div id="block_myprograms_overview" class="block_myprograms_overview">
+        {{#viewgrid}}
+            {{> enrol_programs/block_myprograms_grid}}
+        {{/viewgrid}}
+        {{#viewtable}}
+            {{> enrol_programs/block_myprograms_table}}
+        {{/viewtable}}
+    </div>
+    {{^ismyprogramspage}}
+    <div class="float-end">
+        <ul class="pagination mb-0">
+            <a href="#" class="programs-previous">{{#pix}} i/previous, core, {{#str}}previous{{/str}}{{/pix}}</a>
+            <a href="#" class="programs-next">{{#pix}} i/next, core, {{#str}}next{{/str}}{{/pix}}</a>
+        </ul>
+    </div><br/>
+    {{/ismyprogramspage}}
 </div>

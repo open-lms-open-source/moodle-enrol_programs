@@ -246,13 +246,13 @@ class renderer extends \plugin_renderer_base {
      *
      * @return string
      */
-    public function render_block_content(): string {
+    public function render_block_content($ismyprogramspage = false): string {
         global $DB, $OUTPUT, $CFG, $PAGE;
         $totalpages = ceil(count(allocation::get_my_allocations())/allocation::PROGRAMCOUNTPERPAGE);
 
         $PAGE->requires->js_call_amd('enrol_programs/selector', 'init', [['totalpages' => $totalpages]]);
-
-        $allocations = allocation::get_my_allocations(null, true, 0, allocation::PROGRAMCOUNTPERPAGE);
+        $perpagecount = $ismyprogramspage ? null : allocation::PROGRAMCOUNTPERPAGE;
+        $allocations = allocation::get_my_allocations(null, true, 0, $perpagecount);
         if (!$allocations) {
             return '<em>' . get_string('errornomyprograms', 'enrol_programs') . '</em>';
         }
@@ -280,6 +280,8 @@ class renderer extends \plugin_renderer_base {
             $detailurl = new moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $fullname = \html_writer::link($detailurl, $fullname);
             $row['fullname'] = $fullname;
+            $row['idnumber'] = $program->idnumber;
+            $row['description'] = $program->description;
 
             $row['status'] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
 
@@ -305,7 +307,7 @@ class renderer extends \plugin_renderer_base {
             $viewgrid = true;
         }
         return $OUTPUT->render_from_template('enrol_programs/block_myprograms_overview',
-            ['programs' => $data, 'viewtable' => $viewtable, 'viewgrid' => $viewgrid, 'allowuserlayoutchange' => $allowuserlayoutchange]);
+            ['ismyprogramspage' => $ismyprogramspage, 'programs' => $data, 'viewtable' => $viewtable, 'viewgrid' => $viewgrid, 'allowuserlayoutchange' => $allowuserlayoutchange]);
 
     }
 
@@ -322,246 +324,6 @@ class renderer extends \plugin_renderer_base {
             return '<div class="float-end">'. \html_writer::link($url, get_string('catalogue', 'enrol_programs')) . '</div>';
         }
         return '';
-    }
-
-    /**
-     * Returns My programs data.
-     *
-     * @return array
-     */
-    public function get_my_programs_data($orderby): array {
-        global $DB, $OUTPUT, $CFG, $USER;
-
-        $sql = "SELECT p.*
-          FROM {enrol_programs_programs} p
-          JOIN {enrol_programs_allocations} pa ON pa.programid = p.id
-         WHERE p.archived = 0 AND pa.archived = 0
-               AND pa.userid = :userid
-      ORDER BY $orderby";
-        $params = ['userid' => $USER->id];
-        $programs = $DB->get_records_sql($sql, $params);
-
-        if (!$programs) {
-            echo get_string('errornomyprograms', 'enrol_programs');
-            echo $OUTPUT->footer();
-            die;
-        }
-
-        $items = [];
-        $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
-        $dateformat = get_string('strftimedatetimeshort');
-        $strnotset = get_string('notset', 'enrol_programs');
-        $sourceclasses = \enrol_programs\local\allocation::get_source_classes();
-
-        foreach ($programs as $program) {
-            $allocation = $DB->get_record('enrol_programs_allocations', ['programid' => $program->id, 'userid' => $USER->id]);
-            $source = $DB->get_record('enrol_programs_sources', ['id' => $allocation->sourceid]);
-            /** @var \enrol_programs\local\source\base $sourceclass */
-            $sourceclass = $sourceclasses[$source->type];
-            $pcontext = \context::instance_by_id($program->contextid);
-            $fullname = $programicon . format_string($program->fullname);
-            $detailurl = new moodle_url('/enrol/programs/my/program.php', ['id' => $program->id]);
-            $fullname = \html_writer::link($detailurl, $fullname, array('title' => format_string($program->fullname)));
-            if ($CFG->usetags) {
-                $tags = \core_tag_tag::get_item_tags('enrol_programs', 'program', $program->id);
-                if ($tags) {
-                    $fullname .= '<br />' . $OUTPUT->tag_list($tags, '', 'program-tags');
-                }
-            }
-
-            $idnumber = s($program->idnumber);
-            $description = file_rewrite_pluginfile_urls($program->description, 'pluginfile.php', $pcontext->id, 'enrol_programs', 'description', $program->id);
-            $description = format_text($description, $program->descriptionformat, ['context' => $pcontext]);
-            $programstart = userdate($allocation->timestart, $dateformat);
-            if ($allocation->timedue) {
-                $timedue = userdate($allocation->timedue, $dateformat);
-            } else {
-                $timedue = $strnotset;
-            }
-            if ($allocation->timeend) {
-                $timeend = userdate($allocation->timeend, $dateformat);
-            } else {
-                $timeend = $strnotset;
-            }
-            $source = $sourceclass::render_allocation_source($program, $source, $allocation);
-            $status = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
-
-            $presentation = (array)json_decode($program->presentationjson);
-            if (!empty($presentation['image'])) {
-                $context = \context::instance_by_id($program->contextid);
-                $imageurl = \moodle_url::make_file_url("$CFG->wwwroot/pluginfile.php",
-                    '/' . $context->id . '/enrol_programs/image/' . $program->id . '/'. $presentation['image'], false);
-                $image = $imageurl;
-            } else {
-                $image = $OUTPUT->get_generated_image_for_id($program->id);
-            }
-
-            $items[] = [
-                'fullname' => $fullname,
-                'idnumber' => $idnumber,
-                'description' => $description,
-                'programstart' => $programstart,
-                'programdue' => $timedue,
-                'programend' => $timeend,
-                'source' => $source,
-                'status' => $status,
-                'image' => $image,
-            ];
-        }
-        return $items;
-    }
-
-    /**
-     * Returns my programs columns for table layout.
-     *
-     * @return array
-     */
-    public function get_my_programs_table_layout_columns($sort, $dir): array {
-        global $OUTPUT;
-
-        $pageparams = [];
-        if ($sort !== 'fullname') {
-            $pageparams['sort'] = $sort;
-        }
-        if ($dir !== 'ASC') {
-            $pageparams['dir'] = $dir;
-        }
-        $currenturl = new moodle_url('/enrol/programs/my/index.php', $pageparams);
-
-        $column = get_string('programname', 'enrol_programs');
-        $columndir = ($dir === "ASC" ? "DESC" : "ASC");
-        $columnicon = ($dir === "ASC" ? "sort_asc" : "sort_desc");
-        $columnicon = $OUTPUT->pix_icon('t/' . $columnicon, get_string(strtolower($columndir)), 'core',
-            ['class' => 'iconsort']);
-        $changeurl = new moodle_url($currenturl);
-        $changeurl->param('sort', 'fullname');
-        $changeurl->param('dir', $columndir);
-        $column = \html_writer::link($changeurl, $column);
-        if ($sort === 'fullname') {
-            $column .= $columnicon;
-        }
-        $namecol = $column;
-
-        $column = get_string('idnumber');
-        $columndir = ($dir === "ASC" ? "DESC" : "ASC");
-        $columnicon = ($dir === "ASC" ? "sort_asc" : "sort_desc");
-        $columnicon = $OUTPUT->pix_icon('t/' . $columnicon, get_string(strtolower($columndir)), 'core',
-            ['class' => 'iconsort']);
-        $changeurl = new moodle_url($currenturl);
-        $changeurl->param('sort', 'idnumber');
-        $changeurl->param('dir', $columndir);
-        $column = \html_writer::link($changeurl, $column);
-        if ($sort === 'idnumber') {
-            $column .= $columnicon;
-        }
-        $idnumbercol = $column;
-
-        $descriptioncol = get_string('description');
-
-        $column = get_string('programstart', 'enrol_programs');
-        $columndir = ($dir === "ASC" ? "DESC" : "ASC");
-        $columnicon = ($dir === "ASC" ? "sort_asc" : "sort_desc");
-        $columnicon = $OUTPUT->pix_icon('t/' . $columnicon, get_string(strtolower($columndir)), 'core',
-            ['class' => 'iconsort']);
-        $changeurl = new moodle_url($currenturl);
-        $changeurl->param('sort', 'start');
-        $changeurl->param('dir', $columndir);
-        $column = \html_writer::link($changeurl, $column);
-        if ($sort === 'start') {
-            $column .= $columnicon;
-        }
-        $programstartcol = $column;
-
-        $column = get_string('duedate', 'enrol_programs');
-        $columndir = ($dir === "ASC" ? "DESC" : "ASC");
-        $columnicon = ($dir === "ASC" ? "sort_asc" : "sort_desc");
-        $columnicon = $OUTPUT->pix_icon('t/' . $columnicon, get_string(strtolower($columndir)), 'core',
-            ['class' => 'iconsort']);
-        $changeurl = new moodle_url($currenturl);
-        $changeurl->param('sort', 'due');
-        $changeurl->param('dir', $columndir);
-        $column = \html_writer::link($changeurl, $column);
-        if ($sort === 'due') {
-            $column .= $columnicon;
-        }
-        $programduecol = $column;
-
-        $column = get_string('programend', 'enrol_programs');
-        $columndir = ($dir === "ASC" ? "DESC" : "ASC");
-        $columnicon = ($dir === "ASC" ? "sort_asc" : "sort_desc");
-        $columnicon = $OUTPUT->pix_icon('t/' . $columnicon, get_string(strtolower($columndir)), 'core',
-            ['class' => 'iconsort']);
-        $changeurl = new moodle_url($currenturl);
-        $changeurl->param('sort', 'end');
-        $changeurl->param('dir', $columndir);
-        $column = \html_writer::link($changeurl, $column);
-        if ($sort === 'end') {
-            $column .= $columnicon;
-        }
-        $programendcol = $column;
-
-        $sourcecol = get_string('source', 'enrol_programs');
-        $statuscol = get_string('programstatus', 'enrol_programs');
-
-        $columns = [
-            'namecol' => $namecol,
-            'idnumbercol' => $idnumbercol,
-            'descriptioncol' => $descriptioncol,
-            'programstartcol' => $programstartcol,
-            'programduecol' => $programduecol,
-            'programendcol' => $programendcol,
-            'sourcecol' => $sourcecol,
-            'statuscol' => $statuscol,
-        ];
-
-        return $columns;
-    }
-
-    /**
-     * Returns my programs in table layout.
-     *
-     * @return string
-     */
-    public function render_my_programs_table_layout($sort, $dir): string {
-        global $OUTPUT;
-
-        if ($sort === 'idnumber') {
-            $orderby = 'idnumber';
-        } else {
-            $orderby = 'fullname';
-        }
-        if ($dir === 'ASC') {
-            $orderby .= ' ASC';
-        } else {
-            $orderby .= ' DESC';
-        }
-
-        $programstable = $this->get_my_programs_table_layout_columns($sort, $dir);
-        $programstable ['tabledata'] = $this->get_my_programs_data($orderby);
-        return $OUTPUT->render_from_template('enrol_programs/myprogramstable', $programstable);
-    }
-
-    /**
-     * Returns my programs in grid layout.
-     *
-     * @return string
-     */
-    public function render_my_programs_grid_layout($sort, $dir): string {
-        global $OUTPUT;
-        if ($sort === 'idnumber') {
-            $orderby = 'idnumber';
-        } else {
-            $orderby = 'fullname';
-        }
-        if ($dir === 'ASC') {
-            $orderby .= ' ASC';
-        } else {
-            $orderby .= ' DESC';
-        }
-        $programs = [
-        'items' => $this->get_my_programs_data($orderby),
-        ];
-        return $OUTPUT->render_from_template('enrol_programs/myprogramsgrid', $programs);
     }
 
     /**

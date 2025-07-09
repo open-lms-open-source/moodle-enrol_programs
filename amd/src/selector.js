@@ -140,7 +140,8 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
         if (area == 'block') {
             const pagedContentPage = document.getElementById('block_myprograms_overview');
             templatename = 'enrol_programs/block_myprograms_';
-            Templates.render(templatename + view, { programs: data })
+            const isMyProgramsPage = document.getElementById('ismyprogramspage')?.value === "1";
+            Templates.render(templatename + view, { ismyprogramspage: isMyProgramsPage, programs: data })
                 .then(function(html, js) {
                     return Templates.replaceNodeContents(pagedContentPage, html, js);
                 });
