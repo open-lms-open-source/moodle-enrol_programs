@@ -254,5 +254,32 @@ function enrol_programs_user_preferences(): array {
         ),
         'permissioncallback' => [core_user::class, 'is_current_user'],
     );
+    $preferences['enrol_programs_block_user_filterby'] = array(
+        'null' => NULL_NOT_ALLOWED,
+        'default' => 'programstatus_any',
+        'type' => PARAM_TEXT,
+        'choices' => array(
+            'programstatus_any',
+            'programstatus_open',
+            'programstatus_overdue',
+            'programstatus_completed',
+            'programstatus_future',
+            'programstatus_failed',
+            'programstatus_archived',
+            'programstatus_archived',
+        ),
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    );
+    $preferences['enrol_programs_block_user_orderby'] = array(
+        'null' => NULL_NOT_ALLOWED,
+        'default' => 'timedue',
+        'type' => PARAM_ALPHA,
+        'choices' => array(
+            'timedue',
+            'fullname',
+            'idnumber'
+        ),
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    );
     return $preferences;
 }

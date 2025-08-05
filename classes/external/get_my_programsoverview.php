@@ -41,6 +41,9 @@ final class get_my_programsoverview extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'currentpage' => new external_value(PARAM_INT, 'current page'),
+            'status' => new external_value(PARAM_TEXT, 'status', VALUE_DEFAULT, ''),
+            'search' => new external_value(PARAM_TEXT, 'search', VALUE_DEFAULT, ''),
+            'orderby' => new external_value(PARAM_TEXT, 'sort by', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -49,18 +52,19 @@ final class get_my_programsoverview extends external_api {
      *
      * @return array
      */
-    public static function execute($currentpage): array {
+    public static function execute($currentpage, $status, $search, $orderby): array {
         global $DB, $OUTPUT, $CFG, $PAGE, $OUTPUT;
 
         require_login();
         $context = \context_system::instance();
         $params = self::validate_parameters(self::execute_parameters(),
-            ['currentpage' => $currentpage]);
+            ['currentpage' => $currentpage, 'status' => $status, 'search' => $search, 'orderby' => $orderby]);;
         $currentpage = (int)$params['currentpage'];
+        $filterstatus = $params['status'];
         $count = allocation::PROGRAMCOUNTPERPAGE;
         $from = ($currentpage - 1) * $count;
         $PAGE->set_context($context);
-        $allocations = allocation::get_my_allocations(null, true, $from, $count);
+        $allocations = allocation::get_my_allocations(null, $orderby, $from, $count, $search);
 
         $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
         $dateformat = get_string('strftimedatefullshort');
@@ -70,6 +74,10 @@ final class get_my_programsoverview extends external_api {
             $row = [];
             $row['programicon'] = $programicon;
             $program = $DB->get_record('enrol_programs_programs', ['id' => $allocation->programid]);
+            $statusplain = \enrol_programs\local\allocation::get_completion_status_plain($program, $allocation);
+            if (!empty($status) && $status != 'programstatus_any' && $statusplain !== get_string($filterstatus, 'enrol_programs')) {
+                continue;
+            }
             $context = \context::instance_by_id($program->contextid);
             $presentation = (array)json_decode($program->presentationjson);
             if (!empty($presentation['image'])) {

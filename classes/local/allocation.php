@@ -1353,7 +1353,7 @@ final class allocation {
      * Returns list of programs with allocation data that user can see.
      * @return array
      */
-    public static function get_my_allocations($userid = null, $orderbytimedue = false, $from = null, $count = null): array {
+    public static function get_my_allocations($userid = null, $orderby = 'fullname', $from = null, $count = null, $search = null): array {
         global $USER, $DB;
 
         $params = ['userid' => $userid ?? $USER->id];
@@ -1374,25 +1374,32 @@ final class allocation {
                   JOIN {enrol_programs_programs} p ON p.id = pa.programid
                   $tenantjoin
                  WHERE pa.userid = :userid AND p.archived = 0 AND pa.archived = 0";
-        if ($orderbytimedue) {
+        if (!empty($search)) {
+            $sql .= ' AND '.$DB->sql_like('p.fullname', ':search', false);
+            $params['search'] = "%$search%";
+        }
+
+        if ($orderby === 'timedue' || $orderby === 'timestart' || $orderby === 'timeend') {
             $sql .= " ORDER BY 
                           CASE 
                               WHEN pa.timecompleted IS NULL THEN 0
                               ELSE 1
                           END,
                           CASE 
-                              WHEN timedue IS NOT NULL THEN 0
+                              WHEN $orderby IS NOT NULL THEN 0
                               ELSE 1
                           END,
-                          pa.timedue ASC";
-        } else {
-            $sql .= " ORDER BY p.fullname ASC";
+                          pa.$orderby ASC";
+        } else if ($orderby === 'fullname' || $orderby === 'idnumber') {
+            $sql .= " ORDER BY p.$orderby ASC";
         }
         if (isset($from) && isset($count)) {
             $sql .= " LIMIT {$count} OFFSET {$from}";
         }
 
-        return $DB->get_records_sql($sql, $params);
+        $records =  $DB->get_records_sql($sql, $params);
+
+        return $records;
     }
 
     /**

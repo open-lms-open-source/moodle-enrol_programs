@@ -248,6 +248,8 @@ class renderer extends \plugin_renderer_base {
      */
     public function render_block_content($ismyprogramspage = false): string {
         global $DB, $OUTPUT, $CFG, $PAGE;
+        $filterpref = get_user_preferences('enrol_programs_block_user_filterby', 'programstatus_any');
+        $sortingpref = get_user_preferences('enrol_programs_block_user_orderby', 'timedue');
         $totalpages = ceil(count(allocation::get_my_allocations())/allocation::PROGRAMCOUNTPERPAGE);
 
         $PAGE->requires->js_call_amd('enrol_programs/selector', 'init', [['totalpages' => $totalpages]]);
@@ -265,6 +267,10 @@ class renderer extends \plugin_renderer_base {
             $row = [];
             $row['programicon'] = $programicon;
             $program = $DB->get_record('enrol_programs_programs', ['id' => $allocation->programid]);
+            $statusplain = \enrol_programs\local\allocation::get_completion_status_plain($program, $allocation);
+            if (!empty($filterpref) && $filterpref != 'programstatus_any' && $statusplain !== get_string($filterpref, 'enrol_programs')) {
+                continue;
+            }
             $context = \context::instance_by_id($program->contextid);
             $presentation = (array)json_decode($program->presentationjson);
             if (!empty($presentation['image'])) {
@@ -306,8 +312,56 @@ class renderer extends \plugin_renderer_base {
         } else {
             $viewgrid = true;
         }
+
+        $templatecontext = [
+            'ismyprogramspage' => $ismyprogramspage,
+            'programs' => $data,
+            'viewtable' => $viewtable,
+            'viewgrid' => $viewgrid,
+            'allowuserlayoutchange' => $allowuserlayoutchange,
+        ];
+        $statuses = [
+            'programstatus_any',
+            'programstatus_open',
+            'programstatus_overdue',
+            'programstatus_completed',
+            'programstatus_future',
+            'programstatus_failed',
+            'programstatus_archived',
+            'programstatus_archivedcompleted'
+        ];
+
+        $templatecontext['filters'] = [];
+        $templatecontext['currentfilterlabel'] = get_string($filterpref, 'enrol_programs');
+
+        foreach ($statuses as $status) {
+            $templatecontext['filters'][] = [
+                'value' => $status,
+                'label' => get_string($status, 'enrol_programs'),
+                'isactive' => ($status === $filterpref)
+            ];
+        }
+
+        $sortingoptions = [
+            'timedue' => get_string('sortbyprogramdue', 'enrol_programs'),
+            'fullname' => get_string('sortbyprogramname', 'enrol_programs'),
+            'idnumber' => get_string('sortbyprogramid', 'enrol_programs'),
+            'timestart' => get_string('sortbyprogramstart', 'enrol_programs'),
+            'timeend' => get_string('sortbyprogramend', 'enrol_programs'),
+        ];
+        $templatecontext['sortingoptions'] = [];
+        $templatecontext['currentsortinglabel'] = $sortingoptions[$sortingpref];
+
+        foreach ($sortingoptions as $key => $sortingoption) {
+            $templatecontext['sortingoptions'][] = [
+                'value' => $key,
+                'label' => $sortingoption,
+                'isactive' => ($status === $sortingpref)
+            ];
+        }
+
         return $OUTPUT->render_from_template('enrol_programs/block_myprograms_overview',
-            ['ismyprogramspage' => $ismyprogramspage, 'programs' => $data, 'viewtable' => $viewtable, 'viewgrid' => $viewgrid, 'allowuserlayoutchange' => $allowuserlayoutchange]);
+            $templatecontext);
 
     }
 

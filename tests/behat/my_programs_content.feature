@@ -52,45 +52,57 @@ Feature: Users can view a list of programs where they are allocated
     And I set the following fields to these values:
       | Users | Student 1 |
     And I press dialog form button "Allocate users"
+    And I am on all programs management page
+    And I follow "Program 01"
+    And I follow "Allocation settings"
+    And I click on "Update Manual allocation" "link"
+    And I set the following fields to these values:
+      | Active | Yes |
+    And I press dialog form button "Update"
+    And I follow "Users"
+    When I click on "Users actions" "link"
+    And I click on "Allocate users" "link"
+    And I set the following fields to these values:
+      | Users | Student 1 |
+    And I press dialog form button "Allocate users"
     And I log out
-#
+
   @javascript
-#  Commenting out these tests temporarily since we have removed filters, and they will be readded.
   Scenario: Allocated users can see program content in table and grid layouts
-#    And I log in as "student1"
-#    And I am on My programs page
-#    And ".generaltable" "css_element" should exist
-#    And ".programs-grid" "css_element" should not exist
-#    And ".my-programs-filters" "css_element" should exist
-#    And I should see "Program name"
-#    And I should see "ID number"
-#    And I should see "Description"
-#    And I should see "Program start"
-#    And I should see "Due date"
-#    And I should see "Program end"
-#    And I should see "Source"
-#    And I should see "Program status"
-#    And I should see "Program 00"
-#    And I should see "Manual allocation"
-#    And I should see "Test program"
-#    And I should see "P00"
-#    Given I log in as "admin"
-#    And I navigate to "Programs > Program settings" in site administration
-#    And I set the following fields to these values:
-#      | Programs detailed page layout | Grid layout |
-#    And I press "Save changes"
-#    And I log in as "student1"
-#    And I am on My programs page
-#    And ".my-programs-filters" "css_element" should exist
-#    And ".programs-grid" "css_element" should exist
-#    And ".generaltable" "css_element" should not exist
-#    And I should see "ID #"
-#    And I should see "Program start"
-#    And I should see "Program due"
-#    And I should see "Program end"
-#    And I should see "Source"
-#    And I should see "Status"
-#    And I should see "Program 00"
-#    And I should see "Manual allocation"
-#    And I should see "Test program"
-#    And I should see "P00"
+    And I log in as "student1"
+    And I am on My programs page
+    And ".generaltable" "css_element" should exist
+    And ".programs-grid" "css_element" should not exist
+    And ".my-programs-filters" "css_element" should exist
+    And I should see "Program name"
+    And I should see "Program idnumber"
+    And I should see "Description"
+    And I should see "Program start"
+    And I should see "Program due"
+    And I should see "Program end"
+    And I should see "Program status"
+    And I should see "Program 00"
+    And I should see "Test program"
+    And I should see "P00"
+    Given I log in as "admin"
+    And I navigate to "Programs > Program settings" in site administration
+    And I set the following fields to these values:
+      |  My programs block layout  | Grid layout |
+    And I press "Save changes"
+    And I log in as "student1"
+    And I am on My programs page
+    And ".my-programs-filters" "css_element" should exist
+    And ".programs-grid" "css_element" should exist
+    And ".generaltable" "css_element" should not exist
+    And I should see "ID #"
+    And I should see "Start"
+    And I should see "Due"
+    And I should see "End"
+    And I should see "Program 00"
+    And I should see "Test program"
+    And I should see "P00"
+    And I should see "Program 01"
+    When I set the field "programsearch" to "Program 00"
+    Then I should not see "Program 00"
+    When I set the field "programsearch" to ""
+    Then I should see "Program 00"

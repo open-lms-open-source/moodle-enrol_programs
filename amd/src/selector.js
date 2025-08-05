@@ -2,6 +2,10 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
     let currentPage = 1;
     let selectedView; // For block view
     let totalPages;
+    let filterbyStatus = '';
+    let OrderBy = 'timedue';
+    let searchTimeout;
+    let searchQuery = '';
 
     /**
      * Updates the enabled/disabled state of the pagination arrows based on the current page.
@@ -72,6 +76,7 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
             }
 
             attachDropdownListener(options); // Attach event listeners for both dropdowns
+
         }
     };
 
@@ -89,19 +94,10 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
         viewLayouts.forEach(link => {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
-                const selectedView = this.getAttribute('data-view');
+                selectedView = this.getAttribute('data-view');
                 viewLayouts.forEach(l => l.classList.remove('selected'));
                 this.classList.add('selected');
-                const pagedContentPage = document.getElementById('block_myprograms_overview');
-                Templates.render('core/loading', {}).then(function(spinnerHtml) {
-                    pagedContentPage.innerHTML = spinnerHtml;
-                    UserRepository.setUserPreference('enrol_programs_block_user_view_preference', selectedView)
-                    .then(() => {
-                        fetchTemplateData('block', options).then((data) => {
-                            renderTemplate(selectedView, Object.values(data), 'block');
-                        });
-                    });
-                });
+                loadandrender(options);
             });
         });
 
@@ -124,8 +120,58 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
             });
         });
 
+        document.querySelectorAll('#statusfilter .dropdown-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                let filterbystatus = this.dataset.status;
+                const dropdown = this.closest('.dropdown-menu');
+                dropdown.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector('#statusfilterdropdown .dropdown-label').textContent = this.textContent.trim();
+                UserRepository.setUserPreference('enrol_programs_block_user_filterby', filterbystatus);
+                filterbyStatus = filterbystatus;
+                loadandrender(options);
+            });
+        });
+
+        document.querySelectorAll('#sortbyfilter .dropdown-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                OrderBy = this.dataset.status;
+                const dropdown = this.closest('.dropdown-menu');
+                dropdown.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelector('#sortbyfilter .dropdown-label').textContent = this.textContent.trim();
+                UserRepository.setUserPreference('enrol_programs_block_user_orderby', OrderBy);
+                loadandrender(options);
+            });
+        });
+        document.getElementById('programsearch').addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchQuery = this.value.trim();
+            searchTimeout = setTimeout(() => {
+                loadandrender(options);
+            }, 300);
+        });
+
     }
 
+    /**
+     * Load spining wheel and then render the content.
+     * @param {Object} options options for the fetch
+     */
+    function loadandrender(options) {
+        const pagedContentPage = document.getElementById('block_myprograms_overview');
+        Templates.render('core/loading', {}).then(function(spinnerHtml) {
+            pagedContentPage.innerHTML = spinnerHtml;
+            UserRepository.setUserPreference('enrol_programs_block_user_view_preference', selectedView)
+                .then(() => {
+                    fetchTemplateData('block', options).then((data) => {
+                        renderTemplate(selectedView, Object.values(data), 'block');
+                    });
+                });
+        });
+    }
     /**
      * Renders the template based on the selected user view and provided data.
      *
@@ -175,7 +221,10 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
             return Ajax.call([{
                 methodname: "enrol_programs_get_my_programsoverview",
                 args: {
-                    currentpage: currentPage
+                    currentpage: currentPage,
+                    status: filterbyStatus,
+                    search: searchQuery,
+                    orderby: OrderBy
                 }
             }])[0]
                 .then((result) => result || {});

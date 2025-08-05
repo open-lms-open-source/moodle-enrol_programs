@@ -209,7 +209,11 @@
     padding: 12px;
     text-decoration: none;
     display: inline-flex;
-    margin-bottom: 10px;
+    font-size: 1rem;
+    line-height: 1.5;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
 }
 .programviewtoggle-button:not(.selected) {
     border-color: #ccc;
