@@ -90,6 +90,7 @@ $string['errornomyprograms'] = 'You are not allocated to any programs.';
 $string['errornoprograms'] = 'No programs found.';
 $string['errornorequests'] = 'No program requests found';
 $string['errornotenabled'] = 'Programs plugin is not enabled';
+$string['event_catalogue_program_viewed'] = 'Program catalogue viewed';
 $string['event_program_completed'] = 'Program completed';
 $string['event_program_created'] = 'Program created';
 $string['event_program_deleted'] = 'Program deleted';
