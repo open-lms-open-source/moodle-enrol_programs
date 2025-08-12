@@ -68,6 +68,12 @@
         .card-img-top {
             height: 12rem;
         }
+        .card-title,
+        .card-footer a {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     }
 }
 

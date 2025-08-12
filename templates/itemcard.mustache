@@ -23,7 +23,7 @@
             </span>
         {{/sequencerequired}}
         <div class="card-body">
-            <h5 class="card-title">{{{fullname}}}</h5>
+            <h5 class="card-title" title="{{{simplename}}}">{{{fullname}}}</h5>
             <dl class="row">
                 {{^non-allocated}}
                     <dt class="col-6">
@@ -70,7 +70,7 @@
         <div class="card-footer">
             {{^disabled}}
                 {{#detailurl}}
-                    <a href="{{detailurl}}" class="btn btn-primary w-100">{{simplename}}</a>
+                    <a href="{{detailurl}}" title="{{simplename}}" class="btn btn-primary w-100">{{simplename}}</a>
                 {{/detailurl}}
             {{/disabled}}
         </div>
