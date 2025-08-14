@@ -69,10 +69,12 @@
             height: 12rem;
         }
         .card-title,
+        .card-title a,
         .card-footer a {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            display: block;
         }
     }
 }
@@ -86,6 +88,14 @@
         height: 25em;
         .card-img-top {
             height: 12rem;
+        }
+        .card-title,
+        .card-title a,
+        .card-footer a {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
         }
     }
 }
