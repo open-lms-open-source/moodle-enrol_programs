@@ -18,20 +18,20 @@
     {{#programs}}
         <div class="col d-flex pb-3 px-1">
             <div class="dashboard-card course-card card h-100 d-flex flex-column program-card">
-                <img class="card-img-top programthumbnail" src="{{thumbnail}}" alt="{{fullname}}">
+                <img class="card-img-top programthumbnail" src="{{thumbnail}}" alt="{{fullnameplain}}">
                 {{#ismyprogramspage}}<div class="program-id">{{#str}}idnumbersymbol, enrol_programs {{/str}} {{idnumber}}</div>{{/ismyprogramspage}}
                 <div class="program-name">
                     <h5 class="card-title text-center" title="{{fullnameplain}}">{{{fullname}}}</h5>
                 </div>
-                <div class="card-body d-flex flex-column justify-content-between">
-                    <div>
+                <div class="card-body d-flex flex-column">
+                    {{#description}}
                         <div class="program-desc">
                             {{#ismyprogramspage}}
                                 {{{description}}}
                             {{/ismyprogramspage}}
                         </div>
-                        <p class="card-text">{{{status}}}</p>
-                    </div>
+                    {{/description}}
+                    <div class="card-text">{{{status}}}</div>
                     <ul class="list-unstyled mt-2">
                         {{#programstart}}<li><strong>Start:</strong> {{programstart}}</li>{{/programstart}}
                         {{#programdue}}<li><strong>Due:</strong> {{programdue}}</li>{{/programdue}}

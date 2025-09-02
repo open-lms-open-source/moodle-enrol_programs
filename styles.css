@@ -217,3 +217,15 @@
 .programviewtoggle-button:not(.selected) i {
     color: #888;
 }
+#block_myprograms_overview {
+    .program-name {
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 0;
+        background-color: rgba(0, 0, 0, 0.03);
+        text-align: center;
+        font-weight: bold;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
