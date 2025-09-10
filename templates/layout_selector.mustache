@@ -2,10 +2,10 @@
     <!-- Toggle Buttons -->
     <div {{^isprogramdetailpage}} id="programview-toggle"{{/isprogramdetailpage}}
         {{#isprogramdetailpage}} id="programdetail-programview-toggle"{{/isprogramdetailpage}} class="me-2 d-flex">
-        <a id="table-view" class="programviewtoggle-button {{#viewtable}}selected{{/viewtable}}" data-view="table" title="{{#str}}layouttable, enrol_programs{{/str}}">
+        <a id="table-view" role="button" class="programviewtoggle-button {{#viewtable}}selected{{/viewtable}}" data-view="table" title="{{#str}}layouttable, enrol_programs{{/str}}">
             <i class="fa-solid fa-list fa-lg"></i>
         </a>
-        <a id="grid-view" class="programviewtoggle-button {{#viewgrid}}selected{{/viewgrid}}" data-view="grid" title="{{#str}}layoutgrid, enrol_programs{{/str}}">
+        <a id="grid-view" role="button" class="programviewtoggle-button {{#viewgrid}}selected{{/viewgrid}}" data-view="grid" title="{{#str}}layoutgrid, enrol_programs{{/str}}">
             <i class="fa-solid fa-th fa-lg"></i>
         </a>
     </div>
