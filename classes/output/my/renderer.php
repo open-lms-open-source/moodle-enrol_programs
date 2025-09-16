@@ -327,8 +327,6 @@ class renderer extends \plugin_renderer_base {
             'programstatus_completed',
             'programstatus_future',
             'programstatus_failed',
-            'programstatus_archived',
-            'programstatus_archivedcompleted'
         ];
 
         $templatecontext['filters'] = [];

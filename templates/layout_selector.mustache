@@ -1,14 +1,18 @@
-<div class="d-flex flex-nowrap align-items-center pb-3 my-programs-filters">
+<div class="d-flex flex-wrap gap-2 align-items-center pb-3 my-programs-filters">
     <!-- Toggle Buttons -->
+    {{#allowuserlayoutchange}}
     <div {{^isprogramdetailpage}} id="programview-toggle"{{/isprogramdetailpage}}
         {{#isprogramdetailpage}} id="programdetail-programview-toggle"{{/isprogramdetailpage}} class="me-2 d-flex">
-        <a id="table-view" role="button" class="programviewtoggle-button {{#viewtable}}selected{{/viewtable}}" data-view="table" title="{{#str}}layouttable, enrol_programs{{/str}}">
+        <a id="table-view" role="button" class="programviewtoggle-button {{#viewtable}}selected{{/viewtable}} me-1" data-view="table" title="{{#str}}layouttable, enrol_programs{{/str}}">
             <i class="fa-solid fa-list fa-lg"></i>
         </a>
         <a id="grid-view" role="button" class="programviewtoggle-button {{#viewgrid}}selected{{/viewgrid}}" data-view="grid" title="{{#str}}layoutgrid, enrol_programs{{/str}}">
             <i class="fa-solid fa-th fa-lg"></i>
         </a>
     </div>
+    <span class="divider-vertical"></span>
+    {{/allowuserlayoutchange}}
+    {{^isprogramdetailpage}}
     <div class="ml-1 me-1">
         <div class="dropdown" id="statusfilter">
             <button id="statusfilterdropdown" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -26,7 +30,7 @@
         </div>
     </div>
 
-    <div class="position-relative">
+    <div class="position-relative flex-fill">
         <input id="programsearch" name="programsearch" type="text" class="form-control pe-5" placeholder="{{#str}}searchbyprogramnameorid, enrol_programs{{/str}}">
         <a href="#"><i class="fa fa-search position-absolute text-muted" style="right: 1rem;top: 0.6rem"></i></a>
     </div>
@@ -47,4 +51,5 @@
             </ul>
         </div>
     </div>
+    {{/isprogramdetailpage}}
 </div>

@@ -233,3 +233,11 @@
         white-space: nowrap;
     }
 }
+
+.block_myprograms {
+    .divider-vertical {
+        border-left: 1px solid gray;
+        height: 24px;
+        margin: 0 0.25rem;
+    }
+}
