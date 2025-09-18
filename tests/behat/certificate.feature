@@ -144,4 +144,4 @@ Feature: Issuing of certificates for program completion
     And I log in as "student1"
     And I follow "Profile" in the user menu
     And I click on "//a[contains(.,'My certificates') and contains(@href,'tool/certificate')]" "xpath_element"
-    Then I should see "Certificate 1"
+    Then I should see "Program 000"
