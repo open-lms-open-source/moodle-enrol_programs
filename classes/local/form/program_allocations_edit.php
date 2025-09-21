@@ -18,6 +18,10 @@ namespace enrol_programs\local\form;
 
 use enrol_programs\local\program;
 use enrol_programs\local\allocation;
+<<<<<<< HEAD
+=======
+use html_writer;
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 
 /**
  * Edit program allocation.
@@ -43,6 +47,13 @@ final class program_allocations_edit extends \local_openlms\dialog_form {
         $mform->setType('id', PARAM_INT);
         $mform->setDefault('id', $data->id);
 
+<<<<<<< HEAD
+=======
+        $mform->addElement('static', 'sourcesummary', get_string('allocationsources', 'enrol_programs'),
+            $this->get_sources_overview($data));
+        $mform->setType('sourcesummary', PARAM_RAW);
+
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
         $this->add_action_buttons(true, get_string('updateallocations', 'enrol_programs'));
 
         $this->set_data($data);
@@ -58,4 +69,40 @@ final class program_allocations_edit extends \local_openlms\dialog_form {
 
         return $errors;
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * Render allocation source overview with management links.
+     *
+     * @param \stdClass $program
+     * @return string
+     */
+    protected function get_sources_overview(\stdClass $program): string {
+        global $DB;
+
+        $sourceclasses = allocation::get_source_classes();
+        $items = [];
+        foreach ($sourceclasses as $type => $class) {
+            $record = $DB->get_record('enrol_programs_sources', ['type' => $type, 'programid' => $program->id]);
+            if (!$record && !$class::is_new_allowed($program)) {
+                continue;
+            }
+            $items[$type] = $class::render_status($program, $record ?: null);
+        }
+
+        if (!$items) {
+            return get_string('notavailable');
+        }
+
+        $output = html_writer::start_tag('dl', ['class' => 'row']);
+        foreach ($items as $type => $status) {
+            $name = $sourceclasses[$type]::get_name();
+            $output .= html_writer::tag('dt', $name . ':', ['class' => 'col-3']);
+            $output .= html_writer::tag('dd', $status, ['class' => 'col-9']);
+        }
+        $output .= html_writer::end_tag('dl');
+        return $output;
+    }
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 }

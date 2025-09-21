@@ -390,5 +390,19 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024071100, 'enrol', 'programs');
     }
 
+<<<<<<< HEAD
+=======
+    if ($oldversion < 2024112400) {
+        if (get_config('enrol_programs', 'source_externaldb_allownew') === false) {
+            set_config('source_externaldb_allownew', 0, 'enrol_programs');
+        }
+        if (get_config('enrol_programs', 'source_externaldb_archivemissing') === false) {
+            set_config('source_externaldb_archivemissing', 1, 'enrol_programs');
+        }
+
+        upgrade_plugin_savepoint(true, 2024112400, 'enrol', 'programs');
+    }
+
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
     return true;
 }

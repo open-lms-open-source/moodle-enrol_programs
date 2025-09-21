@@ -14,33 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace enrol_programs\local\form;
+
 /**
- * Program enrolment plugin version.
+ * Simple confirmation form for triggering external DB allocation.
  *
  * @package    enrol_programs
- * @copyright  2022 Open LMS (https://www.openlms.net/)
- * @author     Petr Skoda
+ * @copyright  2024 Open LMS
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+final class externaldb_run extends \local_openlms\dialog_form {
+    protected function definition() {
+        $mform = $this->_form;
+        $program = $this->_customdata['program'];
 
-defined('MOODLE_INTERNAL') || die();
+        $mform->addElement('static', 'info', '', get_string('source_externaldb_runconfirm', 'enrol_programs'));
 
-/** @var stdClass $plugin */
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->setDefault('id', $program->id);
 
-<<<<<<< HEAD
-$plugin->version   = 2024103100;
-$plugin->requires  = 2024091700.00; // 4.5.0
-$plugin->component = 'enrol_programs';
-$plugin->release   = 'v4.0.1';
-=======
-$plugin->version   = 2024112400;
-$plugin->requires  = 2024091700.00; // 4.5.0
-$plugin->component = 'enrol_programs';
-$plugin->release   = 'v4.1.0';
->>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
-$plugin->supported = [405, 405];
+        $this->add_action_buttons(true, get_string('source_externaldb_run', 'enrol_programs'));
 
-$plugin->dependencies = [
-    'local_openlms' => 2024103100,
-    'customfield_training' => 2024091900,
-];
+        $this->set_data(['id' => $program->id]);
+    }
+}

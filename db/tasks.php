@@ -46,5 +46,19 @@ $tasks = array(
         'dayofweek' => '*',
         'disabled' => 0
     ),
+<<<<<<< HEAD
 );
 
+=======
+    array(
+        'classname' => '\enrol_programs\task\sync_externaldb',
+        'blocking' => 0,
+        'minute' => '*/15',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+        'disabled' => 0
+    ),
+);
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)

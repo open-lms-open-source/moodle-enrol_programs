@@ -35,4 +35,9 @@ function xmldb_enrol_programs_install() {
 
     // Disable commerce by default, the defaults may not added during upgrade.
     set_config('source_ecommerce_allownew', 0, 'enrol_programs');
+<<<<<<< HEAD
+=======
+    set_config('source_externaldb_allownew', 0, 'enrol_programs');
+    set_config('source_externaldb_archivemissing', 1, 'enrol_programs');
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 }

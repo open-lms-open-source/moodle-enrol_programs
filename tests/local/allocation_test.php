@@ -45,6 +45,10 @@ final class allocation_test extends \advanced_testcase {
         $this->assertArrayHasKey('cohort', $classes);
         $this->assertArrayHasKey('approval', $classes);
         $this->assertArrayHasKey('selfallocation', $classes);
+<<<<<<< HEAD
+=======
+        $this->assertArrayHasKey('externaldb', $classes);
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
         $this->assertArrayNotHasKey('base', $classes);
     }
 
@@ -58,6 +62,10 @@ final class allocation_test extends \advanced_testcase {
         $this->assertArrayHasKey('cohort', $sources);
         $this->assertArrayHasKey('approval', $sources);
         $this->assertArrayHasKey('selfallocation', $sources);
+<<<<<<< HEAD
+=======
+        $this->assertArrayHasKey('externaldb', $sources);
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
         $this->assertArrayNotHasKey('base', $sources);
     }
 

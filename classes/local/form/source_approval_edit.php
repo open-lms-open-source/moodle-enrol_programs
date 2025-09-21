@@ -57,8 +57,22 @@ final class source_approval_edit extends \local_openlms\dialog_form {
     }
 
     public function validation($data, $files) {
+<<<<<<< HEAD
         $errors = parent::validation($data, $files);
 
+=======
+        global $DB;
+
+        $errors = parent::validation($data, $files);
+
+        $source = $this->_customdata['source'];
+        if (!empty($source->id) && !empty($source->enable) && (int)$data['enable'] === 0) {
+            if ($DB->record_exists('enrol_programs_allocations', ['sourceid' => $source->id])) {
+                $errors['enable'] = get_string('error_source_disable_hasallocations', 'enrol_programs');
+            }
+        }
+
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
         return $errors;
     }
 }

@@ -94,6 +94,72 @@ if ($ADMIN->fulltree) {
         new lang_string('source_udplans_allownew', 'enrol_programs'),
         new lang_string('source_udplans_allownew_desc', 'enrol_programs'), 1));
 
+<<<<<<< HEAD
+=======
+    $settings->add(new admin_setting_configcheckbox('enrol_programs/source_externaldb_allownew',
+        new lang_string('source_externaldb_allownew', 'enrol_programs'),
+        new lang_string('source_externaldb_allownew_desc', 'enrol_programs'), 0));
+
+    $settings->add(new admin_setting_heading('enrol_programs/source_externaldb_heading',
+        new lang_string('source_externaldb_heading', 'enrol_programs'),
+        new lang_string('source_externaldb_heading_desc', 'enrol_programs')));
+
+    $dboptions = ['', "access", "ado_access", "ado", "ado_mssql", "borland_ibase", "csv", "db2", "fbsql", "firebird",
+        "ibase", "informix72", "informix", "mssql", "mssql_n", "mssqlnative", "mysql", "mysqli", "mysqlt",
+        "oci805", "oci8", "oci8po", "odbc", "odbc_mssql", "odbc_oracle", "oracle", "pdo", "postgres64",
+        "postgres7", "postgres", "proxy", "sqlanywhere", "sybase", "sqlite", "sqlite3", "vfp"];
+    $dboptions = array_combine($dboptions, $dboptions);
+    $settings->add(new admin_setting_configselect('enrol_programs/source_externaldb_dbtype',
+        new lang_string('source_externaldb_dbtype', 'enrol_programs'),
+        new lang_string('source_externaldb_dbtype_desc', 'enrol_programs'), '', $dboptions));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_dbhost',
+        new lang_string('source_externaldb_dbhost', 'enrol_programs'), '', ''));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_dbuser',
+        new lang_string('source_externaldb_dbuser', 'enrol_programs'), '', ''));
+
+    $settings->add(new admin_setting_configpasswordunmask('enrol_programs/source_externaldb_dbpass',
+        new lang_string('source_externaldb_dbpass', 'enrol_programs'), '', ''));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_dbname',
+        new lang_string('source_externaldb_dbname', 'enrol_programs'), '', ''));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_dbencoding',
+        new lang_string('source_externaldb_dbencoding', 'enrol_programs'), '', 'utf-8'));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_dbsetupsql',
+        new lang_string('source_externaldb_dbsetupsql', 'enrol_programs'), '', ''));
+
+    $settings->add(new admin_setting_configcheckbox('enrol_programs/source_externaldb_dbsybasequoting',
+        new lang_string('source_externaldb_dbsybasequoting', 'enrol_programs'), '', 0));
+
+    $settings->add(new admin_setting_configcheckbox('enrol_programs/source_externaldb_debugdb',
+        new lang_string('source_externaldb_debugdb', 'enrol_programs'),
+        new lang_string('source_externaldb_debugdb_desc', 'enrol_programs'), 0));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_remotetable',
+        new lang_string('source_externaldb_remotetable', 'enrol_programs'), '', ''));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_programfield',
+        new lang_string('source_externaldb_programfield', 'enrol_programs'), '', ''));
+
+    $settings->add(new admin_setting_configtext('enrol_programs/source_externaldb_userfield',
+        new lang_string('source_externaldb_userfield', 'enrol_programs'), '', ''));
+
+    $programfieldoptions = ['idnumber' => 'idnumber', 'id' => 'id'];
+    $settings->add(new admin_setting_configselect('enrol_programs/source_externaldb_localprogramfield',
+        new lang_string('source_externaldb_localprogramfield', 'enrol_programs'), '', 'idnumber', $programfieldoptions));
+
+    $userfieldoptions = ['idnumber' => 'idnumber', 'username' => 'username', 'email' => 'email', 'id' => 'id'];
+    $settings->add(new admin_setting_configselect('enrol_programs/source_externaldb_localuserfield',
+        new lang_string('source_externaldb_localuserfield', 'enrol_programs'), '', 'idnumber', $userfieldoptions));
+
+    $settings->add(new admin_setting_configcheckbox('enrol_programs/source_externaldb_archivemissing',
+        new lang_string('source_externaldb_archivemissing', 'enrol_programs'),
+        new lang_string('source_externaldb_archivemissing_desc', 'enrol_programs'), 1));
+
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
     if (\enrol_programs\local\source\ecommerce::is_commerce_enabled()) {
         $settings->add(new admin_setting_configcheckbox('enrol_programs/source_ecommerce_allownew',
             new lang_string('source_ecommerce_allownew', 'enrol_programs'),

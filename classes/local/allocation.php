@@ -19,6 +19,10 @@ namespace enrol_programs\local;
 use enrol_programs\local\source\approval;
 use enrol_programs\local\source\base;
 use enrol_programs\local\source\cohort;
+<<<<<<< HEAD
+=======
+use enrol_programs\local\source\externaldb;
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 use enrol_programs\local\source\ecommerce;
 use enrol_programs\local\source\manual;
 use enrol_programs\local\source\selfallocation;
@@ -51,6 +55,10 @@ final class allocation {
             selfallocation::get_type() => selfallocation::class,
             approval::get_type() => approval::class,
             cohort::get_type() => cohort::class,
+<<<<<<< HEAD
+=======
+            externaldb::get_type() => externaldb::class,
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
         ];
 
         if (ecommerce::is_commerce_enabled()) {

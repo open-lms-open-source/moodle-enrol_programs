@@ -88,6 +88,17 @@ if (has_capability('enrol/programs:edit', $context) && !$program->archived) {
     $importaction = new \local_openlms\output\dialog_form\button($importurl, get_string('importprogramallocation',
         'enrol_programs'));
     echo $dialogformoutput->render($importaction);
+<<<<<<< HEAD
+=======
+
+    $externaldbsource = $DB->get_record('enrol_programs_sources', ['programid' => $program->id, 'type' => 'externaldb']);
+    if ($externaldbsource) {
+        $runurl = new moodle_url('/enrol/programs/management/program_run_externaldb.php', ['id' => $program->id]);
+        $runaction = new \local_openlms\output\dialog_form\button($runurl, get_string('source_externaldb_run', 'enrol_programs'));
+        $runaction->set_dialog_name(get_string('source_externaldb', 'enrol_programs'));
+        echo $dialogformoutput->render($runaction);
+    }
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 }
 
 echo $OUTPUT->footer();

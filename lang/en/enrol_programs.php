@@ -121,6 +121,12 @@ $string['importprogramallocation'] = 'Import program allocation';
 $string['importprogramallocationconfirmation'] = 'You are importing allocation settings from program __{$a->fullname} / {$a->idnumber} / {$a->category}__.
 
 Please select all settings that you want to import.';
+<<<<<<< HEAD
+=======
+$string['source_externaldb_run'] = 'Run external database allocation';
+$string['source_externaldb_runconfirm'] = 'Synchronise the program allocations immediately with the configured external database?';
+$string['source_externaldb_runcomplete'] = 'External database allocation synchronisation finished.';
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 $string['importprogramcontent'] = 'Import program content';
 $string['importprogramcontentconfirmation'] = 'You are importing content from program __{$a->fullname} / {$a->idnumber} / {$a->category}__.';
 $string['importprogramdue'] = 'Program due ({$a})';
@@ -426,6 +432,42 @@ $string['source_ecommerce_allowsignup'] = 'Allow new allocations';
 $string['source_ecommerce_cohortmembershiprequirement'] = 'Users must be a member of one of the following cohorts: {$a}';
 $string['source_ecommerce_maxusers'] = 'Max users';
 $string['source_ecommerce_nocapacity'] = 'There is no remaining capacity on this program';
+<<<<<<< HEAD
+=======
+$string['source_externaldb'] = 'External database allocation';
+$string['source_externaldb_allownew'] = 'Allow external database allocation';
+$string['source_externaldb_allownew_desc'] = 'Allow adding new external database allocation sources to programs';
+$string['source_externaldb_heading'] = 'External database connection';
+$string['source_externaldb_heading_desc'] = 'Configure the database connection that provides program allocations.';
+$string['source_externaldb_dbtype'] = 'Database driver';
+$string['source_externaldb_dbtype_desc'] = 'Driver name understood by ADODB, for example mysqli, postgres, oracle, sqlite3 or pdo.';
+$string['source_externaldb_dbhost'] = 'Database host / DSN';
+$string['source_externaldb_dbuser'] = 'Database user';
+$string['source_externaldb_dbpass'] = 'Database password';
+$string['source_externaldb_dbname'] = 'Database name';
+$string['source_externaldb_dbencoding'] = 'Database encoding';
+$string['source_externaldb_dbsetupsql'] = 'Setup SQL';
+$string['source_externaldb_dbsybasequoting'] = 'Enable Sybase quotes';
+$string['source_externaldb_debugdb'] = 'Debug external DB connection';
+$string['source_externaldb_debugdb_desc'] = 'Enable verbose output from ADODB when connecting to the external database. Use for troubleshooting only.';
+$string['source_externaldb_remotetable'] = 'Remote allocation table';
+$string['source_externaldb_programfield'] = 'Program field name';
+$string['source_externaldb_userfield'] = 'User field name';
+$string['source_externaldb_localprogramfield'] = 'Local program field';
+$string['source_externaldb_localuserfield'] = 'Local user field';
+$string['source_externaldb_archivemissing'] = 'Archive missing allocations';
+$string['source_externaldb_archivemissing_desc'] = 'Archive allocations created by this source when the corresponding record is no longer present in the external database.';
+$string['source_externaldb_archivemissing_help'] = 'When enabled, allocations created by this source will be archived automatically if the matching record is removed from the external database table.';
+$string['source_externaldb_configinfo'] = 'External table: {$a->table}, program field: {$a->programfield}, user field: {$a->userfield}';
+$string['source_externaldb_confignotset'] = 'External database connection is not configured. Complete the settings above before enabling this source.';
+$string['source_externaldb_programvalue'] = 'Program identifier override';
+$string['source_externaldb_programvalue_help'] = 'Optional value that should match the external program field. Leave empty to use the configured local program field value.';
+$string['source_externaldb_missingprogramvalue'] = 'Enter a value or populate the program {$a} field so that the external record can be matched.';
+$string['source_externaldb_status_programvalue'] = 'external value {$a}';
+$string['source_externaldb_status_programfield'] = 'taken from program value {$a}';
+$string['source_externaldb_status_archiving'] = 'missing entries archived automatically';
+$string['error_source_disable_hasallocations'] = 'This allocation source already has users assigned and cannot be disabled.';
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 $string['source_manual'] = 'Manual allocation';
 $string['source_manual_allocateusers'] = 'Allocate users';
 $string['source_manual_csvfile'] = 'CSV file';
@@ -476,6 +518,10 @@ $string['tabvisibility'] = 'Visibility settings';
 $string['tagarea_program'] = 'Programs';
 $string['taskcertificate'] = 'Programs certificate issuing cron';
 $string['taskcron'] = 'Programs plugin cron';
+<<<<<<< HEAD
+=======
+$string['taskexternaldbsync'] = 'Synchronise external database allocations';
+>>>>>>> e3f9c16 (Add privacy provider tests and cron task tests for enrol_programs plugin)
 $string['training'] = 'Training';
 $string['trainingcompletion'] = 'Required training: {$a}';
 $string['trainingprogress'] = 'Training progress: {$a->current}/{$a->total}';
