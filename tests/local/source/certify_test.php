@@ -23,6 +23,7 @@ use tool_certify\local\assignment;
 use tool_certify\local\period;
 use enrol_programs\local\course_reset;
 use stdClass;
+use tool_certify\task\cron;
 
 /**
  * Certifications program source test.
@@ -1052,5 +1053,32 @@ final class certify_test extends \advanced_testcase {
         $ccompletion = new \completion_completion(['course' => $course2->id, 'userid' => $user3->id]);
         $this->assertTrue($ccompletion->is_complete());
         $this->assertTrue($DB->record_exists('course_modules_completion', ['coursemoduleid' => $cm2->id, 'userid' => $user3->id]));
+    }
+
+    public function test_cohort_assignment_alongwith_program_allocation() {
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+
+
+        $cohort1 = $this->getDataGenerator()->create_cohort();
+
+        cohort_add_member($cohort1->id, $user1->id);
+        cohort_add_member($cohort1->id, $user2->id);
+        $programgenerator = $this->getDataGenerator()->get_plugin_generator('enrol_programs');
+
+        $program1 = $programgenerator->create_program(['fullname' => 'hokus', 'sources' => ['certify' => [], 'cohort' => ['cohorts' => [$cohort1->id]]]]);
+        $task = new \enrol_programs\task\cron();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+        /** @var \tool_certify_generator $generator */
+        $generator = $this->getDataGenerator()->get_plugin_generator('tool_certify');
+
+        $certification1 = $generator->create_certification(['programid1' => $program1->id, 'idnumber' => 'pokus', 'sources' => ['cohort' => ['cohorts' => [$cohort1->id]]]]);
+        $task = new cron();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
     }
 }

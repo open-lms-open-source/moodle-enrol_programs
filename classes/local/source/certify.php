@@ -339,6 +339,12 @@ final class certify extends base {
 
                 course_reset::reset_courses($user, $resettype, $program->id);
 
+                // Check if the user already is allocated to the program for this certification.
+                if ($DB->record_exists('enrol_programs_allocations', ['userid' => $period->userid, 'programid' => $period->programid])
+                    && $DB->record_exists('tool_certify_periods', ['userid' => $period->userid, 'programid' => $period->programid])) {
+                    continue;
+                }
+
                 $allocation = $DB->get_record('enrol_programs_allocations', ['userid' => $period->userid, 'programid' => $period->programid]);
                 if ($allocation) {
                     // Something is wrong, probably some automatic allocation source messing this up, oh well.
