@@ -133,13 +133,16 @@ class fields_handler extends \core_customfield\handler {
     public function config_form_definition(\MoodleQuickForm $mform) {
         $mform->addElement('header', 'programcustomfields', get_string('customfieldsettings', 'enrol_programs'));
         $mform->setExpanded('programcustomfields', true);
-        $mform->addElement('html', get_string('customfieldvisibleto', 'enrol_programs'));
+        $mform->addElement('static', 'customfieldvisibleto', get_string('customfieldvisibleto', 'enrol_programs'));
         $mform->addElement('advcheckbox', 'configdata[visibilitymanagers]',
             '', get_string('customfieldvisible:viewcapability', 'enrol_programs'), ['group' => 1]);
+        $mform->addHelpButton('configdata[visibilitymanagers]', 'customfieldvisible:viewcapability', 'enrol_programs');
         $mform->addElement('advcheckbox', 'configdata[visibilityallocated]',
             '', get_string('customfieldvisible:allocated', 'enrol_programs'), ['group' => 1]);
+        $mform->addHelpButton('configdata[visibilityallocated]', 'customfieldvisible:allocated', 'enrol_programs');
         $mform->addElement('advcheckbox', 'configdata[visibilityeveryone]',
             '', get_string('customfieldvisible:everyone', 'enrol_programs'), ['group' => 1]);
+        $mform->addHelpButton('configdata[visibilityeveryone]', 'customfieldvisible:viewcapability', 'enrol_programs');
     }
 
 }
