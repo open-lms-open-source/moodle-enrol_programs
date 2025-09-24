@@ -54,12 +54,6 @@ $returnurl = new moodle_url('/enrol/programs/management/program_completion_overr
 
 $user = $DB->get_record('user', ['id' => $allocation->userid], '*', MUST_EXIST);
 
-/** @var \enrol_programs\local\source\base $coursceclass */
-$coursceclass = allocation::get_source_classes()[$source->type];
-if (!$coursceclass::allocation_edit_supported($program, $source, $allocation)) {
-    redirect($returnurl);
-}
-
 $currenturl = new moodle_url('/enrol/programs/management/program_completion_override.php', ['id' => $allocation->id]);
 
 management::setup_program_page($currenturl, $context, $program);
