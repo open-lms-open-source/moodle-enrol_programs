@@ -28,14 +28,14 @@ defined('MOODLE_INTERNAL') || die();
 $string['addprogram'] = 'เพิ่มโปรแกรม';
 $string['addset'] = 'เพิ่มชุดใหม่';
 $string['allocationend'] = 'สิ้นสุดการจัดสรร';
-$string['allocationend_help'] = 'ความหมายของวันที่สิ้นสุดการจัดสรรขึ้นอยู่กับแหล่งที่มาของการจัดสรรที่เปิดใช้งาน โดยปกติการจัดสรรใหม่จะเป็นไปไม่ได้หลังจากวันที่นี้หากมีการระบุไว้';
+$string['allocationend_help'] = 'ความหมายของวันที่สิ้นสุดการจัดสรรขึ้นอยู่กับแหล่งที่มาการจัดสรรที่เปิดใข้งาน โดยทั่วไปการจัดสรรใหม่จะเป็นไปไม่ได้หลังจากวันที่นี้หากมีการระบุ';
 $string['allocation'] = 'การจัดสรร';
 $string['allocations'] = 'การจัดสรร';
 $string['programallocations'] = 'การจัดสรรโปรแกรม';
 $string['allocationdate'] = 'วันที่การจัดสรร';
 $string['allocationsources'] = 'แหล่งที่มาการจัดสรร';
 $string['allocationstart'] = 'เริ่มต้นการจัดสรร';
-$string['allocationstart_help'] = 'ความหมายของวันที่เริ่มต้นการจัดสรรขึ้นอยู่กับแหล่งของการจัดสรรที่เปิดใช้งาน โดยปกติการจัดสรรใหม่จะเป็นไปได้หลังจากวันที่นี้เท่านั้นหากมีการระบุไว้';
+$string['allocationstart_help'] = 'ความหมายของวันที่เริ่มต้นการจัดสรรขึ้นอยู่กับแหล่งที่มาการจัดสรรที่เปิดใข้งาน โดยทั่วไปการจัดสรรใหม่จะเป็นไปได้หลังจากวันที่นี้เท่านั้นหากมีการระบุ';
 $string['allprograms'] = 'โปรแกรมทั้งหมด';
 $string['appenditem'] = 'ผนวกรายการ';
 $string['appendinto'] = 'ผนวกลงในรายการ';
@@ -52,10 +52,12 @@ $string['catalogue_searchtext'] = 'ค้นหาข้อความ';
 $string['catalogue_tag'] = 'กรองตามแท็ก';
 $string['certificatetemplatechoose'] = 'เลือกเทมเพลต...';
 $string['cohorts'] = 'ปรากฏแก่กลุ่ม';
-$string['cohorts_help'] = 'ทำโปรแกรมที่ไม่ใช่สาธารณะให้ปรากฏแก่สมาชิกกลุ่มที่ระบุได้
+$string['cohorts_help'] = 'สามารถตั้งค่าโปรแกรมที่ไม่ใช่สาธารณะให้สมาชิกกลุ่มร่วมรุ่นที่กำหนดมองเห็นได้
 
-สถานะการปรากฏไม่ส่งผลกระทบต่อโปรแกรมที่จัดสรรแล้ว';
+สถานะการมองเห็นไม่มีผลต่อโปรแกรมที่ได้รับการจัดสรรแล้ว';
 $string['columnusedalready'] = 'คอลัมน์ถูกใช้แล้ว';
+$string['completepercent'] = '{$a}% เสร็จสิ้นแล้ว';
+$string['completion'] = 'เสร็จสมบูรณ์';
 $string['completiondate'] = 'วันที่เสร็จสมบูรณ์';
 $string['completiondelay'] = 'การจบหลักสูตรล่าช้า';
 $string['completionoverride'] = 'เขียนทับการจบหลักสูตร';
@@ -81,6 +83,7 @@ $string['errorcoursemissing'] = 'รายวิชาขาดหายไป';
 $string['errorcoursesmissing'] = 'รายวิชาที่หายไป: {$a}';
 $string['errorinvalidoverridedates'] = 'การเขียนทับวันที่ไม่ถูกต้อง';
 $string['errordifferenttenant'] = 'ไม่สามารถเข้าถึงโปรแกรมจากผู้ใช้งานอื่น';
+$string['errorduplicateprogramid'] = 'หมายเลข ID โปรแกรมถูกใช้ไปแล้วสำหรับโปรแกรมอื่น โปรดใช้หมายเลข ID โปรแกรมที่ไม่ซ้ำกัน';
 $string['errornoallocations'] = 'ไม่พบการจัดสรรผู้ใช้งาน';
 $string['errornoallocation'] = 'โปรแกรมไม่ได้รับการจัดสรร';
 $string['errornomyprograms'] = 'คุณไม่ได้รับการจัดสรรลงในโปรแกรมใด';
@@ -115,12 +118,13 @@ $string['extra_menu_management_program_general'] = 'การดำเนิน�
 $string['extra_menu_management_program_users'] = 'การดำเนินการของผู้ใช้';
 $string['extra_menu_management_program_allocation'] = 'การดำเนินการจัดสรร';
 $string['fixeddate'] = 'ในวันที่กำหนด';
+$string['idnumbersymbol'] = 'ID #:';
 $string['importallocationend'] = 'สิ้นสุดการจัดสรร ({$a})';
 $string['importallocationstart'] = 'เริ่มต้นการจัดสรร ({$a})';
 $string['importprogramallocation'] = 'นำเข้าการจัดสรรโปรแกรม';
 $string['importprogramallocationconfirmation'] = 'คุณกำลังนำเข้าการตั้งค่าการจัดสรรจากโปรแกรม __{$a->fullname} / {$a->idnumber} / {$a->category}__
 
-โปรดเลือกการตั้งค่าทั้งหมดที่คุณต้องการนำเข้า';
+กรุณาเลือกการตั้งค่าทั้งหมดที่คุณต้องการนำเข้า';
 $string['importprogramcontent'] = 'นำเข้าเนื้อหาโปรแกรม';
 $string['importprogramcontentconfirmation'] = 'คุณกำลังนำเข้าเนื้อหาจากโปรแกรม __{$a->fullname} / {$a->idnumber} / {$a->category}__';
 $string['importprogramdue'] = 'ครบกำหนดโปรแกรม ({$a})';
@@ -133,6 +137,8 @@ $string['item'] = 'ชิ้น';
 $string['itemcompletion'] = 'การเสร็จสมบูรณ์ของรายการโปรแกรม';
 $string['itempoints'] = 'จุด';
 $string['itemrecalculate'] = 'คำนวณการจบหลักสูตรของรายการใหม่';
+$string['layoutgrid'] = 'เค้าโครงกริด';
+$string['layouttable'] = 'เค้าโครงตาราง';
 $string['management'] = 'การจัดการโปรแกรม';
 $string['messageprovider:allocation_notification'] = 'การแจ้งเตือนการจัดสรรโปรแกรม';
 $string['messageprovider:approval_request_notification'] = 'การแจ้งเตือนคำขอการอนุมัติโปรแกรม';
@@ -334,6 +340,14 @@ $string['programs'] = 'โปรแกรม';
 $string['programsactive'] = 'ใช้งานอยู่';
 $string['programsarchived'] = 'เก็บถาวร';
 $string['programsarchived_help'] = 'โปรแกรมที่เก็บถาวรจะถูกซ่อนจากผู้ใช้งานและความคืบหน้าจะถูกล็อก';
+$string['programslayout'] = 'เค้าโครงหน้าโดยละเอียดของโปรแกรม';
+$string['programslayout_desc'] = 'ควบคุมเค้าโครงของโปรแกรม - มุมมองตารางหรือกริดสำหรับหน้าของฉัน/โปรแกรม';
+$string['programslayoutallowuserswitch'] = 'อนุญาตให้ผู้ใช้สลับเค้าโครงโปรแกรม';
+$string['programslayoutallowuserswitch_desc'] = 'อนุญาตให้ผู้ใช้สลับเค้าโครงโปรแกรม';
+$string['programslayout_desc'] = 'ควบคุมเค้าโครงของโปรแกรม - มุมมองตารางหรือกริดสำหรับหน้าของฉัน/โปรแกรม';
+$string['programsblocklayout'] = 'เค้าโครงบล็อกโปรแกรมของฉัน';
+$string['programsblocklayout_desc'] = 'ควบคุมเค้าโครงโปรแกรม - มุมมองตารางหรือกริดสำหรับบล็อกโปรแกรมของฉัน';
+
 $string['programstart'] = 'เริ่มต้นโปรแกรม';
 $string['programstart_help'] = 'ผู้ใช้งานไม่สามารถป้อนรายวิชาโปรแกรมก่อนเริ่มต้นโปรแกรม';
 $string['programstart_allocation'] = 'เริ่มต้นทันทีหลังการจัดสรร';
@@ -367,9 +381,9 @@ $string['programs:upload'] = 'อัปโหลดโปรแกรม';
 $string['programs:view'] = 'ดูการจัดการโปรแกรม';
 $string['programs:viewcatalogue'] = 'เข้าถึงแคตตาล็อกโปรแกรม';
 $string['public'] = 'สาธารณะ';
-$string['public_help'] = 'โปรแกรมสาธารณะจะปรากฏแก่ผู้ใช้งานทั้งหมด
+$string['public_help'] = 'ผู้ใช้ทุกคนจะมองเห็นโปรแกรมสาธารณะได้
 
-สถานะการปรากฏไม่ส่งผลกระทบต่อโปรแกรมที่จัดสรรแล้ว';
+สถานะการมองเห็นไม่มีผลต่อโปรแกรมที่ได้รับการจัดสรรแล้ว';
 $string['purchaseaccess'] = 'ซื้อการเข้าถึง';
 $string['resetallocation'] = 'รีเซ็ตความคืบหน้าโปรแกรม';
 $string['resettype'] = 'ประเภทการรีเซ็ต';
@@ -383,6 +397,11 @@ $string['sequencetype_allinanyorder'] = 'ทั้งหมดตามลำด
 $string['sequencetype_atleast'] = 'อย่างน้อย {$a->min}';
 $string['sequencetype_minpoints'] = 'ขั้นต่ำ {$a->minpoints} คะแนน';
 $string['selectcategory'] = 'เลือกประเภท';
+$string['sortbyprogramname'] = 'จัดเรียงตามชื่อโปรแกรม';
+$string['sortbyprogramid'] = 'จัดเรียงตาม ID โปรแกรม';
+$string['sortbyprogramstart'] = 'จัดเรียงตามวันที่เริ่มต้นโปรแกรม';
+$string['sortbyprogramdue'] = 'จัดเรียงตามวันที่ครบกำหนดโปรแกรม';
+$string['sortbyprogramend'] = 'จัดเรียงตามวันที่สิ้นสุดโปรแกรม';
 $string['source'] = 'แหล่งที่มา';
 $string['source_approval'] = 'คำขอที่มีการอนุมัติ';
 $string['source_approval_allownew'] = 'อนุญาตการอนุมัติ';
@@ -400,8 +419,6 @@ $string['source_approval_notification_approval_reject_subject'] = 'การแ�
 $string['source_approval_notification_approval_reject_body'] = 'สวัสดี {$a->user_fullname}
 
 คำขอเข้าถึงโปรแกรม "{$a->program_fullname}" ถูกปฏิเสธ
-
-{$a->reason}
 ';
 $string['source_approval_requestallowed'] = 'คำขอได้รับอนุญาต';
 $string['source_approval_requestnotallowed'] = 'คำขอไม่ได้รับอนุญาต';
@@ -473,7 +490,7 @@ $string['tabcontent'] = 'เนื้อหา';
 $string['tabgeneral'] = 'ทั่วไป';
 $string['tabusers'] = 'ผู้ใช้งาน';
 $string['tabvisibility'] = 'การตั้งค่าการปรากฏ';
-$string['tagarea_program'] = 'โปรแกรม';
+$string['tagarea_enrol_programs_programs'] = 'โปรแกรม';
 $string['taskcertificate'] = 'Cron การออกใบรับรองโปรแกรม';
 $string['taskcron'] = 'Cron ปลั๊กอินโปรแกรม';
 $string['training'] = 'การฝึกอบรม';
@@ -513,7 +530,7 @@ $string['rb_coursesall'] = 'หลักสูตร - ทั้งหมด';
 $string['rb_incomplete'] = 'ไม่สมบูรณ์';
 $string['rb_isallocated'] = 'จัดสรรแล้ว';
 $string['rb_iscomplete'] = 'เสร็จสิ้นแล้ว?';
-$string['rb_iscompleteany'] = 'เสร็จสิ้นแล้ว? (ทุกวิธี)';
+$string['rb_iscompleteany'] = 'เสร็จสิ้นแล้วหรือไม่ (ทุกวิธี)';
 $string['rb_isinprogress'] = 'กำลังดำเนินการ?';
 $string['rb_isnotcomplete'] = 'ไม่เสร็จสมบูรณ์?';
 $string['rb_isnotyetstarted'] = 'ยังไม่เริ่มต้น?';

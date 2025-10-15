@@ -56,6 +56,8 @@ $string['cohorts_help'] = 'Programmer, der ikke er offentlige, kan gøres synlig
 
 Synlighedsstatus påvirker ikke allerede allokerede programmer.';
 $string['columnusedalready'] = 'Kolonnen er allerede i brug';
+$string['completepercent'] = '{$a} % gennemført';
+$string['completion'] = 'Udført';
 $string['completiondate'] = 'Fuldførelsesdato';
 $string['completiondelay'] = 'Forsinkelse af færdiggørelse';
 $string['completionoverride'] = 'Tilsidesæt færdiggørelse';
@@ -81,6 +83,7 @@ $string['errorcoursemissing'] = 'Kurset mangler';
 $string['errorcoursesmissing'] = 'Manglende kurser: {$a}';
 $string['errorinvalidoverridedates'] = 'Tilsidesættelser af ugyldig dato';
 $string['errordifferenttenant'] = 'Der er ikke adgang til programmet fra en anden lejer';
+$string['errorduplicateprogramid'] = 'Program-id-nummer bruges allerede til et andet program, brug venligst et unikt program-id-nummer';
 $string['errornoallocations'] = 'Ingen brugerallokeringer blev fundet';
 $string['errornoallocation'] = 'Programmet er ikke allokeret';
 $string['errornomyprograms'] = 'Du er ikke allokeret til nogen programmer.';
@@ -115,12 +118,13 @@ $string['extra_menu_management_program_general'] = 'Handlinger for program';
 $string['extra_menu_management_program_users'] = 'Brugerhandlinger';
 $string['extra_menu_management_program_allocation'] = 'Allokeringshandlinger';
 $string['fixeddate'] = 'På en fastsat dato';
+$string['idnumbersymbol'] = 'Id-nummer:';
 $string['importallocationend'] = 'Allokeringsafslutning ({$a})';
 $string['importallocationstart'] = 'Allokeringsstart ({$a})';
 $string['importprogramallocation'] = 'Importér programallokering';
-$string['importprogramallocationconfirmation'] = 'Du er ved at importere allokeringsindstillinger fra program __{$a->fullname} / {$a->idnumber} / {$a->category}__.
+$string['importprogramallocationconfirmation'] = 'Du er i færd med at importere allokeringsindstillinger fra program __{$a->fullname} / {$a->idnumber} / {$a->category}__.
 
-Vælg alle de indstillinger, du vil importere.';
+Vælg alle de indstillinger, du ønsker at importere.';
 $string['importprogramcontent'] = 'Importér programindhold';
 $string['importprogramcontentconfirmation'] = 'Du er ved at importere indhold fra program __{$a->fullname} / {$a->idnumber} / {$a->category}__.';
 $string['importprogramdue'] = 'Programfrist nået ({$a})';
@@ -133,6 +137,8 @@ $string['item'] = 'Element';
 $string['itemcompletion'] = 'Programelement færdiggjort';
 $string['itempoints'] = 'Point';
 $string['itemrecalculate'] = 'Genberegn færdiggørelse af element';
+$string['layoutgrid'] = 'Gitterlayout';
+$string['layouttable'] = 'Tabellayout';
 $string['management'] = 'Programadministration';
 $string['messageprovider:allocation_notification'] = 'Notifikation om programallokering';
 $string['messageprovider:approval_request_notification'] = 'Notifikation om anmodning om programgodkendelse';
@@ -266,7 +272,7 @@ Program "{$a->program_fullname}" er startet.
 $string['notification_start_description'] = 'Notifikation sendt til brugere, når deres program er startet.';
 $string['notificationdates'] = 'Notifikationsdatoer';
 $string['notset'] = 'Ikke angivet';
-$string['plugindisabled'] = 'Pluginet til programtilmelding er deaktiveret. Programmerne vil ikke virke.
+$string['plugindisabled'] = 'Plugin’et til programtilmelding er deaktiveret. Programmerne vil ikke fungere.
 
 [Enable plugin now]({$a->url})';
 $string['pluginname'] = 'Programmer';
@@ -334,6 +340,14 @@ $string['programs'] = 'Programmer';
 $string['programsactive'] = 'Aktiv';
 $string['programsarchived'] = 'Arkiveret';
 $string['programsarchived_help'] = 'Arkiverede programmer er skjult for brugere, og deres status er låst.';
+$string['programslayout'] = 'Programmets detaljerede sidelayout';
+$string['programslayout_desc'] = 'Styrer programmernes layout – tabel- eller gittervisning for min/program-siden.';
+$string['programslayoutallowuserswitch'] = 'Tillad brugere at skifte programlayout';
+$string['programslayoutallowuserswitch_desc'] = 'Tillad brugere at skifte programlayout';
+$string['programslayout_desc'] = 'Styrer programmernes layout – tabel- eller gittervisning for min/program-siden.';
+$string['programsblocklayout'] = 'Mit programs bloklayout';
+$string['programsblocklayout_desc'] = 'Styrer programmernes layout – tabel- eller gittervisning for myprograms-blokken.';
+
 $string['programstart'] = 'Programstart';
 $string['programstart_help'] = 'Brugere kan ikke indtaste programkurser før programstart.';
 $string['programstart_allocation'] = 'Øjeblikkelig start efter allokering';
@@ -367,7 +381,7 @@ $string['programs:upload'] = 'Upload programmer';
 $string['programs:view'] = 'Vis programadministration';
 $string['programs:viewcatalogue'] = 'Få adgang til programkataloget';
 $string['public'] = 'Offentlig';
-$string['public_help'] = 'De offentlige programmer er synlige for alle brugere.
+$string['public_help'] = 'Offentlige programmer er synlige for alle brugere.
 
 Synlighedsstatus påvirker ikke allerede allokerede programmer.';
 $string['purchaseaccess'] = 'Tilkøb adgang';
@@ -383,6 +397,11 @@ $string['sequencetype_allinanyorder'] = 'Alt i enhver rækkefølge';
 $string['sequencetype_atleast'] = 'Mindst {$a->min}';
 $string['sequencetype_minpoints'] = 'Mindst {$a->minpoints} point';
 $string['selectcategory'] = 'Vælg kategori';
+$string['sortbyprogramname'] = 'Sortér efter programnavn';
+$string['sortbyprogramid'] = 'Sortér efter program-id';
+$string['sortbyprogramstart'] = 'Sortér efter programmets startdato';
+$string['sortbyprogramdue'] = 'Sortér efter programmets forfaldsdato';
+$string['sortbyprogramend'] = 'Sortér efter programmets slutdato';
 $string['source'] = 'Kilde';
 $string['source_approval'] = 'Anmodninger med godkendelse';
 $string['source_approval_allownew'] = 'Tillad godkendelser';
@@ -473,7 +492,7 @@ $string['tabcontent'] = 'Indhold';
 $string['tabgeneral'] = 'Generelt';
 $string['tabusers'] = 'Brugere';
 $string['tabvisibility'] = 'Synlighedsindstillinger';
-$string['tagarea_program'] = 'Programmer';
+$string['tagarea_enrol_programs_programs'] = 'Programmer';
 $string['taskcertificate'] = 'Cron til udstedelse af programcertifikater';
 $string['taskcron'] = 'Cron til programplugin';
 $string['training'] = 'Undervisning';

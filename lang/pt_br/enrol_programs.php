@@ -41,7 +41,7 @@ $string['appenditem'] = 'Anexar item';
 $string['appendinto'] = 'Anexar ao item';
 $string['archive'] = 'Arquivar';
 $string['archived'] = 'Arquivada';
-$string['benefitname'] = '{$a}: Alocação do programa';
+$string['benefitname'] = '{$a}: alocação do programa';
 $string['calendarprogramend'] = '{$a} termina';
 $string['calendarprogramdue'] = '{$a} está vencido';
 $string['calendarprogramstart'] = '{$a} inicia';
@@ -56,6 +56,8 @@ $string['cohorts_help'] = 'Programas não públicos podem ser visíveis para mem
 
 O status de visibilidade não afeta os programas já alocados.';
 $string['columnusedalready'] = 'A coluna já está sendo usada';
+$string['completepercent'] = '{$a}% concluído';
+$string['completion'] = 'Conclusão';
 $string['completiondate'] = 'Data de conclusão';
 $string['completiondelay'] = 'Atraso na conclusão';
 $string['completionoverride'] = 'Substituir conclusão';
@@ -81,6 +83,7 @@ $string['errorcoursemissing'] = 'Curso ausente';
 $string['errorcoursesmissing'] = 'Cursos ausentes: {$a}';
 $string['errorinvalidoverridedates'] = 'Substituições de data inválidas';
 $string['errordifferenttenant'] = 'O programa de outro locatário não pode ser acessado';
+$string['errorduplicateprogramid'] = 'O número de ID do programa já está sendo usado para outro programa. Use um número de ID exclusivo do programa.';
 $string['errornoallocations'] = 'Nenhuma alocação de usuário encontrada';
 $string['errornoallocation'] = 'O programa não está alocado';
 $string['errornomyprograms'] = 'Você não está alocado a programa algum.';
@@ -115,10 +118,11 @@ $string['extra_menu_management_program_general'] = 'Ações do programa';
 $string['extra_menu_management_program_users'] = 'Ações dos usuários';
 $string['extra_menu_management_program_allocation'] = 'Ações de alocação';
 $string['fixeddate'] = 'Na data fixa';
+$string['idnumbersymbol'] = 'Número do código:';
 $string['importallocationend'] = 'Término da alocação ({$a})';
 $string['importallocationstart'] = 'Início da alocação ({$a})';
 $string['importprogramallocation'] = 'Importar alocação de programa';
-$string['importprogramallocationconfirmation'] = 'Você está importando configurações de alocação do programa __{$a->fullname} / {$a->idnumber} / {$a->category}__.
+$string['importprogramallocationconfirmation'] = 'Você está importando configurações de alocação do programa __{$a->fullname} / {$a->idnumber} {$a->category}__.
 
 Selecione todas as configurações que deseja importar.';
 $string['importprogramcontent'] = 'Importar conteúdo do programa';
@@ -133,6 +137,8 @@ $string['item'] = 'Item';
 $string['itemcompletion'] = 'Conclusão do item do programa';
 $string['itempoints'] = 'Pontos';
 $string['itemrecalculate'] = 'Recalcular conclusão do item';
+$string['layoutgrid'] = 'Layout da grade';
+$string['layouttable'] = 'Layout da tabela';
 $string['management'] = 'Gerenciamento de programa';
 $string['messageprovider:allocation_notification'] = 'Notificação de alocação de programa';
 $string['messageprovider:approval_request_notification'] = 'Notificação de solicitação de aprovação de programa';
@@ -266,9 +272,7 @@ o programa "{$a->program_fullname}" foi iniciado.
 $string['notification_start_description'] = 'Notificação enviada aos usuários quando o programa é iniciado.';
 $string['notificationdates'] = 'Datas de notificação';
 $string['notset'] = 'Não definido';
-$string['plugindisabled'] = 'O plug-in de inscrição no programa está desabilitado, os programas não estão funcionais.
-
-[Enable plugin now]({$a->url})';
+$string['plugindisabled'] = 'O plug-in de inscrição no programa está desabilitado, os programas não estão funcionais. [Enable plugin now]({$a->url})';
 $string['pluginname'] = 'Programas';
 $string['pluginname_desc'] = 'Os programas são projetados para permitir a criação de conjuntos de cursos.';
 $string['privacy:metadata:field:programid'] = 'ID do programa';
@@ -334,6 +338,14 @@ $string['programs'] = 'Programas';
 $string['programsactive'] = 'Ativos';
 $string['programsarchived'] = 'Arquivada';
 $string['programsarchived_help'] = 'Os programas arquivados ficam ocultos para os usuários e seu progresso é bloqueado.';
+$string['programslayout'] = 'Programa o layout detalhado da página';
+$string['programslayout_desc'] = 'Controla o layout dos programas – exibição de tabela ou grade para a página Meus/programas.';
+$string['programslayoutallowuserswitch'] = 'Permitir que os usuários alternem o layout do programa';
+$string['programslayoutallowuserswitch_desc'] = 'Permitir que os usuários alternem o layout do programa';
+$string['programslayout_desc'] = 'Controla o layout dos programas – exibição de tabela ou grade para a página Meus/programas.';
+$string['programsblocklayout'] = 'Layout do bloco Meus programas';
+$string['programsblocklayout_desc'] = 'Controla o layout dos programas – exibição de tabela ou grade para o bloco myprograms.';
+
 $string['programstart'] = 'Início do programa';
 $string['programstart_help'] = 'Os usuários não podem entrar nos cursos do programa antes do início do programa.';
 $string['programstart_allocation'] = 'Inicie imediatamente após a alocação';
@@ -367,7 +379,7 @@ $string['programs:upload'] = 'Carregar programas';
 $string['programs:view'] = 'Visualizar gerenciamento de programas';
 $string['programs:viewcatalogue'] = 'Acessar catálogo de programas';
 $string['public'] = 'Público';
-$string['public_help'] = 'Programas públicos são visíveis para todos os usuários.
+$string['public_help'] = 'Os programas públicos são visíveis para todos os usuários.
 
 O status de visibilidade não afeta os programas já alocados.';
 $string['purchaseaccess'] = 'Adquirir acesso';
@@ -383,7 +395,12 @@ $string['sequencetype_allinanyorder'] = 'Todos em qualquer ordem';
 $string['sequencetype_atleast'] = 'Pelo menos {$a->min}';
 $string['sequencetype_minpoints'] = 'Mínimo de {$a->minpoints} pontos';
 $string['selectcategory'] = 'Selecionar categoria';
-$string['source'] = 'Origem';
+$string['sortbyprogramname'] = 'Ordenar por sobrenome';
+$string['sortbyprogramid'] = 'Classificar por ID do programa';
+$string['sortbyprogramstart'] = 'Classificar por data de início do programa';
+$string['sortbyprogramdue'] = 'Classificar por data de vencimento do programa';
+$string['sortbyprogramend'] = 'Classificar por data final do programa';
+$string['source'] = 'Fonte';
 $string['source_approval'] = 'Solicitações com aprovação';
 $string['source_approval_allownew'] = 'Permitir aprovações';
 $string['source_approval_allownew_desc'] = 'Permitir a adição de novas fontes de _requests with approval_ aos programas';
@@ -473,7 +490,7 @@ $string['tabcontent'] = 'Conteúdo';
 $string['tabgeneral'] = 'Geral';
 $string['tabusers'] = 'Usuários';
 $string['tabvisibility'] = 'Configurações de visibilidade';
-$string['tagarea_program'] = 'Programas';
+$string['tagarea_enrol_programs_programs'] = 'Programas';
 $string['taskcertificate'] = 'Certificado de programas emitindo cron';
 $string['taskcron'] = 'Programa plug-in cron';
 $string['training'] = 'Treinamento';
