@@ -95,9 +95,9 @@ Feature: Users can view a list of programs where they are allocated
     And ".programs-grid" "css_element" should exist
     And ".generaltable" "css_element" should not exist
     And I should see "ID #"
-    And I should see "Start"
-    And I should see "Due"
-    And I should see "End"
+    And I should see "Program start"
+    And I should see "Program due"
+    And I should see "Program end"
     And I should see "Program 00"
     And I should see "Test program"
     And I should see "P00"

@@ -139,6 +139,9 @@
         }
     }
     .programs-grid {
+        .program-card .card-title {
+            margin-bottom: 0;
+        }
         .program-card {
             width: 100%;
             max-width: 30em;
@@ -152,15 +155,14 @@
             @media (max-width: 767px) {
                 height: 36em;
             }
-            .program-name {
-                padding: 0.75rem 1.25rem;
-                margin-bottom: 0;
-                background-color: rgba(0, 0, 0, 0.03);
-                text-align: center;
-                font-weight: bold;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+            .program-image-wrapper {
+                position: relative;
+                width: 100%;
+            }
+            .programthumbnail {
+                display: block;
+                width: 100%;
+                height: auto;
             }
             .card-img-top {
                 height: 15em;
@@ -168,8 +170,8 @@
             .program-id {
                 position: absolute;
                 text-align: center;
-                width: 40%;
-                bottom: 25em;
+                max-width: 80%;
+                bottom: 0.75em;
                 left: 1em;
                 background-color: white;
                 color: black;
@@ -178,12 +180,7 @@
                 border-radius: 10px;
                 font-weight: bold;
                 border: 1px solid;
-                @media (max-width: 1200px) {
-                    bottom: 32em;
-                }
-                @media (max-width: 767px) {
-                    bottom: 25em;
-                }
+                width: fit-content;
             }
         }
     }
@@ -221,18 +218,26 @@
 .programviewtoggle-button:not(.selected) i {
     color: #888;
 }
-#block_myprograms_overview {
-    .program-name {
-        padding: 0.75rem 1.25rem;
-        margin-bottom: 0;
-        background-color: rgba(0, 0, 0, 0.03);
-        text-align: center;
-        font-weight: bold;
+
+.program-name {
+    font-size: 1rem;
+    padding: 0.5rem 1.25rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    text-align: center;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    a {
+        display: inline-block;
+        max-width: 100%;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        text-decoration: none;
+        font-size: 1rem;
     }
 }
+
 
 .block_myprograms {
     .divider-vertical {

@@ -254,14 +254,16 @@ class renderer extends \plugin_renderer_base {
 
         $PAGE->requires->js_call_amd('enrol_programs/selector', 'init', [['totalpages' => $totalpages]]);
         $perpagecount = $ismyprogramspage ? null : allocation::PROGRAMCOUNTPERPAGE;
-        $allocations = allocation::get_my_allocations(null, true, 0, $perpagecount);
+        $allocations = allocation::get_my_allocations(null, 'timedue', 0, $perpagecount);
         if (!$allocations) {
             return '<em>' . get_string('errornomyprograms', 'enrol_programs') . '</em>';
         }
 
         $programicon = $this->output->pix_icon('program', '', 'enrol_programs');
-        $dateformat = get_string('strftimedatefullshort');
+        $dateformat = get_string('strftimedateformatprograms', 'enrol_programs');;
         $data = [];
+
+        $sourceclasses = allocation::get_source_classes();
 
         foreach ($allocations as $allocation) {
             $row = [];
@@ -281,7 +283,7 @@ class renderer extends \plugin_renderer_base {
                 $row['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
             }
 
-            $fullname = shorten_text(format_string($program->fullname), 23, true);
+            $fullname = $program->fullname;
             $row['fullnameplain'] = format_string($program->fullname);
             $detailurl = new moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $fullname = \html_writer::link($detailurl, $fullname);
@@ -290,7 +292,11 @@ class renderer extends \plugin_renderer_base {
             $row['description'] = $program->description;
 
             $row['status'] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
+            $source = $DB->get_record('enrol_programs_sources', ['id' => $allocation->sourceid], '*', MUST_EXIST);
 
+            $sourceclass = $sourceclasses[$source->type];
+
+            $row['source'] = $sourceclass::render_allocation_source($program, $source, $allocation);
             $row['programstart'] = userdate($allocation->timestart, $dateformat);
 
             $row['programdue'] = (isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : null);

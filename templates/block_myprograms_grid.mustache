@@ -18,10 +18,12 @@
     {{#programs}}
         <div class="col d-flex pb-3 px-1">
             <div class="dashboard-card course-card card h-100 d-flex flex-column program-card">
-                <img class="card-img-top programthumbnail" src="{{thumbnail}}" alt="{{fullnameplain}}">
-                {{#ismyprogramspage}}<div class="program-id">{{#str}}idnumbersymbol, enrol_programs {{/str}} {{idnumber}}</div>{{/ismyprogramspage}}
+                <div class="program-image-wrapper">
+                    <img class="card-img-top programthumbnail" src="{{thumbnail}}" alt="{{fullnameplain}}">
+                    {{#ismyprogramspage}}<div class="program-id">{{#str}}idnumbersymbol, enrol_programs {{/str}} {{idnumber}}</div>{{/ismyprogramspage}}
+                </div>
                 <div class="program-name">
-                    <h5 class="card-title text-center" title="{{fullnameplain}}">{{{fullname}}}</h5>
+                    <h2 class="card-title text-center" title="{{fullnameplain}}">{{{fullname}}}</h2>
                 </div>
                 <div class="card-body d-flex flex-column">
                     {{#description}}
@@ -31,12 +33,26 @@
                             {{/ismyprogramspage}}
                         </div>
                     {{/description}}
-                    <div class="card-text">{{{status}}}</div>
-                    <ul class="list-unstyled mt-2">
-                        {{#programstart}}<li><strong>Start:</strong> {{programstart}}</li>{{/programstart}}
-                        {{#programdue}}<li><strong>Due:</strong> {{programdue}}</li>{{/programdue}}
-                        {{#programend}}<li><strong>End:</strong> {{programend}}</li>{{/programend}}
-                    </ul>
+                    <div class="card-text">
+                        {{^ismyprogramspage}}
+                        <ul class="list-unstyled mt-2">
+                            <li>{{{status}}}</li>
+                            {{#programstart}}<li><strong>{{#str}}start, enrol_programs{{/str}} :</strong> {{programstart}}</li>{{/programstart}}
+                            {{#programdue}}<li><strong>{{#str}}due, enrol_programs{{/str}} :</strong> {{programdue}}</li>{{/programdue}}
+                            {{#programend}}<li><strong>{{#str}}end, enrol_programs{{/str}}:</strong> {{programend}}</li>{{/programend}}
+                            <li><strong>{{#str}}source, enrol_programs{{/str}} </strong> : {{{source}}}</li>
+                        </ul>
+                        {{/ismyprogramspage}}
+                        {{#ismyprogramspage}}
+                        <ul class="list-unstyled mt-2">
+                            {{#programstart}}<li><strong>{{#str}}programstart, enrol_programs{{/str}} :</strong> {{programstart}}</li>{{/programstart}}
+                            {{#programdue}}<li><strong>{{#str}}programdue, enrol_programs{{/str}} :</strong> {{programdue}}</li>{{/programdue}}
+                            {{#programend}}<li><strong>{{#str}}programend, enrol_programs{{/str}}:</strong> {{programend}}</li>{{/programend}}
+                            <li><strong>{{#str}}source, enrol_programs{{/str}} </strong> : {{{source}}}</li>
+                            <li><strong>{{#str}}programstatus, enrol_programs{{/str}} :</strong> {{{status}}}</li>
+                        </ul>
+                        {{/ismyprogramspage}}
+                    </div>
                 </div>
             </div>
         </div>

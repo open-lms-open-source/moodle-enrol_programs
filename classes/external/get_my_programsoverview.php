@@ -67,8 +67,9 @@ final class get_my_programsoverview extends external_api {
         $allocations = allocation::get_my_allocations(null, $orderby, $from, $count, $search);
 
         $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
-        $dateformat = get_string('strftimedatefullshort');
+        $dateformat = get_string('strftimedateformatprograms', 'enrol_programs');;
         $data = [];
+        $sourceclasses = allocation::get_source_classes();
 
         foreach ($allocations as $allocation) {
             $row = [];
@@ -95,7 +96,11 @@ final class get_my_programsoverview extends external_api {
             $row['idnumber'] = $program->idnumber;
             $row['description'] = $program->description;
             $row['status'] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
+            $source = $DB->get_record('enrol_programs_sources', ['id' => $allocation->sourceid], '*', MUST_EXIST);
 
+            $sourceclass = $sourceclasses[$source->type];
+
+            $row['source'] = $sourceclass::render_allocation_source($program, $source, $allocation);
             $row['programstart'] = userdate($allocation->timestart, $dateformat);
 
             $row['programdue'] = (isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : null);
@@ -121,6 +126,7 @@ final class get_my_programsoverview extends external_api {
                 'idnumber' => new external_value(PARAM_TEXT, 'Program idnumber'),
                 'description' => new external_value(PARAM_RAW, 'Program description'),
                 'status' => new external_value(PARAM_CLEANHTML, 'Program status'),
+                'source' => new external_value(PARAM_CLEANHTML, 'Allocation source information'),
                 'thumbnail' => new external_value(PARAM_CLEANHTML, 'Program image'),
                 'programstart' => new external_value(PARAM_CLEANHTML, 'Program start', VALUE_OPTIONAL),
                 'programdue' => new external_value(PARAM_CLEANHTML, 'Program due', VALUE_OPTIONAL),
