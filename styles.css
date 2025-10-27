@@ -106,36 +106,39 @@
     padding: 10px;
 }
 */
+.my-programs-filters {
+    gap: 0.5rem;
+    .sort-filters {
+        @media (max-width: 767px) {
+            padding-right: 10rem;
+            padding-left: 10rem;
+        }
+        .dropdown-menu {
+            .dropdown-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+            li {
+                display: flex;
+                .icon {
+                    margin-left: 1em;
+                }
+            }
+        }
+    }
+    .divider-vertical {
+        border-left: 1px solid gray;
+        height: 24px;
+        margin: 0 0.25rem;
+    }
+}
 #page-enrol-programs-my-index {
     #region-main {
         @media (min-width: 1600px) {
             padding-right: 10rem;
             padding-left: 10rem;
-        }
-    }
-    .my-programs-filters {
-        padding-bottom: 1em;
-        gap: 1rem;
-        .sort-filters {
-            @media (max-width: 767px) {
-                padding-right: 10rem;
-                padding-left: 10rem;
-            }
-            .dropdown-menu {
-                .dropdown-item {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    width: 100%;
-                }
-                li {
-                    display: flex;
-                    .icon {
-                        margin-left: 1em;
-                    }
-                }
-            }
-
         }
     }
     .programs-grid {
@@ -237,12 +240,19 @@
         font-size: 1rem;
     }
 }
+.my-programs-filters {
+    flex-wrap: wrap;
+}
 
+#region-main .my-programs-filters {
+    flex-wrap: wrap;
+}
 
-.block_myprograms {
-    .divider-vertical {
-        border-left: 1px solid gray;
-        height: 24px;
-        margin: 0 0.25rem;
+@media (min-width: 992px) {
+    #region-main .my-programs-filters {
+        flex-wrap: nowrap;
     }
+}
+aside .my-programs-filters {
+    flex-wrap: wrap;
 }

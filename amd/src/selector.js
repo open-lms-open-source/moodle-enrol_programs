@@ -3,7 +3,7 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
     let selectedView; // For block view
     let totalPages;
     let filterbyStatus = '';
-    let OrderBy = 'timedue';
+    let OrderBy = 'fullname';
     let searchTimeout;
     let searchQuery = '';
 
@@ -138,10 +138,26 @@ define(['core/templates', 'core_user/repository', 'core/ajax'], function(Templat
             item.addEventListener('click', function (e) {
                 e.preventDefault();
                 OrderBy = this.dataset.status;
+                const button = document.querySelector('#sortbyfilterdropdown');
+                if (button) {
+                    button.textContent = this.textContent;
+                }
+                let newStatus, newArrow;
+                if (OrderBy.endsWith('_desc')) {
+                    // If already descending, toggle to ascending
+                    newStatus = OrderBy.replace('_desc', '');
+                    newArrow = '↑'; // ascending
+                } else {
+                    // If ascending, toggle to descending
+                    newStatus = `${OrderBy}_desc`;
+                    newArrow = '↓'; // descending
+                }
+                this.dataset.status = newStatus;
                 const dropdown = this.closest('.dropdown-menu');
                 dropdown.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
                 this.classList.add('active');
-                document.querySelector('#sortbyfilter .dropdown-label').textContent = this.textContent.trim();
+                const baseText = this.textContent.trim().replace(/[↑↓]/g, '').trim();
+                this.textContent = `${baseText} ${newArrow}`;
                 UserRepository.setUserPreference('enrol_programs_block_user_orderby', OrderBy);
                 loadandrender(options);
             });

@@ -272,12 +272,19 @@ function enrol_programs_user_preferences(): array {
     );
     $preferences['enrol_programs_block_user_orderby'] = array(
         'null' => NULL_NOT_ALLOWED,
-        'default' => 'timedue',
-        'type' => PARAM_ALPHA,
+        'default' => 'fullname',
+        'type' => PARAM_ALPHANUMEXT,
         'choices' => array(
-            'timedue',
             'fullname',
-            'idnumber'
+            'idnumber',
+            'timedue',
+            'timestart',
+            'timeend',
+            'fullname_desc',
+            'idnumber_desc',
+            'timedue_desc',
+            'timestart_desc',
+            'timeend_desc',
         ),
         'permissioncallback' => [core_user::class, 'is_current_user'],
     );

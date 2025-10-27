@@ -1375,10 +1375,17 @@ final class allocation {
                   $tenantjoin
                  WHERE pa.userid = :userid AND p.archived = 0 AND pa.archived = 0";
         if (!empty($search)) {
-            $sql .= ' AND '.$DB->sql_like('p.fullname', ':search', false);
+            $sql .= '  AND ( '.$DB->sql_like('p.fullname', ':search', false). ' OR '.
+                    $DB->sql_like('p.idnumber', ':searchidnum', false).')';
             $params['search'] = "%$search%";
+            $params['searchidnum'] = "%$search%";
         }
-
+        if (str_ends_with($orderby, '_desc')) {
+            $orderby = substr($orderby, 0, -5);
+            $dir = 'DESC';
+        } else {
+            $dir = 'ASC';
+        }
         if ($orderby === 'timedue' || $orderby === 'timestart' || $orderby === 'timeend') {
             $sql .= " ORDER BY 
                           CASE 
@@ -1389,9 +1396,9 @@ final class allocation {
                               WHEN $orderby IS NOT NULL THEN 0
                               ELSE 1
                           END,
-                          pa.$orderby ASC";
+                          pa.$orderby ".$dir;
         } else if ($orderby === 'fullname' || $orderby === 'idnumber') {
-            $sql .= " ORDER BY p.$orderby ASC";
+            $sql .= " ORDER BY p.$orderby ".$dir;
         }
         if (isset($from) && isset($count)) {
             $sql .= " LIMIT {$count} OFFSET {$from}";

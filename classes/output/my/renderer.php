@@ -249,7 +249,7 @@ class renderer extends \plugin_renderer_base {
     public function render_block_content($ismyprogramspage = false): string {
         global $DB, $OUTPUT, $CFG, $PAGE;
         $filterpref = get_user_preferences('enrol_programs_block_user_filterby', 'programstatus_any');
-        $sortingpref = get_user_preferences('enrol_programs_block_user_orderby', 'timedue');
+        $sortingpref = get_user_preferences('enrol_programs_block_user_orderby', 'fullname');
         $totalpages = ceil(count(allocation::get_my_allocations())/allocation::PROGRAMCOUNTPERPAGE);
 
         $PAGE->requires->js_call_amd('enrol_programs/selector', 'init', [['totalpages' => $totalpages]]);
@@ -345,23 +345,33 @@ class renderer extends \plugin_renderer_base {
                 'isactive' => ($status === $filterpref)
             ];
         }
-
+        $isdesc = str_ends_with($sortingpref, '_desc');
+        $basekey = $isdesc ? substr($sortingpref, 0, -5) : $sortingpref;
         $sortingoptions = [
-            'timedue' => get_string('sortbyprogramdue', 'enrol_programs'),
             'fullname' => get_string('sortbyprogramname', 'enrol_programs'),
             'idnumber' => get_string('sortbyprogramid', 'enrol_programs'),
             'timestart' => get_string('sortbyprogramstart', 'enrol_programs'),
+            'timedue' => get_string('sortbyprogramdue', 'enrol_programs'),
             'timeend' => get_string('sortbyprogramend', 'enrol_programs'),
         ];
+        $templatecontext['currentsortinglabel'] = $sortingoptions[$basekey] . ($isdesc ? '↓' : '↑');
         $templatecontext['sortingoptions'] = [];
-        $templatecontext['currentsortinglabel'] = $sortingoptions[$sortingpref];
 
         foreach ($sortingoptions as $key => $sortingoption) {
-            $templatecontext['sortingoptions'][] = [
-                'value' => $key,
-                'label' => $sortingoption,
-                'isactive' => ($status === $sortingpref)
-            ];
+            if ($key === $basekey) {
+                $key = $isdesc ? $basekey : $basekey . '_desc';
+                $templatecontext['sortingoptions'][] = [
+                    'value' => $key,
+                    'label' => $sortingoption . ($isdesc ? '↑' : '↓'),
+                    'isactive' => false,
+                ];
+            } else {
+                $templatecontext['sortingoptions'][] = [
+                    'value' => $key,
+                    'label' => $sortingoption,
+                    'isactive' => ($key === $sortingpref)
+                ];
+            }
         }
 
         return $OUTPUT->render_from_template('enrol_programs/block_myprograms_overview',
@@ -379,7 +389,8 @@ class renderer extends \plugin_renderer_base {
         $url = \enrol_programs\local\catalogue::get_catalogue_url();
 
         if ($url) {
-            return '<div class="float-end">'. \html_writer::link($url, get_string('catalogue', 'enrol_programs')) . '</div>';
+            return '<div class="float-end">'. \html_writer::link($url, get_string('catalogue', 'enrol_programs'),
+                ['class' => 'btn btn-primary']) . '</div>';
         }
         return '';
     }
