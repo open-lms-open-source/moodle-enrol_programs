@@ -28,8 +28,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class base extends \local_openlms\notification\notificationtype {
-    /** @var int "soon" means in 3 days from now */
-    public const TIME_SOON = (60 * 60 * 24 * 3);
 
     /** @var int any due notification that was missed by more than 2 days is ignored */
     public const TIME_CUTOFF = (60 * 60 * 24 * 2);
@@ -41,6 +39,15 @@ abstract class base extends \local_openlms\notification\notificationtype {
      */
     public static function get_provider(): string {
         return static::get_notificationtype() . '_notification';
+    }
+
+    /**
+     * Returns the value for time soon, 3 days by default.
+     *
+     * @return int
+     */
+    public static function get_time_soon() : int {
+        return get_config('enrol_programs', 'timesoon') ?? 24*60*60*3;
     }
 
     /**

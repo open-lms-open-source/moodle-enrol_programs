@@ -85,9 +85,9 @@ final class endfailed_relateduser_test extends \advanced_testcase {
         $DB->update_record('enrol_programs_allocations', $allocation1);
         $allocation2->timeend = $now - endfailed_relateduser::TIME_CUTOFF - 100;
         $DB->update_record('enrol_programs_allocations', $allocation2);
-        $allocation3->timeend = $now + endfailed_relateduser::TIME_SOON - 100;
+        $allocation3->timeend = $now + endfailed_relateduser::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation3);
-        $allocation4->timeend = $now + endfailed_relateduser::TIME_SOON + 100;
+        $allocation4->timeend = $now + endfailed_relateduser::get_time_soon() + 100;
         $DB->update_record('enrol_programs_allocations', $allocation4);
         $allocation5->timeend = $now - 100;
         $DB->update_record('enrol_programs_allocations', $allocation5);

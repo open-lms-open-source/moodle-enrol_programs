@@ -72,7 +72,7 @@ final class duesoon_relateduser extends base {
             $params['userid'] = $user->id;
         }
         $params['now'] = time();
-        $params['soon'] = $params['now'] + self::TIME_SOON;
+        $params['soon'] = $params['now'] + self::get_time_soon();
         $params['fieldid'] = $fieldid;
 
         $sql = "SELECT pa.*, rur.parent as relateduserid

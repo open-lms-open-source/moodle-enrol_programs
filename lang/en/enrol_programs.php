@@ -584,3 +584,5 @@ $string['rb_type_program_customfields'] = 'Program custom fields';
 $string['rb_user'] = 'The user';
 $string['rb_viewprogram'] = 'View Program';
 $string['rb_visiblecohorts'] = 'Cohorts with visibility';
+$string['timesoon'] = 'Timesoon';
+$string['timesoon_desc'] = 'Setting for time soon - 3 days by default. You can enter value in seconds directly or enter a calculation like 60 * 60 * 24 * 3';

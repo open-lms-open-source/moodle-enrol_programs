@@ -402,5 +402,11 @@ function xmldb_enrol_programs_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025051400, 'enrol', 'programs');
     }
 
+    if ($oldversion < 2025111900) {
+        set_config( 'timesoon', 60*60*24*3, 'enrol_programs');
+        // Programs savepoint reached.
+        upgrade_plugin_savepoint(true, 2025111900, 'enrol', 'programs');
+    }
+
     return true;
 }

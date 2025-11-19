@@ -38,7 +38,7 @@ final class base_test extends \advanced_testcase {
     }
 
     public function test_constants() {
-        $this->assertGreaterThan(0, base::TIME_SOON);
+        $this->assertGreaterThan(0, base::get_time_soon());
         $this->assertGreaterThan(0, base::TIME_CUTOFF);
     }
 

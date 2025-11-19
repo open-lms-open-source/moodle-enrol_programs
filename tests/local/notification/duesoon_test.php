@@ -63,13 +63,13 @@ final class duesoon_test extends \advanced_testcase {
         $DB->update_record('enrol_programs_allocations', $allocation1);
         $allocation2->timedue = $now - duesoon::TIME_CUTOFF - 100;
         $DB->update_record('enrol_programs_allocations', $allocation2);
-        $allocation3->timedue = $now + duesoon::TIME_SOON - 100;
+        $allocation3->timedue = $now + duesoon::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation3);
-        $allocation4->timedue = $now + duesoon::TIME_SOON + 100;
+        $allocation4->timedue = $now + duesoon::get_time_soon() + 100;
         $DB->update_record('enrol_programs_allocations', $allocation4);
-        $allocation5->timedue = $now + duesoon::TIME_SOON - 100;
+        $allocation5->timedue = $now + duesoon::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation5);
-        $allocation6->timedue = $now + duesoon::TIME_SOON - 100;
+        $allocation6->timedue = $now + duesoon::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation6);
         $generator->create_program_notification(['notificationtype' => 'duesoon', 'programid' => $program1->id]);
         $generator->create_program_notification(['notificationtype' => 'duesoon', 'programid' => $program2->id]);

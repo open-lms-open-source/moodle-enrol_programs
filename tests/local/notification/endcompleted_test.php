@@ -65,10 +65,10 @@ final class endcompleted_test extends \advanced_testcase {
         $allocation2->timeend = $now - endcompleted::TIME_CUTOFF - 100;
         $allocation2->timecompleted = $now;
         $DB->update_record('enrol_programs_allocations', $allocation2);
-        $allocation3->timeend = $now + endcompleted::TIME_SOON - 100;
+        $allocation3->timeend = $now + endcompleted::get_time_soon() - 100;
         $allocation3->timecompleted = $now;
         $DB->update_record('enrol_programs_allocations', $allocation3);
-        $allocation4->timeend = $now + endcompleted::TIME_SOON + 100;
+        $allocation4->timeend = $now + endcompleted::get_time_soon() + 100;
         $allocation4->timecompleted = $now;
         $DB->update_record('enrol_programs_allocations', $allocation4);
         $allocation5->timeend = $now - 100;

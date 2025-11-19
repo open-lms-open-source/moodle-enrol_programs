@@ -63,13 +63,13 @@ final class endsoon_test extends \advanced_testcase {
         $DB->update_record('enrol_programs_allocations', $allocation1);
         $allocation2->timeend = $now - endsoon::TIME_CUTOFF - 100;
         $DB->update_record('enrol_programs_allocations', $allocation2);
-        $allocation3->timeend = $now + endsoon::TIME_SOON - 100;
+        $allocation3->timeend = $now + endsoon::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation3);
-        $allocation4->timeend = $now + endsoon::TIME_SOON + 100;
+        $allocation4->timeend = $now + endsoon::get_time_soon() + 100;
         $DB->update_record('enrol_programs_allocations', $allocation4);
-        $allocation5->timeend = $now + endsoon::TIME_SOON - 100;
+        $allocation5->timeend = $now + endsoon::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation5);
-        $allocation6->timeend = $now + endsoon::TIME_SOON - 100;
+        $allocation6->timeend = $now + endsoon::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation6);
         $generator->create_program_notification(['notificationtype' => 'endsoon', 'programid' => $program1->id]);
         $generator->create_program_notification(['notificationtype' => 'endsoon', 'programid' => $program2->id]);

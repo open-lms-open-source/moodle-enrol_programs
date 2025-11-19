@@ -63,9 +63,9 @@ final class start_test extends \advanced_testcase {
         $DB->update_record('enrol_programs_allocations', $allocation1);
         $allocation2->timestart = $now - start::TIME_CUTOFF - 100;
         $DB->update_record('enrol_programs_allocations', $allocation2);
-        $allocation3->timestart = $now + start::TIME_SOON - 100;
+        $allocation3->timestart = $now + start::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation3);
-        $allocation4->timestart = $now + start::TIME_SOON + 100;
+        $allocation4->timestart = $now + start::get_time_soon() + 100;
         $DB->update_record('enrol_programs_allocations', $allocation4);
         $generator->create_program_notification(['notificationtype' => 'start', 'programid' => $program1->id]);
         $generator->create_program_notification(['notificationtype' => 'start', 'programid' => $program2->id]);

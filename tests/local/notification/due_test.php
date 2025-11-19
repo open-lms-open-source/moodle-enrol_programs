@@ -63,9 +63,9 @@ final class due_test extends \advanced_testcase {
         $DB->update_record('enrol_programs_allocations', $allocation1);
         $allocation2->timedue = $now - due::TIME_CUTOFF - 100;
         $DB->update_record('enrol_programs_allocations', $allocation2);
-        $allocation3->timedue = $now + due::TIME_SOON - 100;
+        $allocation3->timedue = $now + due::get_time_soon() - 100;
         $DB->update_record('enrol_programs_allocations', $allocation3);
-        $allocation4->timedue = $now + due::TIME_SOON + 100;
+        $allocation4->timedue = $now + due::get_time_soon() + 100;
         $DB->update_record('enrol_programs_allocations', $allocation4);
         $allocation5->timedue = $now - 100;
         $DB->update_record('enrol_programs_allocations', $allocation5);
