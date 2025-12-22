@@ -114,7 +114,7 @@ if ($ADMIN->fulltree) {
         new lang_string('source_udplans_allownew', 'enrol_programs'),
         new lang_string('source_udplans_allownew_desc', 'enrol_programs'), 1));
 
-    $settings->add(new admin_setting_configtext('enrol_programs/timesoon',
+    $settings->add(new admin_setting_configduration('enrol_programs/timesoon',
         new lang_string('timesoon', 'enrol_programs'),
         new lang_string('timesoon_desc', 'enrol_programs'), 60 * 60 * 24 * 3, PARAM_INT));
 
