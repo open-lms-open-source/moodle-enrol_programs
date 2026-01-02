@@ -347,6 +347,7 @@ final class manual extends base {
             $program = $DB->get_record('enrol_programs_programs', ['idnumber' => $programid]);
         }
         if (!$program) {
+            $programid = trim((string)$programid, " \t\n\r\0\x0B'\"");
             $upt->track('enrolments', get_string('source_manual_userupload_invalidprogram', 'enrol_programs', s($programid)), 'error');
             return;
         }
