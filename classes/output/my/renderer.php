@@ -286,7 +286,7 @@ class renderer extends \plugin_renderer_base {
             $fullname = $program->fullname;
             $row['fullnameplain'] = format_string($program->fullname);
             $detailurl = new moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
-            $fullname = \html_writer::link($detailurl, $fullname);
+            $fullname = \html_writer::link($detailurl, shorten_text($program->fullname, 23, true), ['title' => format_string($program->fullname)]);
             $row['fullname'] = $fullname;
             $row['idnumber'] = $program->idnumber;
             $row['description'] = $program->description;
@@ -390,7 +390,7 @@ class renderer extends \plugin_renderer_base {
 
         if ($url) {
             return '<div class="float-end">'. \html_writer::link($url, get_string('catalogue', 'enrol_programs'),
-                ['class' => 'btn btn-primary']) . '</div>';
+                ['class' => 'btn btn-primary mb-2 my-2', 'role' => 'button']) . '</div>';
         }
         return '';
     }

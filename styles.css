@@ -20,11 +20,6 @@
     border-radius: 0.5rem;
 }
 
-#page-enrol-programs-catalogue-index .programimage img {
-    height: 150px;
-    width: 200px;
-}
-
 .programs .programbox.even {
     background-color: rgba(0, 0, 0, 0.03);
 }
@@ -142,9 +137,6 @@
         }
     }
     .programs-grid {
-        .program-card .card-title {
-            margin-bottom: 0;
-        }
         .program-card {
             width: 100%;
             max-width: 30em;
@@ -223,13 +215,20 @@
 }
 
 .program-name {
+    .card-title {
+        margin: 0;
+        line-height: unset;
+    }
     font-size: 1rem;
-    padding: 0.5rem 1.25rem;
+    padding: 0.25rem 1.25rem;
     background-color: rgba(0, 0, 0, 0.03);
     text-align: center;
     font-weight: bold;
     overflow: hidden;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     a {
         display: inline-block;
         max-width: 100%;

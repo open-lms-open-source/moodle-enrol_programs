@@ -92,7 +92,7 @@ final class get_my_programsoverview extends external_api {
             $fullname = shorten_text(format_string($program->fullname), 23, true);;
             $row['fullnameplain'] = format_string($program->fullname);
             $detailurl = new \moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
-            $row['fullname'] = \html_writer::link($detailurl, $fullname);
+            $row['fullname'] = \html_writer::link($detailurl, $fullname, ['title' => format_string($program->fullname)]);
             $row['idnumber'] = $program->idnumber;
             $row['description'] = $program->description;
             $row['status'] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
