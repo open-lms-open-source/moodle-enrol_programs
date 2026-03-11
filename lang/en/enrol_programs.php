@@ -165,6 +165,7 @@ $string['messageprovider:endfailed_notification'] = 'Failed program ended notifi
 $string['messageprovider:endfailed_relateduser_notification'] = 'Failed program ended notification - related user';
 $string['messageprovider:reset_notification'] = 'Program reset notification';
 $string['messageprovider:start_notification'] = 'Program started notification';
+$string['messageprovider:start_relateduser_notification'] = 'Program started notification - related user';
 $string['moveitem'] = 'Move item';
 $string['moveitemcancel'] = 'Cancel moving';
 $string['moveafter'] = 'Move "{$a->item}" after "{$a->target}"';
@@ -272,12 +273,19 @@ your progress in program "{$a->program_fullname}" was reset.
 ';
 $string['notification_reset_description'] = 'Notification sent to users when their program progress is reset.';
 $string['notification_start'] = 'Program started';
+$string['notification_start_relateduser'] = 'Program started - related user';
 $string['notification_start_subject'] = 'Program started';
+$string['notification_start_relateduser_subject'] = 'Program started - related user';
 $string['notification_start_body'] = 'Hello {$a->user_fullname},
 
 program "{$a->program_fullname}" has started.
 ';
+$string['notification_start_relateduser_body'] = 'Hello {$a->relateduser_fullname},
+
+program "{$a->program_fullname}" for user {$a->user_fullname}  has started.
+';
 $string['notification_start_description'] = 'Notification sent to users when their program started.';
+$string['notification_start_relateduser_description'] = 'Notification sent to related users when their program started.';
 $string['notificationdates'] = 'Notification dates';
 $string['notset'] = 'Not set';
 $string['plugindisabled'] = 'Program enrolment plugin is disabled, programs will not be functional.
