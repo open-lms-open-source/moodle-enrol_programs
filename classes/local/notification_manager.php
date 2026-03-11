@@ -37,6 +37,7 @@ final class notification_manager extends \local_openlms\notification\manager {
         return [
             'allocation' => notification\allocation::class,
             'start' => notification\start::class,
+            'start_relateduser' => notification\start_relateduser::class,
             'completion' => notification\completion::class,
             'completion_relateduser' => notification\completion_relateduser::class,
             'duesoon' => notification\duesoon::class,
