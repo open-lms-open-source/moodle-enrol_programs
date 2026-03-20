@@ -425,7 +425,7 @@ class renderer extends \plugin_renderer_base {
             get_string('actions'),
         ];
         $table->id = 'program_content';
-        $table->attributes['class'] = 'admintable generaltable';
+        $table->attributes['class'] = 'admintable generaltable table mb-3';
         $table->data = $rows;
 
         if (isset($movetargetsfor)) {
@@ -498,7 +498,7 @@ class renderer extends \plugin_renderer_base {
         $table = new \html_table();
         $table->head = [get_string('item', 'enrol_programs'), get_string('actions')];
         $table->id = 'program_content_orphaned_sets';
-        $table->attributes['class'] = 'admintable generaltable';
+        $table->attributes['class'] = 'admintable generaltable table mb-3';
         $table->data = $rows;
 
         $result = '';
@@ -679,7 +679,7 @@ class renderer extends \plugin_renderer_base {
             get_string('evidence', 'enrol_programs'),
         ];
         $table->id = 'program_content';
-        $table->attributes['class'] = 'admintable generaltable';
+        $table->attributes['class'] = 'admintable generaltable table mb-3';
         $table->data = $rows;
 
         $result = $this->output->heading(get_string('completion', 'completion'),  3, ['h4']);

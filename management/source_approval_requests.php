@@ -150,7 +150,7 @@ if (!$totalcount) {
         get_string('actions'),
     ];
     $table->id = 'program_requests';
-    $table->attributes['class'] = 'admintable generaltable';
+    $table->attributes['class'] = 'admintable generaltable table mb-3';
     $table->data = $data;
     echo html_writer::table($table);
 }

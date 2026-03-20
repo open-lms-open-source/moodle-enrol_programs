@@ -362,7 +362,7 @@ if (!$totalcount) {
     $table = new html_table();
     $table->head = $columns;
     $table->id = 'program_allocations';
-    $table->attributes['class'] = 'admintable generaltable';
+    $table->attributes['class'] = 'admintable generaltable table mb-3';
     $table->data = $data;
     echo html_writer::table($table);
 }

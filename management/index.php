@@ -265,7 +265,7 @@ if (!$programsinfo['totalcount']) {
         array_unshift($table->head, get_string('category'));
     }
     $table->id = 'management_programs';
-    $table->attributes['class'] = 'admintable generaltable';
+    $table->attributes['class'] = 'admintable generaltable table mb-3';
     $table->data = $data;
     echo html_writer::table($table);
 }
