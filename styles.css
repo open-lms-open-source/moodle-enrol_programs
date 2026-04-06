@@ -49,6 +49,7 @@
     }
 
     .sequence-badge {
+        color: #000;
         top: 10px;
         right: 10px;
     }
@@ -257,4 +258,8 @@ aside .my-programs-filters {
 }
 #id_s_enrol_programs_timesoonu {
     margin-left: 5px;
+}
+
+.drawercontent #block_myprograms_overview .card-grid .col {
+    width: 100%;
 }
