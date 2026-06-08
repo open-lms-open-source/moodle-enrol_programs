@@ -250,11 +250,19 @@ class renderer extends \plugin_renderer_base {
         global $DB, $OUTPUT, $CFG, $PAGE;
         $filterpref = get_user_preferences('enrol_programs_block_user_filterby', 'programstatus_any');
         $sortingpref = get_user_preferences('enrol_programs_block_user_orderby', 'fullname');
-        $totalpages = ceil(count(allocation::get_my_allocations())/allocation::PROGRAMCOUNTPERPAGE);
+        $perpage = $ismyprogramspage ? (int) get_user_preferences(
+            'enrol_programs_block_user_perpage', allocation::PROGRAMCOUNTPERPAGE) : allocation::PROGRAMCOUNTPERPAGE;
+        $totalcount  = count(allocation::get_my_allocations());
+        $totalpages  = ceil($totalcount / $perpage);
 
-        $PAGE->requires->js_call_amd('enrol_programs/selector', 'init', [['totalpages' => $totalpages]]);
-        $perpagecount = $ismyprogramspage ? null : allocation::PROGRAMCOUNTPERPAGE;
-        $allocations = allocation::get_my_allocations(null, 'timedue', 0, $perpagecount);
+        $PAGE->requires->js_call_amd('enrol_programs/selector', 'init', [[
+            'totalpages' => $totalpages,
+            'perpage'    => $perpage,
+            'totalcount' => $totalcount,
+        ]]);
+
+        $perpagecount = $ismyprogramspage ? $perpage : allocation::PROGRAMCOUNTPERPAGE;
+        $allocations = allocation::get_my_allocations(null, 'fullname', 0, $perpagecount);
         if (!$allocations) {
             return '<em>' . get_string('errornomyprograms', 'enrol_programs') . '</em>';
         }

@@ -291,5 +291,12 @@ function enrol_programs_user_preferences(): array {
         ),
         'permissioncallback' => [core_user::class, 'is_current_user'],
     );
+    $preferences['enrol_programs_block_user_perpage'] = array(
+        'null'     => NULL_NOT_ALLOWED,
+        'default'  => 12,
+        'type'     => PARAM_INT,
+        'choices'  => array(0, 6, 12, 24, 48),
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    );
     return $preferences;
 }

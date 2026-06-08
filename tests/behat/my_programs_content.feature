@@ -103,6 +103,6 @@ Feature: Users can view a list of programs where they are allocated
     And I should see "P00"
     And I should see "Program 01"
     When I set the field "programsearch" to "Program 00"
-    Then I should not see "Program 00"
+    Then I should not see "Program 01"
     When I set the field "programsearch" to ""
     Then I should see "Program 00"

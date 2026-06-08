@@ -41,6 +41,7 @@ final class get_my_programsoverview extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'currentpage' => new external_value(PARAM_INT, 'current page'),
+            'perpage'     => new external_value(PARAM_INT, 'per page', VALUE_DEFAULT, allocation::PROGRAMCOUNTPERPAGE),
             'status' => new external_value(PARAM_TEXT, 'status', VALUE_DEFAULT, ''),
             'search' => new external_value(PARAM_TEXT, 'search', VALUE_DEFAULT, ''),
             'orderby' => new external_value(PARAM_TEXT, 'sort by', VALUE_DEFAULT, ''),
@@ -52,65 +53,87 @@ final class get_my_programsoverview extends external_api {
      *
      * @return array
      */
-    public static function execute($currentpage, $status, $search, $orderby): array {
+    public static function execute($currentpage, $perpage, $status, $search, $orderby): array {
         global $DB, $OUTPUT, $CFG, $PAGE, $OUTPUT;
 
         require_login();
         $context = \context_system::instance();
         $params = self::validate_parameters(self::execute_parameters(),
-            ['currentpage' => $currentpage, 'status' => $status, 'search' => $search, 'orderby' => $orderby]);;
+            ['currentpage' => $currentpage, 'status' => $status, 'perpage' => $perpage, 'search' => $search, 'orderby' => $orderby]);
         $currentpage = (int)$params['currentpage'];
+        $perpage = (int)$params['perpage'];
         $filterstatus = $params['status'];
-        $count = allocation::PROGRAMCOUNTPERPAGE;
-        $from = ($currentpage - 1) * $count;
+        $from = ($currentpage - 1) * $perpage;
         $PAGE->set_context($context);
-        $allocations = allocation::get_my_allocations(null, $orderby, $from, $count, $search);
 
-        $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
-        $dateformat = get_string('strftimedateformatprograms', 'enrol_programs');;
-        $data = [];
+        // Get all matching allocations for accurate total count with status filter.
+        $allallocations = allocation::get_my_allocations(null, $params['orderby'], 0, null, $params['search']);
+        // Apply status filter to get accurate total.
         $sourceclasses = allocation::get_source_classes();
-
-        foreach ($allocations as $allocation) {
-            $row = [];
-            $row['programicon'] = $programicon;
-            $program = $DB->get_record('enrol_programs_programs', ['id' => $allocation->programid]);
-            $statusplain = \enrol_programs\local\allocation::get_completion_status_plain($program, $allocation);
-            if (!empty($status) && $status != 'programstatus_any' && $statusplain !== get_string($filterstatus, 'enrol_programs')) {
-                continue;
+        $filtered = [];
+        foreach ($allallocations as $allocation) {
+            if (!empty($filterstatus) && $filterstatus !== 'programstatus_any') {
+                $program    = $DB->get_record('enrol_programs_programs', ['id' => $allocation->programid]);
+                $statusplain = \enrol_programs\local\allocation::get_completion_status_plain($program, $allocation);
+                if ($statusplain !== get_string($filterstatus, 'enrol_programs')) {
+                    continue;
+                }
             }
+            $filtered[] = $allocation;
+        }
+
+        $totalcount = count($filtered);
+        if ($perpage) {
+            $totalpages = (int)ceil($totalcount / $perpage);
+            $totalpages = max(1, $totalpages);
+            $pagedallocations = array_slice($filtered, $from, $perpage);
+        } else {
+            $totalpages = 1;
+            $pagedallocations = $filtered;
+        }
+        $programicon = $OUTPUT->pix_icon('program', '', 'enrol_programs');
+        $dateformat  = get_string('strftimedateformatprograms', 'enrol_programs');
+        $data = [];
+
+        foreach ($pagedallocations as $allocation) {
+            $row     = [];
+            $program = $DB->get_record('enrol_programs_programs', ['id' => $allocation->programid]);
             $context = \context::instance_by_id($program->contextid);
-            $presentation = (array)json_decode($program->presentationjson);
+            $presentation = (array) json_decode($program->presentationjson);
+
+            $row['programicon'] = $programicon;
+
             if (!empty($presentation['image'])) {
                 $imageurl = \moodle_url::make_file_url("$CFG->wwwroot/pluginfile.php",
-                '/' . $context->id . '/enrol_programs/image/' . $program->id . '/'. $presentation['image'], false);
+                        '/' . $context->id . '/enrol_programs/image/' . $program->id . '/' . $presentation['image'], false);
                 $row['thumbnail'] = $imageurl->out();
             } else {
                 $row['thumbnail'] = $OUTPUT->get_generated_image_for_id($program->id);
             }
 
-            $fullname = shorten_text(format_string($program->fullname), 23, true);;
+            $fullname = shorten_text(format_string($program->fullname), 23, true);
             $row['fullnameplain'] = format_string($program->fullname);
             $detailurl = new \moodle_url('/enrol/programs/catalogue/program.php', ['id' => $program->id]);
             $row['fullname'] = \html_writer::link($detailurl, $fullname, ['title' => format_string($program->fullname)]);
             $row['idnumber'] = $program->idnumber;
             $row['description'] = $program->description;
             $row['status'] = \enrol_programs\local\allocation::get_completion_status_html($program, $allocation);
+
             $source = $DB->get_record('enrol_programs_sources', ['id' => $allocation->sourceid], '*', MUST_EXIST);
-
             $sourceclass = $sourceclasses[$source->type];
-
             $row['source'] = $sourceclass::render_allocation_source($program, $source, $allocation);
             $row['programstart'] = userdate($allocation->timestart, $dateformat);
-
-            $row['programdue'] = (isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : null);
-
-            $row['programend'] = (isset($allocation->timeend) ? userdate($allocation->timeend, $dateformat) : null);
+            $row['programdue'] = isset($allocation->timedue) ? userdate($allocation->timedue, $dateformat) : null;
+            $row['programend'] = isset($allocation->timeend) ? userdate($allocation->timeend, $dateformat) : null;
 
             $data[] = $row;
         }
 
-        return $data;
+        return [
+            'programs'   => $data,
+            'totalpages' => $totalpages,
+            'totalcount' => $totalcount,
+        ];
     }
 
     /**
@@ -118,20 +141,24 @@ final class get_my_programsoverview extends external_api {
      *
      * @return external_multiple_structure
      */
-    public static function execute_returns(): external_multiple_structure {
-        return new external_multiple_structure(
-            new external_single_structure([
-                'fullnameplain' => new external_value(PARAM_TEXT, 'Program fullname without html'),
-                'fullname' => new external_value(PARAM_CLEANHTML, 'Program fullname'),
-                'idnumber' => new external_value(PARAM_TEXT, 'Program idnumber'),
-                'description' => new external_value(PARAM_RAW, 'Program description'),
-                'status' => new external_value(PARAM_CLEANHTML, 'Program status'),
-                'source' => new external_value(PARAM_CLEANHTML, 'Allocation source information'),
-                'thumbnail' => new external_value(PARAM_CLEANHTML, 'Program image'),
-                'programstart' => new external_value(PARAM_CLEANHTML, 'Program start', VALUE_OPTIONAL),
-                'programdue' => new external_value(PARAM_CLEANHTML, 'Program due', VALUE_OPTIONAL),
-                'programend' => new external_value(PARAM_CLEANHTML, 'Program end', VALUE_OPTIONAL),
-            ], 'List of users own program allocations')
-        );
+    public static function execute_returns(): external_single_structure {
+        return new external_single_structure([
+            'totalpages' => new external_value(PARAM_INT, 'Total number of pages'),
+            'totalcount' => new external_value(PARAM_INT, 'Total number of programs'),
+            'programs' => new external_multiple_structure(
+                new external_single_structure([
+                    'fullnameplain' => new external_value(PARAM_TEXT, 'Program fullname without html'),
+                    'fullname' => new external_value(PARAM_CLEANHTML, 'Program fullname'),
+                    'idnumber' => new external_value(PARAM_TEXT, 'Program idnumber'),
+                    'description' => new external_value(PARAM_RAW, 'Program description'),
+                    'status' => new external_value(PARAM_CLEANHTML, 'Program status'),
+                    'source' => new external_value(PARAM_CLEANHTML, 'Allocation source information'),
+                    'thumbnail' => new external_value(PARAM_CLEANHTML, 'Program image'),
+                    'programstart' => new external_value(PARAM_CLEANHTML, 'Program start', VALUE_OPTIONAL),
+                    'programdue' => new external_value(PARAM_CLEANHTML, 'Program due', VALUE_OPTIONAL),
+                    'programend' => new external_value(PARAM_CLEANHTML, 'Program end', VALUE_OPTIONAL),
+                ], 'List of users own program allocations')
+            ),
+        ]);
     }
 }
