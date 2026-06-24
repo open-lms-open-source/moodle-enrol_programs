@@ -43,8 +43,8 @@ class enrol_programs_plugin extends enrol_plugin {
      */
     public function get_instance_name($instance) {
         global $DB;
-        
-        if (!isset($instance->name)) {
+
+        if (!isset($instance)) {
             return get_string('pluginname', 'enrol_programs');
         }
         $program = $DB->get_record('enrol_programs_programs', ['id' => $instance->customint1]);
