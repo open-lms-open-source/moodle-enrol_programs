@@ -124,6 +124,13 @@ class renderer extends \plugin_renderer_base {
                 if ($child instanceof set) {
                     $sequence = 1;
                 }
+                if ($child instanceof course) {
+                    $courseid = $child->get_courseid();
+                    $course = get_course($courseid);
+                    if (!can_access_course($course, null, '', true)) {
+                        continue;
+                    }
+                }
                 $children[] = $programtree($child, $itemdepth + 1, $item, $sequence);
                 $sequence++;
             }

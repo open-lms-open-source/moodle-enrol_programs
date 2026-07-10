@@ -149,3 +149,14 @@ Feature: Users can view the program content information
     And I should see "1 day"
     And I should see "All in order"
     And I should not see "Points"
+    And I log in as "admin"
+    And I am on "Course 01" course homepage
+    And I navigate to "Settings" in current page administration
+    And I set the field "Course visibility" to "Hide"
+    And I press "Save and display"
+    And I log in as "student2"
+    And I am on Program catalogue page
+    Then I should not see "Course 01"
+    And I login as "admin"
+    And I am on Program catalogue page
+    Then I should see "Course 01"
