@@ -263,3 +263,35 @@ aside .my-programs-filters {
 .drawercontent #block_myprograms_overview .card-grid .col {
     width: 100%;
 }
+.programs-pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.95rem;
+}
+
+.programs-pagination .page-link > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.programs-pagination .page-link .icon {
+    margin: 0;
+    width: auto;
+    height: auto;
+    font-size: inherit;
+}
+.program-search-wrapper .program-search-icon {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+}
+
+.program-search-wrapper .program-search-icon .icon {
+    margin: 0;
+}
